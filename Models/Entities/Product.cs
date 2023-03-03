@@ -14,5 +14,7 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Models.Entities
         [Column(TypeName = "ntext")]
         public string? Description { get; set; }
         public string? Image { get; set; }
+
+        public List<ProductItem>? ProductItems { get; set; }
     }
 }

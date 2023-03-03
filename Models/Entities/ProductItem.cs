@@ -16,5 +16,7 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Models.Entities
 
         public int? ProductId { get; set; }
         public Product? Product { get; set; }
+
+        public List<ProductConfiguration>? ProductConfigurations { get; set; }
     }
 }
