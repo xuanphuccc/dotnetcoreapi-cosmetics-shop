@@ -1,0 +1,19 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace asp_dotnet_core_web_api_cosmetics_shop.Models.Entities
+{
+    public class ShippingMethod
+    {
+        [Key]
+        public int ShippingMethodId { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string? Name { get; set; }
+
+        [Required]
+        public decimal? Price { get; set; }
+
+        public List<ShopOrder>? ShopOrders { get; set; }
+    }
+}

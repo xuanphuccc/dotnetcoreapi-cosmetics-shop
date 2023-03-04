@@ -3,21 +3,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace asp_dotnet_core_web_api_cosmetics_shop.Models.Entities
 {
-    public class Product
+    public class Category
     {
         [Key]
-        public int ProductId { get; set; }
+        public int CategoryId { get; set; }
 
-        [StringLength(450)]
         [Required]
+        [StringLength(100)]
         public string? Name { get; set; }
 
-        [Column(TypeName = "ntext")]
-        public string? Description { get; set; }
-        public string? Image { get; set; }
-
-
-        public List<ProductItem>? ProductItems { get; set; }
+        public int? PromotionId { get; set; }
+        [ForeignKey("PromotionId")]
+        public Promotion? Promotion { get; set; }
 
         public List<ProductCategory>? ProductCategories { get; set; }
     }

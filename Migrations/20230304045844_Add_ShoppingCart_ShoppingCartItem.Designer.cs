@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using asp_dotnet_core_web_api_cosmetics_shop.Data;
 
@@ -11,9 +12,10 @@ using asp_dotnet_core_web_api_cosmetics_shop.Data;
 namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
 {
     [DbContext(typeof(CosmeticsShopContext))]
-    partial class CosmeticsShopContextModelSnapshot : ModelSnapshot
+    [Migration("20230304045844_Add_ShoppingCart_ShoppingCartItem")]
+    partial class Add_ShoppingCart_ShoppingCartItem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,14 +46,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -104,53 +98,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                     b.HasIndex("PromotionId");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.OrderItem", b =>
-                {
-                    b.Property<int>("OrderItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderItemId"), 1L, 1);
-
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("ProductItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Qty")
-                        .HasColumnType("int");
-
-                    b.HasKey("OrderItemId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ProductItemId");
-
-                    b.ToTable("OrderItems");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.OrderStatus", b =>
-                {
-                    b.Property<int>("OderStatusId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OderStatusId"), 1L, 1);
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("OderStatusId");
-
-                    b.ToTable("OrderStatuses");
                 });
 
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.PaymentMethod", b =>
@@ -226,8 +173,8 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("ProductId");
 
@@ -250,11 +197,9 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
 
                     b.HasKey("ProductCategoryId");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("CategoryId");
 
-                    b.HasIndex("CategoryId", "ProductId")
-                        .IsUnique()
-                        .HasFilter("[CategoryId] IS NOT NULL AND [ProductId] IS NOT NULL");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("ProductCategories");
                 });
@@ -330,9 +275,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("OptionTypeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -340,27 +282,7 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
 
                     b.HasKey("ProductOptionId");
 
-                    b.HasIndex("OptionTypeId");
-
                     b.ToTable("ProductOptions");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ProductOptionType", b =>
-                {
-                    b.Property<int>("OptionTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OptionTypeId"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("OptionTypeId");
-
-                    b.ToTable("ProductOptionTypes");
                 });
 
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.Promotion", b =>
@@ -391,67 +313,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                     b.HasKey("PromotionId");
 
                     b.ToTable("Promotions");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShippingMethod", b =>
-                {
-                    b.Property<int>("ShippingMethodId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShippingMethodId"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal?>("Price")
-                        .IsRequired()
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("ShippingMethodId");
-
-                    b.ToTable("ShippingMethods");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShopOrder", b =>
-                {
-                    b.Property<int>("OrderId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"), 1L, 1);
-
-                    b.Property<int?>("AddressId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OderStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("OrderTotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("PaymentMethodId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ShippingMethodId")
-                        .HasColumnType("int");
-
-                    b.HasKey("OrderId");
-
-                    b.HasIndex("AddressId");
-
-                    b.HasIndex("OderStatusId");
-
-                    b.HasIndex("PaymentMethodId");
-
-                    b.HasIndex("ShippingMethodId");
-
-                    b.ToTable("ShopOrders");
                 });
 
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShoppingCart", b =>
@@ -500,43 +361,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                     b.ToTable("ShoppingCartItems");
                 });
 
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.UserReview", b =>
-                {
-                    b.Property<int>("ReviewId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"), 1L, 1);
-
-                    b.Property<string>("Comment")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CommentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("OrderItemId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("RatingValue")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("ReviewId");
-
-                    b.HasIndex("OrderItemId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserReviews");
-                });
-
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.Address", b =>
                 {
                     b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.AppUser", "AppUser")
@@ -553,21 +377,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                         .HasForeignKey("PromotionId");
 
                     b.Navigation("Promotion");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.OrderItem", b =>
-                {
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShopOrder", "ShopOrder")
-                        .WithMany("Items")
-                        .HasForeignKey("OrderId");
-
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ProductItem", "ProductItem")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("ProductItemId");
-
-                    b.Navigation("ProductItem");
-
-                    b.Navigation("ShopOrder");
                 });
 
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.PaymentMethod", b =>
@@ -624,42 +433,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ProductOption", b =>
-                {
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ProductOptionType", "ProductOptionType")
-                        .WithMany("ProductOptions")
-                        .HasForeignKey("OptionTypeId");
-
-                    b.Navigation("ProductOptionType");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShopOrder", b =>
-                {
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.Address", "Address")
-                        .WithMany("ShopOrders")
-                        .HasForeignKey("AddressId");
-
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.OrderStatus", "OrderStatus")
-                        .WithMany("ShopOrders")
-                        .HasForeignKey("OderStatusId");
-
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.PaymentMethod", "PaymentMethod")
-                        .WithMany("ShopOrders")
-                        .HasForeignKey("PaymentMethodId");
-
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShippingMethod", "ShippingMethod")
-                        .WithMany("ShopOrders")
-                        .HasForeignKey("ShippingMethodId");
-
-                    b.Navigation("Address");
-
-                    b.Navigation("OrderStatus");
-
-                    b.Navigation("PaymentMethod");
-
-                    b.Navigation("ShippingMethod");
-                });
-
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShoppingCart", b =>
                 {
                     b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.AppUser", "AppUser")
@@ -684,26 +457,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                     b.Navigation("ShoppingCart");
                 });
 
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.UserReview", b =>
-                {
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.OrderItem", "OrderItem")
-                        .WithMany("UserReviews")
-                        .HasForeignKey("OrderItemId");
-
-                    b.HasOne("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.AppUser", "AppUser")
-                        .WithMany("UserReviews")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("AppUser");
-
-                    b.Navigation("OrderItem");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.Address", b =>
-                {
-                    b.Navigation("ShopOrders");
-                });
-
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.AppUser", b =>
                 {
                     b.Navigation("Address");
@@ -711,28 +464,11 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                     b.Navigation("PaymentMethods");
 
                     b.Navigation("ShoppingCarts");
-
-                    b.Navigation("UserReviews");
                 });
 
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.Category", b =>
                 {
                     b.Navigation("ProductCategories");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.OrderItem", b =>
-                {
-                    b.Navigation("UserReviews");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.OrderStatus", b =>
-                {
-                    b.Navigation("ShopOrders");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.PaymentMethod", b =>
-                {
-                    b.Navigation("ShopOrders");
                 });
 
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.PaymentType", b =>
@@ -749,8 +485,6 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
 
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ProductItem", b =>
                 {
-                    b.Navigation("OrderItems");
-
                     b.Navigation("ProductConfigurations");
 
                     b.Navigation("ShoppingCartItems");
@@ -761,24 +495,9 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
                     b.Navigation("ProductConfigurations");
                 });
 
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ProductOptionType", b =>
-                {
-                    b.Navigation("ProductOptions");
-                });
-
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.Promotion", b =>
                 {
                     b.Navigation("Categories");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShippingMethod", b =>
-                {
-                    b.Navigation("ShopOrders");
-                });
-
-            modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShopOrder", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("asp_dotnet_core_web_api_cosmetics_shop.Models.Entities.ShoppingCart", b =>
