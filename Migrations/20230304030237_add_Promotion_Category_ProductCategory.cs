@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
+namespace web_api_cosmetics_shop.Migrations
 {
     public partial class add_Promotion_Category_ProductCategory : Migration
     {

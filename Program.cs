@@ -1,5 +1,6 @@
-using asp_dotnet_core_web_api_cosmetics_shop.Data;
+using web_api_cosmetics_shop.Data;
 using Microsoft.EntityFrameworkCore;
+using web_api_cosmetics_shop.Services.PromotionService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,20 @@ builder.Services.AddDbContext<CosmeticsShopContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("CosmeticsShop");
     options.UseSqlServer(connectionString);
+});
+
+// Add Repository
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+
+// Add Cors
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policyBuilder =>
+    {
+        policyBuilder.AllowAnyOrigin();
+        policyBuilder.AllowAnyMethod();
+        policyBuilder.AllowAnyHeader();
+    });
 });
 
 var app = builder.Build();

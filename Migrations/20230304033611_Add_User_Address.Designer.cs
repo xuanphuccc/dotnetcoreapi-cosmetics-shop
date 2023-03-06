@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using asp_dotnet_core_web_api_cosmetics_shop.Data;
+using web_api_cosmetics_shop.Data;
 
 #nullable disable
 
-namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
+namespace web_api_cosmetics_shop.Migrations
 {
     [DbContext(typeof(CosmeticsShopContext))]
     [Migration("20230304033611_Add_User_Address")]

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace asp_dotnet_core_web_api_cosmetics_shop.Models.Entities
+namespace web_api_cosmetics_shop.Models.Entities
 {
     public class ProductOptionType
     {

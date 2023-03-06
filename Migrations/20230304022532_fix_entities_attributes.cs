@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace asp_dotnet_core_web_api_cosmetics_shop.Migrations
+namespace web_api_cosmetics_shop.Migrations
 {
     public partial class fix_entities_attributes : Migration
     {

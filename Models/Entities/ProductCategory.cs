@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace asp_dotnet_core_web_api_cosmetics_shop.Models.Entities
+namespace web_api_cosmetics_shop.Models.Entities
 {
     public class ProductCategory
     {

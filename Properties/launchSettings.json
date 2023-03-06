@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "asp_dotnet_core_web_api_cosmetics_shop": {
+    "web_api_cosmetics_shop": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

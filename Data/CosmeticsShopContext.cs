@@ -1,7 +1,7 @@
-﻿using asp_dotnet_core_web_api_cosmetics_shop.Models.Entities;
+﻿using web_api_cosmetics_shop.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace asp_dotnet_core_web_api_cosmetics_shop.Data
+namespace web_api_cosmetics_shop.Data
 {
     public class CosmeticsShopContext : DbContext
     {
@@ -18,22 +18,17 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ProductConfiguration>(entity =>
-            {
-                // Xóa ProductItem -> Xóa ProductConfigurations
-                //entity.HasOne(pc => pc.ProductItem)
-                //      .WithMany(pi => pi.ProductConfigurations)
-                //      .OnDelete(DeleteBehavior.ClientCascade);
-                
-                // 1 ProductItem chỉ có 1 loại option
-                // VD: 1 loại áo chỉ có 1 loại size M
-                entity.HasIndex(productConfiguration => new { productConfiguration.ProductItemId, productConfiguration.ProductOptionId })
-                      .IsUnique();
-            });
-
             modelBuilder.Entity<ProductCategory>(entity => {
                 // trong 1 category không thể có 2 sản phẩm giống nhau
                 entity.HasIndex(productCategory => new { productCategory.CategoryId, productCategory.ProductId })
+                      .IsUnique();
+            });
+
+            modelBuilder.Entity<ProductConfiguration>(entity =>
+            {
+                // 1 ProductItem chỉ có 1 loại option
+                // VD: 1 loại áo chỉ có 1 loại size M
+                entity.HasIndex(productConfiguration => new { productConfiguration.ProductItemId, productConfiguration.ProductOptionId })
                       .IsUnique();
             });
 
@@ -42,6 +37,19 @@ namespace asp_dotnet_core_web_api_cosmetics_shop.Data
                 // VD: Chỉ có 1 áo size M với số lượng là 2
                 // không phải 2 áo size M với số lượng là 1
                 entity.HasIndex(shoppingCartItem => new { shoppingCartItem.CartId, shoppingCartItem.ProductItemId })
+                      .IsUnique();
+            });
+
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.HasIndex(orderItem => new {orderItem.OrderId, orderItem.ProductItemId})
+                      .IsUnique();
+            });
+
+            modelBuilder.Entity<UserReview>(entity =>
+            {
+                // Một sản phẩm đã mua chỉ có thể có 1 đánh giá
+                entity.HasIndex(orderItem => new { orderItem.UserId, orderItem.OrderItemId })
                       .IsUnique();
             });
         }
