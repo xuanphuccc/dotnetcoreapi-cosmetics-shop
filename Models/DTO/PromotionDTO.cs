@@ -4,20 +4,20 @@ namespace web_api_cosmetics_shop.Models.DTO
 {
 	public class PromotionDTO
 	{
-		//[Required]
+		[Required]
 		[StringLength(256)]
 		public string? Name { get; set; }
 
 		public string? Description { get; set; }
 
-		//[Required]
+		[Required]
 		[Range(1, 100)]
 		public int DiscountRate { get; set; }
 
-		//[Required]
+		[Required]
 		public DateTime StartDate { get; set; }
 
-		//[Required]
+		[Required]
 		public DateTime EndDate { get; set; }
 	}
 }
