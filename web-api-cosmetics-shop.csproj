@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>asp_dotnet_core_web_api_cosmetics_shop</RootNamespace>
+    <RootNamespace>web_api_cosmetics_shop</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

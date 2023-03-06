@@ -26,24 +26,31 @@ namespace web_api_cosmetics_shop.Controllers
 
         // GET: /api/promotions/{id}
         [HttpGet("{id?}")]
-        public async Task<IActionResult> GetPromotion(int? id)
+        public async Task<IActionResult> GetPromotion([FromRoute] int? id)
         {
-            if (id == null) return BadRequest();
+            if (id == null)
+            {
+				return BadRequest();
+			}
 
+            // Finding Promotion
             var promotions = await _promotionData.GetPromotionByIdAsync(id.Value);
-
-            if(promotions == null) return NotFound();
+            if(promotions == null)
+            {
+				return NotFound();
+			}
 
             return Ok(promotions);
         }
 
         // POST: /api/promotions
         [HttpPost]
-        public async Task<IActionResult> CreatePromotion(PromotionDTO? promotion)
+        public async Task<IActionResult> CreatePromotion([FromBody] PromotionDTO? promotion)
         {
-            if (promotion == null) return BadRequest();
-
-            //if (!ModelState.IsValid) return BadRequest(ModelState.ErrorCount);
+            if (promotion == null)
+            {
+				return BadRequest();
+			}
 
             var newPromotion = new Promotion()
             {
@@ -54,22 +61,31 @@ namespace web_api_cosmetics_shop.Controllers
                 EndDate = promotion.EndDate
             };
 
+            // Creating Promotion
             var createdPromotion = await _promotionData.AddPromotionAsync(newPromotion);
-
-            if(createdPromotion == null) return BadRequest();
+            if(createdPromotion == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
 
             return CreatedAtAction(nameof(GetPromotion), new { id = createdPromotion.PromotionId }, createdPromotion);
         }
 
 		// PUT: /api/promotions/{id}
 		[HttpPut("{id?}")]
-        public async Task<IActionResult> UpdatePromotion(int? id, PromotionDTO? promotion)
+        public async Task<IActionResult> UpdatePromotion([FromRoute] int? id, [FromBody] PromotionDTO? promotion)
         {
-            if (id == null || promotion == null) return BadRequest();
+            if (id == null || promotion == null)
+            {
+				return BadRequest();
+			}
 
-            // Tìm Promotion đã tồn tại có id
+            // Find existing Promotion with PromotionId = id
             var existPromotion = await _promotionData.GetPromotionByIdAsync(id.Value);
-            if (existPromotion == null) return NotFound();
+            if (existPromotion == null)
+            {
+				return NotFound();
+			}
 
 			var newPromotion = new Promotion()
 			{
@@ -81,30 +97,40 @@ namespace web_api_cosmetics_shop.Controllers
 				EndDate = promotion.EndDate
 			};
 
+            // Updating Promotion
             var result = await _promotionData.UpdatePromotionAsync(newPromotion);
-
-            if (result == null) return BadRequest();
+            if (result == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
 
             return Ok(result);
         }
 
 		// DELETE: /api/promotions/{id}
 		[HttpDelete("{id?}")]
-        public async Task<IActionResult> RemovePromotion(int? id)
+        public async Task<IActionResult> RemovePromotion([FromRoute] int? id)
         {
-            if (id == null) return BadRequest();
+            if (id == null)
+            {
+				return BadRequest();
+			}
 
+            // Find existing Promotion
             var existPromotion = await _promotionData.GetPromotionByIdAsync(id.Value);
+            if (existPromotion == null)
+            {
+                return NotFound();
+            }
 
-            if (existPromotion == null) return NotFound();
-
+            // Removing Promotion
             var result = await _promotionData.RemovePromotionAsync(existPromotion);
-
-            if (result == null) return BadRequest();
+            if (result == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
 
             return Ok(result);
         }
-
-
     }
 }
