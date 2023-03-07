@@ -75,5 +75,12 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 
 			return category;
 		}
+
+		public async Task<bool> GetExistCategoryNameAsync(string name)
+		{
+			var isExistName = await _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower());
+			return isExistName;
+
+		}
 	}
 }

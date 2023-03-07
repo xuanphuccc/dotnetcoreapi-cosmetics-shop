@@ -79,5 +79,11 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             return promotion;
         }
-    }
+
+		public async Task<bool> GetExistPromotionName(string name)
+		{
+			var isExistName = await _context.Promotions.AnyAsync(p => p.Name.ToLower() == name.ToLower());
+            return isExistName;
+		}
+	}
 }

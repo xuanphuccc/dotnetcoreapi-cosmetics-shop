@@ -1,6 +1,8 @@
 using web_api_cosmetics_shop.Data;
 using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Services.PromotionService;
+using web_api_cosmetics_shop.Services.CategoryService;
+using web_api_cosmetics_shop.Services.ProductOptionService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,8 @@ builder.Services.AddDbContext<CosmeticsShopContext>(options =>
 
 // Add Repository
 builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductOptionService, ProductOptionService>();
 
 // Add Cors
 builder.Services.AddCors(options =>

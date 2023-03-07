@@ -6,6 +6,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
     {
         Task<List<Promotion>> GetPromotionsAsync();
         Task<Promotion> GetPromotionByIdAsync(int id);
+        Task<bool> GetExistPromotionName(string name);
         Task<Promotion> AddPromotionAsync(Promotion promotion);
         Task<Promotion> UpdatePromotionAsync(Promotion promotion);
         Task<Promotion> RemovePromotionAsync(Promotion promotion);

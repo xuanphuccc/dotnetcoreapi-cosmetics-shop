@@ -11,16 +11,16 @@ namespace web_api_cosmetics_shop.Controllers
     [ApiController]
     public class PromotionsController : ControllerBase
     {
-        private readonly IPromotionService _promotionData;
+        private readonly IPromotionService _promotionService;
         public PromotionsController(IPromotionService promotionData) { 
-            _promotionData = promotionData;
+            _promotionService = promotionData;
         }
 
         // GET: /api/promotions
         [HttpGet]
         public async Task<IActionResult> GetPromotions()
         {
-            var promotions = await _promotionData.GetPromotionsAsync();
+            var promotions = await _promotionService.GetPromotionsAsync();
             return Ok(promotions);
         }
 
@@ -28,19 +28,19 @@ namespace web_api_cosmetics_shop.Controllers
         [HttpGet("{id?}")]
         public async Task<IActionResult> GetPromotion([FromRoute] int? id)
         {
-            if (id == null)
+            if (!id.HasValue)
             {
 				return BadRequest();
 			}
 
             // Finding Promotion
-            var promotions = await _promotionData.GetPromotionByIdAsync(id.Value);
-            if(promotions == null)
+            var promotion = await _promotionService.GetPromotionByIdAsync(id.Value);
+            if(promotion == null)
             {
 				return NotFound();
 			}
 
-            return Ok(promotions);
+            return Ok(promotion);
         }
 
         // POST: /api/promotions
@@ -52,7 +52,14 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest();
 			}
 
-            var newPromotion = new Promotion()
+			// Check existing Category name
+			var isExistPromotionName = await _promotionService.GetExistPromotionName(promotion.Name);
+			if (isExistPromotionName == true)
+			{
+				return BadRequest(new ErrorDTO() { Title = "Name already exist", Status = 400 });
+			}
+
+			var newPromotion = new Promotion()
             {
                 Name = promotion.Name,
                 Description = promotion.Description,
@@ -62,7 +69,7 @@ namespace web_api_cosmetics_shop.Controllers
             };
 
             // Creating Promotion
-            var createdPromotion = await _promotionData.AddPromotionAsync(newPromotion);
+            var createdPromotion = await _promotionService.AddPromotionAsync(newPromotion);
             if(createdPromotion == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
@@ -75,16 +82,23 @@ namespace web_api_cosmetics_shop.Controllers
 		[HttpPut("{id?}")]
         public async Task<IActionResult> UpdatePromotion([FromRoute] int? id, [FromBody] PromotionDTO? promotion)
         {
-            if (id == null || promotion == null)
+            if (!id.HasValue || promotion == null)
             {
 				return BadRequest();
 			}
 
             // Find existing Promotion with PromotionId = id
-            var existPromotion = await _promotionData.GetPromotionByIdAsync(id.Value);
+            var existPromotion = await _promotionService.GetPromotionByIdAsync(id.Value);
             if (existPromotion == null)
             {
 				return NotFound();
+			}
+
+			// Check existing Category name
+			var isExistPromotionName = await _promotionService.GetExistPromotionName(promotion.Name);
+			if (isExistPromotionName == true)
+			{
+				return BadRequest(new ErrorDTO() { Title = "Name already exist", Status = 400 });
 			}
 
 			var newPromotion = new Promotion()
@@ -98,7 +112,7 @@ namespace web_api_cosmetics_shop.Controllers
 			};
 
             // Updating Promotion
-            var result = await _promotionData.UpdatePromotionAsync(newPromotion);
+            var result = await _promotionService.UpdatePromotionAsync(newPromotion);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
@@ -111,20 +125,20 @@ namespace web_api_cosmetics_shop.Controllers
 		[HttpDelete("{id?}")]
         public async Task<IActionResult> RemovePromotion([FromRoute] int? id)
         {
-            if (id == null)
+            if (!id.HasValue)
             {
 				return BadRequest();
 			}
 
             // Find existing Promotion
-            var existPromotion = await _promotionData.GetPromotionByIdAsync(id.Value);
+            var existPromotion = await _promotionService.GetPromotionByIdAsync(id.Value);
             if (existPromotion == null)
             {
                 return NotFound();
             }
 
             // Removing Promotion
-            var result = await _promotionData.RemovePromotionAsync(existPromotion);
+            var result = await _promotionService.RemovePromotionAsync(existPromotion);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
