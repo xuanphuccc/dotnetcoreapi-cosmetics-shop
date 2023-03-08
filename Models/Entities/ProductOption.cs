@@ -10,11 +10,11 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [StringLength(50)]
         [Required]
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [StringLength(50)]
         [Required]
-        public string? Value { get; set; }
+        public string Value { get; set; } = string.Empty;
 
 
         public int? OptionTypeId { get; set; }

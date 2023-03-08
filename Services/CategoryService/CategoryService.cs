@@ -52,6 +52,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 			}
 
 			existCategory.Name = category.Name;
+			existCategory.Image = category.Image;
 			existCategory.PromotionId = category.PromotionId;
 
 			var result = await _context.SaveChangesAsync();

@@ -10,27 +10,27 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [Required]
         [StringLength(50)]
-        public string? FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string? City { get; set; }
+        public string City { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string? District { get; set; }
+        public string District { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string? Ward { get; set; }
+        public string Ward { get; set; } = string.Empty;
 
         [Required]
         [StringLength(256)]
-        public string? AddressLine { get; set; }
+        public string AddressLine { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string? PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } = string.Empty;
 
         [Required]
         public bool IsDefault { get; set; }

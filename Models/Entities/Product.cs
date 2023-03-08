@@ -10,7 +10,7 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [StringLength(450)]
         [Required]
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Column(TypeName = "ntext")]
         public string? Description { get; set; }

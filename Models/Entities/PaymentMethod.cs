@@ -10,11 +10,11 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [Required]
         [StringLength(100)]
-        public string? Provider { get; set; }
+        public string Provider { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string? AccountNumber { get; set; }
+        public string AccountNumber { get; set; } = string.Empty;
 
         [Required]
         public DateTime ExpiryDate { get; set; }

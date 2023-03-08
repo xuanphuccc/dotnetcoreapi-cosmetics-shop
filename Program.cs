@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Services.PromotionService;
 using web_api_cosmetics_shop.Services.CategoryService;
 using web_api_cosmetics_shop.Services.ProductOptionService;
+using web_api_cosmetics_shop.Services.ProductService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ builder.Services.AddDbContext<CosmeticsShopContext>(options =>
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductOptionService, ProductOptionService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 // Add Cors
 builder.Services.AddCors(options =>

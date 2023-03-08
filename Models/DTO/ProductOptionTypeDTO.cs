@@ -8,7 +8,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 
 		[Required]
 		[StringLength(50)]
-		public string? Name { get; set; }
+		public string Name { get; set; } = string.Empty;
 
 		[Required]
 		public List<ProductOptionDTO>? Options { get; set; }
@@ -21,10 +21,10 @@ namespace web_api_cosmetics_shop.Models.DTO
 
 		[StringLength(50)]
 		[Required]
-		public string? Name { get; set; }
+		public string Name { get; set; } = string.Empty;
 
 		[StringLength(50)]
 		[Required]
-		public string? Value { get; set; }
+		public string Value { get; set; } = string.Empty;
 	}
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using web_api_cosmetics_shop.Data;
 
@@ -11,9 +12,10 @@ using web_api_cosmetics_shop.Data;
 namespace web_api_cosmetics_shop.Migrations
 {
     [DbContext(typeof(CosmeticsShopContext))]
-    partial class CosmeticsShopContextModelSnapshot : ModelSnapshot
+    [Migration("20230307094800_Fix_ProductItem_Category")]
+    partial class Fix_ProductItem_Category
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,7 +72,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Addresses", (string)null);
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.AppUser", b =>
@@ -80,7 +82,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("AppUsers", (string)null);
+                    b.ToTable("AppUsers");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.Category", b =>
@@ -106,7 +108,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasIndex("PromotionId");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.OrderItem", b =>
@@ -137,7 +139,7 @@ namespace web_api_cosmetics_shop.Migrations
                         .IsUnique()
                         .HasFilter("[OrderId] IS NOT NULL AND [ProductItemId] IS NOT NULL");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.OrderStatus", b =>
@@ -155,7 +157,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasKey("OderStatusId");
 
-                    b.ToTable("OrderStatuses", (string)null);
+                    b.ToTable("OrderStatuses");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.PaymentMethod", b =>
@@ -194,7 +196,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PaymentMethods", (string)null);
+                    b.ToTable("PaymentMethods");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.PaymentType", b =>
@@ -212,7 +214,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasKey("PaymentTypeId");
 
-                    b.ToTable("PaymentTypes", (string)null);
+                    b.ToTable("PaymentTypes");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.Product", b =>
@@ -236,7 +238,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ProductCategory", b =>
@@ -261,7 +263,7 @@ namespace web_api_cosmetics_shop.Migrations
                         .IsUnique()
                         .HasFilter("[CategoryId] IS NOT NULL AND [ProductId] IS NOT NULL");
 
-                    b.ToTable("ProductCategories", (string)null);
+                    b.ToTable("ProductCategories");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ProductConfiguration", b =>
@@ -286,7 +288,7 @@ namespace web_api_cosmetics_shop.Migrations
                         .IsUnique()
                         .HasFilter("[ProductItemId] IS NOT NULL AND [ProductOptionId] IS NOT NULL");
 
-                    b.ToTable("ProductConfigurations", (string)null);
+                    b.ToTable("ProductConfigurations");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ProductItem", b =>
@@ -322,7 +324,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductItems", (string)null);
+                    b.ToTable("ProductItems");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ProductOption", b =>
@@ -350,7 +352,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasIndex("OptionTypeId");
 
-                    b.ToTable("ProductOptions", (string)null);
+                    b.ToTable("ProductOptions");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ProductOptionType", b =>
@@ -368,7 +370,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasKey("OptionTypeId");
 
-                    b.ToTable("ProductOptionTypes", (string)null);
+                    b.ToTable("ProductOptionTypes");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.Promotion", b =>
@@ -398,7 +400,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasKey("PromotionId");
 
-                    b.ToTable("Promotions", (string)null);
+                    b.ToTable("Promotions");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ShippingMethod", b =>
@@ -420,7 +422,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasKey("ShippingMethodId");
 
-                    b.ToTable("ShippingMethods", (string)null);
+                    b.ToTable("ShippingMethods");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ShopOrder", b =>
@@ -459,7 +461,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasIndex("ShippingMethodId");
 
-                    b.ToTable("ShopOrders", (string)null);
+                    b.ToTable("ShopOrders");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ShoppingCart", b =>
@@ -477,7 +479,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ShoppingCarts", (string)null);
+                    b.ToTable("ShoppingCarts");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.ShoppingCartItem", b =>
@@ -505,7 +507,7 @@ namespace web_api_cosmetics_shop.Migrations
                         .IsUnique()
                         .HasFilter("[CartId] IS NOT NULL AND [ProductItemId] IS NOT NULL");
 
-                    b.ToTable("ShoppingCartItems", (string)null);
+                    b.ToTable("ShoppingCartItems");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.UserReview", b =>
@@ -544,7 +546,7 @@ namespace web_api_cosmetics_shop.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL AND [OrderItemId] IS NOT NULL");
 
-                    b.ToTable("UserReviews", (string)null);
+                    b.ToTable("UserReviews");
                 });
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.Address", b =>

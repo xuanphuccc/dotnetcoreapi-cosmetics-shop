@@ -59,6 +59,7 @@ namespace web_api_cosmetics_shop.Controllers
 			var newCategory = new Category()
 			{
 				Name = category.Name,
+				Image = category.Image,
 				PromotionId = category.PromotionId
 			};
 
@@ -98,6 +99,7 @@ namespace web_api_cosmetics_shop.Controllers
 			{
 				CategoryId = existCategory.CategoryId,
 				Name = category.Name,
+				Image = category.Image,
 				PromotionId = category.PromotionId
 			};
 

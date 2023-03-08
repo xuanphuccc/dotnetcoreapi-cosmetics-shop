@@ -10,7 +10,7 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [StringLength(50)]
         [Required]
-        public string? SKU { get; set; }
+        public string SKU { get; set; } = string.Empty;
 
         [Required]
         public int QtyInStock { get; set; }
@@ -19,6 +19,8 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [Required]
         public decimal? Price { get; set; }
+
+        public decimal? CostPrice { get; set; }
 
         public int? ProductId { get; set; }
         [ForeignKey("ProductId")]

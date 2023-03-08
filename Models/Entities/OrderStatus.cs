@@ -9,8 +9,8 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [Required]
         [StringLength(100)]
-        public string? Status { get; set; }
+        public string Status { get; set; } = string.Empty;
 
-        public List<ShopOrder> ShopOrders { get; set; }
+        public List<ShopOrder>? ShopOrders { get; set; }
     }
 }

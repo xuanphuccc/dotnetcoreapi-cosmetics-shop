@@ -10,7 +10,9 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [Required]
         [StringLength(100)]
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
+
+        public string? Image { get; set; }
 
         public int? PromotionId { get; set; }
         [ForeignKey("PromotionId")]

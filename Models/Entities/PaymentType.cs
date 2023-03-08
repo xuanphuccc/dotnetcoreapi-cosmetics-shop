@@ -9,7 +9,7 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         [Required]
         [StringLength(50)]
-        public string? Value { get; set; }
+        public string Value { get; set; } = string.Empty;
 
         public List<PaymentMethod>? PaymentMethods { get; set; }
     }
