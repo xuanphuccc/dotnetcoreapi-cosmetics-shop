@@ -203,6 +203,7 @@ namespace web_api_cosmetics_shop.Controllers
 			}
 
 			var existProduct = await _productService.GetProductById(id.Value);
+			productDto.ProductId = existProduct.ProductId;
 			if(existProduct == null)
 			{
 				return NotFound();
@@ -216,7 +217,7 @@ namespace web_api_cosmetics_shop.Controllers
 				Image = productDto.Image
 			};
 
-			// Update Product
+			//# Update Product
 			if(
 				existProduct.Name != newProduct.Name ||
 				existProduct.Description != newProduct.Description ||
@@ -229,7 +230,84 @@ namespace web_api_cosmetics_shop.Controllers
 				}
 			}
 
-			return Ok();
+
+			//# Update Product Categories
+			// Remove old Product Categories
+			await _productService.RemoveProductCategories(existProduct);
+
+			// Creating new Product Categories
+			foreach (var categoryId in productDto.CategoriesId)
+			{
+				var productCategory = new ProductCategory()
+				{
+					ProductId = existProduct.ProductId,
+					CategoryId = categoryId,
+				};
+
+				var createdProductCategory = await _productService.AddProductCategory(productCategory);
+				if (createdProductCategory == null)
+				{
+					return BadRequest(new ErrorDTO() { Title = "Can not create product category", Status = 500 });
+				}
+			}
+
+			//# Update Product Items and Product Options
+			// Remove old Product Items and Product Options
+			var existItems = await _productService.GetItems(existProduct);
+			foreach(var item in existItems)
+			{
+				await _productService.RemoveProductOptions(item);
+			}
+
+			var removeOldItemsResult = await _productService.RemoveProductItems(existProduct);
+			if(removeOldItemsResult == 0)
+			{
+				return BadRequest(new ErrorDTO() { Title = "Can not remove product items", Status = 500 });
+			}
+
+			// Creating Product Items
+			foreach (var item in productDto.Items)
+			{
+				var productItem = new ProductItem()
+				{
+					ProductId = existProduct.ProductId,
+					SKU = item.SKU,
+					QtyInStock = item.QtyInStock,
+					Image = item.Image,
+					Price = item.Price,
+					CostPrice = item.CostPrice
+				};
+				var createdProductItem = await _productService.AddProductItem(productItem);
+				item.ProductItemId = createdProductItem.ProductItemId;
+				item.ProductId = existProduct.ProductId;
+
+				if (createdProductItem == null)
+				{
+					return BadRequest(new ErrorDTO() { Title = "Can not create product item", Status = 400 });
+				}
+
+				// Creating Product Options
+				if (item.OptionsId == null)
+				{
+					return BadRequest();
+				}
+				foreach (var optionId in item.OptionsId)
+				{
+					var option = new ProductConfiguration()
+					{
+						ProductItemId = createdProductItem.ProductItemId,
+						ProductOptionId = optionId
+					};
+
+					var createdProductOption = await _productService.AddProductOption(option);
+					if (createdProductOption == null)
+					{
+						return BadRequest(new ErrorDTO() { Title = "Can not create product option", Status = 400 });
+					}
+				}
+			}
+
+			return Ok(productDto);
 		}
 
 		// ---------- Remove Product ----------
@@ -251,18 +329,14 @@ namespace web_api_cosmetics_shop.Controllers
 
 			var hasRemoveProduct = await ConvertToProductDtoAsync(product);
 
+			// Removing Categories
+            await _productService.RemoveProductCategories(product);
+
 			// Removing Product Options
             foreach (var item in productItems)
             {
-				var removeOptionsResult = await _productService.RemoveProductOptions(item);
-				if(removeOptionsResult == 0)
-				{
-					return StatusCode(StatusCodes.Status500InternalServerError);
-				}
+				await _productService.RemoveProductOptions(item);
             }
-
-			// Removing Categories
-            await _productService.RemoveProductCategories(product);
 
 			// Removing Product Items
 			var removeItemsResult = await _productService.RemoveProductItems(product);
