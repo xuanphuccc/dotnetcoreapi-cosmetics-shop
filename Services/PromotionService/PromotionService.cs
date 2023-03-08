@@ -21,10 +21,9 @@ namespace web_api_cosmetics_shop.Services.PromotionService
         public async Task<Promotion> GetPromotionByIdAsync(int id)
         {
             var promotion = await _context.Promotions.FirstOrDefaultAsync(p => p.PromotionId == id);
-
             if(promotion == null)
             {
-                return null;
+                return null!;
             }
 
             return promotion;
@@ -37,7 +36,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             if(result == 0)
             {
-                return null;
+                return null!;
             }
 
             return promotion;
@@ -50,7 +49,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             if(result == 0)
             {
-                return null;
+                return null!;
             }
             return promotion;
         }
@@ -61,7 +60,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             if (existPromotion == null)
             {
-                return null;
+                return null!;
             }
 
             existPromotion.Name = promotion.Name;
@@ -74,7 +73,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             if(result == 0)
             {
-                return null;
+                return null!;
             }
 
             return promotion;

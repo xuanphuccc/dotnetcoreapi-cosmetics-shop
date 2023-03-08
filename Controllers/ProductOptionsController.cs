@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using web_api_cosmetics_shop.Models.DTO;
+using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.ProductOptionService;
 
 namespace web_api_cosmetics_shop.Controllers
@@ -14,110 +15,228 @@ namespace web_api_cosmetics_shop.Controllers
 			_productOptionService = productOptionService;
 		}
 
-		// GET: api/productoptions
-		[HttpGet]
-		public async Task<IActionResult> GetProductOptions()
+		[NonAction]
+		private async Task<ProductOptionTypeDTO> ConvertToProductOptionTypeDtoAsync(ProductOptionType optionsType)
 		{
-			var allProductOptions = await _productOptionService.GetProductOptions();
-			return Ok(allProductOptions);
+			// Get Options of Type
+			var options = await _productOptionService.GetOptions(optionsType);
+
+			// Convert ProductOption to ProductOptionDTO
+			List<ProductOptionDTO> productOptionDtos = new List<ProductOptionDTO>();
+			foreach (var option in options)
+			{
+				var productOptionDto = new ProductOptionDTO()
+				{
+					ProductOptionId = option.ProductOptionId,
+					OptionTypeId = optionsType.OptionTypeId,
+					Name = option.Name,
+					Value = option.Value
+				};
+
+				productOptionDtos.Add(productOptionDto);
+			}
+
+			// Convert ProductOptionType to ProductOptionTypeDTO
+			var productOptionTypeDto = new ProductOptionTypeDTO()
+			{
+				OptionTypeId = optionsType.OptionTypeId,
+				Name = optionsType.Name,
+				Options = productOptionDtos
+			};
+
+			return productOptionTypeDto;
 		}
 
+		// ----------- GET ALL -----------
+		// GET: api/productoptions
+		[HttpGet]
+		public async Task<IActionResult> GetAllProductOptions()
+		{
+			var allOptionsType = await _productOptionService.GetAllOptionsTypes();
+
+			List<ProductOptionTypeDTO> productOptionTypeDtos = new List<ProductOptionTypeDTO>();
+			foreach(var type in allOptionsType)
+			{
+				var productOptionTypeDto = await ConvertToProductOptionTypeDtoAsync(type);
+				productOptionTypeDtos.Add(productOptionTypeDto);
+			}
+
+			return Ok(productOptionTypeDtos);
+		}
+
+		// ----------- GET -----------
 		// GET: api/productoptions/9
 		[HttpGet("{id?}")]
-		public async Task<IActionResult> GetProductOption([FromRoute] int? id)
+		public async Task<IActionResult> GetProductOptions([FromRoute] int? id)
 		{
 			if(!id.HasValue)
 			{
 				return BadRequest();
 			}
 
-			var productOptions = await _productOptionService.GetProductOption(id.Value);
-			if(productOptions == null)
+			// Get Options Type
+			var optionsType = await _productOptionService.GetOptionsTypeById(id.Value);
+			if(optionsType == null)
 			{
 				return NotFound();
 			}
 
-			return Ok(productOptions);
+			var productOptionTypeDto = await ConvertToProductOptionTypeDtoAsync(optionsType);
+
+			return Ok(productOptionTypeDto);
 		}
 
+		// ----------- POST -----------
 		// POST: api/productoptions
 		[HttpPost]
-		public async Task<IActionResult> CreateProductOptions([FromBody] ProductOptionTypeDTO productOptions)
+		public async Task<IActionResult> CreateProductOptions([FromBody] ProductOptionTypeDTO productOptionsTypeDto)
 		{
-			if(productOptions == null)
+			if(productOptionsTypeDto == null || productOptionsTypeDto.Options == null)
 			{
 				return BadRequest();
 			}
 
 			// Check exist Option Type name
-			if(await _productOptionService.GetExistOptionTypeName(productOptions.Name))
+			if(await _productOptionService.GetExistOptionTypeName(productOptionsTypeDto.Name))
 			{
 				return BadRequest(new ErrorDTO() { Title = "Type Name already exist", Status = 400 });
 			}
 
-			var result = await _productOptionService.AddProductOptions(productOptions);
-			if(result == null)
+			// Adding Product Options Type
+			var newOptionsType = new ProductOptionType()
+			{
+				Name = productOptionsTypeDto.Name,
+			};
+
+			var createdOptionsType = await _productOptionService.AddOptionsType(newOptionsType);
+			productOptionsTypeDto.OptionTypeId = createdOptionsType.OptionTypeId;
+			if (createdOptionsType == null)
 			{
 				return StatusCode(StatusCodes.Status500InternalServerError);
 			}
 
-			return CreatedAtAction(nameof(GetProductOption), new { id = result.OptionTypeId }, result);
+			// Adding Product Options
+            foreach (var option in productOptionsTypeDto.Options)
+            {
+
+				var newOption = new ProductOption()
+				{
+					OptionTypeId = createdOptionsType.OptionTypeId,
+					Name = option.Name,
+					Value = option.Value
+				};
+
+				var createdOption = await _productOptionService.AddOption(newOption);
+				option.ProductOptionId = createdOption.ProductOptionId;
+				option.OptionTypeId = createdOption.OptionTypeId;
+				if (createdOption == null)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError);
+				}
+			}
+
+			return CreatedAtAction(nameof(GetProductOptions), new { id = createdOptionsType.OptionTypeId }, productOptionsTypeDto);
 		}
 
+		// ----------- PUT -----------
 		// PUT: api/productoptions/9
 		[HttpPut("{id?}")]
-		public async Task<IActionResult> UpdateProductOptions([FromRoute] int? id, [FromBody] ProductOptionTypeDTO productOptions)
+		public async Task<IActionResult> UpdateProductOptions([FromRoute] int? id, [FromBody] ProductOptionTypeDTO productOptionsTypeDto)
 		{
-			if(!id.HasValue || productOptions == null)
+			if (
+				!id.HasValue || 
+				productOptionsTypeDto == null || 
+				productOptionsTypeDto.Options == null
+				)
 			{
 				return BadRequest();
 			}
 
 			// Check existing Option Type
-			var existProductOptionType = await _productOptionService.GetProductOption(id.Value);
-			if (existProductOptionType == null)
+			var existOptionsType = await _productOptionService.GetOptionsTypeById(id.Value);
+			productOptionsTypeDto.OptionTypeId = existOptionsType.OptionTypeId;
+			if (existOptionsType == null)
 			{
 				return NotFound();
 			}
 
 			// Check exist Option Type name
-			if (await _productOptionService.GetExistOptionTypeName(productOptions.Name) && existProductOptionType.Name != productOptions.Name)
+			if (await _productOptionService.GetExistOptionTypeName(productOptionsTypeDto.Name) && existOptionsType.Name != productOptionsTypeDto.Name)
 			{
 				return BadRequest(new ErrorDTO() { Title = "Type Name already exist", Status = 400 });
 			}
 
-			productOptions.OptionTypeId = existProductOptionType.OptionTypeId;
-			var result = await _productOptionService.UpdateProductOptions(productOptions);
-			if (result == null)
+			// Update Options Type
+			var newOptionsType = new ProductOptionType()
 			{
-				return StatusCode(StatusCodes.Status500InternalServerError);
+				OptionTypeId = existOptionsType.OptionTypeId,
+				Name = productOptionsTypeDto.Name,
+			};
+
+			if(existOptionsType.Name != newOptionsType.Name)
+			{
+				var updateOptionsTypeResult = await _productOptionService.UpdateOptionsType(newOptionsType);
+				if(updateOptionsTypeResult == null)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError);
+				}
 			}
 
-			return Ok(result);
+			// Remove old Options
+			await _productOptionService.RemoveOptions(existOptionsType);
+
+			// Add new Options
+			foreach (var option in productOptionsTypeDto.Options)
+			{
+
+				var newOption = new ProductOption()
+				{
+					OptionTypeId = existOptionsType.OptionTypeId,
+					Name = option.Name,
+					Value = option.Value
+				};
+
+				var createdOption = await _productOptionService.AddOption(newOption);
+				option.ProductOptionId = createdOption.ProductOptionId;
+				option.OptionTypeId = createdOption.OptionTypeId;
+				if (createdOption == null)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError);
+				}
+			}
+
+			return Ok(productOptionsTypeDto);
 		}
 
+		// ----------- DELETE -----------
 		// DELETE: api/productoptions/9
 		[HttpDelete("{id?}")]
 		public async Task<IActionResult> RemoveProductOption([FromRoute] int? id)
 		{
-			if(!id.HasValue)
+			if (!id.HasValue)
 			{
 				return BadRequest();
 			}
 
-			var existProductOptionType = await _productOptionService.GetProductOption(id.Value);
-			if(existProductOptionType == null)
+			var existOptionType = await _productOptionService.GetOptionsTypeById(id.Value);
+			if (existOptionType == null)
 			{
 				return NotFound();
 			}
 
-			var result = await _productOptionService.RemoveProductOptions(id.Value);
-			if(result == null)
+			var hasRemove = await ConvertToProductOptionTypeDtoAsync(existOptionType);
+
+			// Removing Options
+			await _productOptionService.RemoveOptions(existOptionType);
+
+			// Removing Options Type
+			var result = await _productOptionService.RemoveOptionsType(existOptionType);
+			if (result == 0)
 			{
 				return StatusCode(StatusCodes.Status500InternalServerError);
 			}
 
-			return Ok(result);
+			return Ok(hasRemove);
 		}
 	}
 }

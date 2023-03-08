@@ -1,14 +1,25 @@
 ﻿using web_api_cosmetics_shop.Models.DTO;
+using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.ProductOptionService
 {
 	public interface IProductOptionService
 	{
-		Task<List<ProductOptionTypeDTO>> GetProductOptions();
-		Task<ProductOptionTypeDTO> GetProductOption(int productOptionTypeId);
-		Task<bool> GetExistOptionTypeName(string optionTypeName);
-		Task<ProductOptionTypeDTO> AddProductOptions(ProductOptionTypeDTO productOptionTypeDTO);
-		Task<ProductOptionTypeDTO> UpdateProductOptions(ProductOptionTypeDTO productOptionTypeDTO);
-		Task<ProductOptionTypeDTO> RemoveProductOptions(int productOptionTypeId);
+		// Get
+		Task<List<ProductOptionType>> GetAllOptionsTypes();
+		Task<ProductOptionType> GetOptionsTypeById(int id);
+		Task<List<ProductOption>> GetOptions(ProductOptionType optionsType);
+		Task<bool> GetExistOptionTypeName(string optionsTypeName);
+
+		// Add
+		Task<ProductOptionType> AddOptionsType(ProductOptionType optionsType);
+		Task<ProductOption> AddOption(ProductOption option);
+
+		// Update
+		Task<ProductOptionType> UpdateOptionsType(ProductOptionType optionsType);
+
+		// Remove
+		Task<int> RemoveOptionsType(ProductOptionType optionsType);
+		Task<int> RemoveOptions(ProductOptionType optionsType);
 	}
 }

@@ -24,7 +24,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 
 			if(category == null)
 			{
-				return null;
+				return null!;
 			}
 
 			return category;
@@ -37,7 +37,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
 			{
-				return null;
+				return null!;
 			}
 
 			return category;
@@ -48,7 +48,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 			var existCategory = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == category.CategoryId);
 			if(existCategory == null)
 			{
-				return null;
+				return null!;
 			}
 
 			existCategory.Name = category.Name;
@@ -58,7 +58,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
 			{
-				return null;
+				return null!;
 			}
 
 			return existCategory;
@@ -71,7 +71,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 			int result =  await _context.SaveChangesAsync();
 			if(result == 0)
 			{
-				return null;
+				return null!;
 			}
 
 			return category;

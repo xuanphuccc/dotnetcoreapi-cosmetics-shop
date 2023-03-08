@@ -26,5 +26,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[StringLength(50)]
 		[Required]
 		public string Value { get; set; } = string.Empty;
+
+		public int? OptionTypeId { get; set; }
 	}
 }
