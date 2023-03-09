@@ -10,6 +10,6 @@
 
 	public class SubError
 	{
-		public string[]? Name { get; set; }
+		public List<string>? Message { get; set; }
 	}
 }
