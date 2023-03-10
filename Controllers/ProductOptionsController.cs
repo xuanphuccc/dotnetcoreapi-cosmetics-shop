@@ -215,6 +215,7 @@ namespace web_api_cosmetics_shop.Controllers
 				// Add new Options list: in new options and not in old options
 				foreach (var option in productOptionsTypeDto.Options)
 				{
+					// Add new Option
 					if(!oldOptionsId.Contains(option.ProductOptionId))
 					{
 						var newOption = new ProductOption()
@@ -232,6 +233,33 @@ namespace web_api_cosmetics_shop.Controllers
 						// Get information
 						option.ProductOptionId = createdOption.ProductOptionId;
 						option.OptionTypeId = createdOption.OptionTypeId;
+					}
+
+					// Update old Option
+					if (oldOptionsId.Contains(option.ProductOptionId))
+					{
+						var existOption = await _productOptionService.GetOption(option.ProductOptionId);
+						if(existOption == null)
+						{
+							return NotFound(new ErrorDTO() { Title = "Option Id not found", Status = 404 });
+						}
+
+						var updateOption = new ProductOption()
+						{
+							ProductOptionId = existOption.ProductOptionId,
+							Name = option.Name,
+							Value = option.Value
+						};
+
+						if(existOption.Name != updateOption.Name || existOption.Value != updateOption.Value)
+						{
+							var updateOptionResult = await _productOptionService.UpdateOption(updateOption);
+							if (updateOptionResult == null)
+							{
+								return BadRequest(new ErrorDTO() { Title = "Can not update option", Status = 500 });
+							}
+						}
+
 					}
 				}
 

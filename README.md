@@ -94,24 +94,67 @@
 ```
 
 ## Bảng Products
+- Get all: /api/products
+- Get: /api/products/{id?}
+- Delete: /api/products/{id?}
+    - Chỉ được xóa sản phẩm khi chưa có đơn đặt hàng nào
+- Post: /api/products
 ```
 {
-	productId: 1,
-	name: "Tên sản phẩm",
-	description: "Mô tả sản phẩm",
-	image: "http://www.xuanphuc.space",
-	categoriesId: ["categoryId", "categoryId2"],
-	items: [
+	"name": "Tên sản phẩm",
+	"description": "Mô tả sản phẩm",
+	"image": "http://www.xuanphuc.space",
+	"categoriesId": [2, 3],  ==>(ID phải tồn tại)
+	"items": [
 		{
-			productItemId: 1,
-			productId: 1,
-			sku: "SP001",
-			qtyInStock: 20,
-			image: "https://www.xuanphuc.space",
-			price: 200,
-			costPrice: 150,
-			optionsId: ["optionId", "optionId2"]
-		}
+            "sku": "SP001",
+            "qtyInStock": 30,
+            "image": "https://www.xuanphuc.space",
+            "price": 200.00,
+            "costPrice": 150.00,
+            "optionsId": [2, 3, 4]  ==>(ID phải tồn tại)
+        },
+        {
+            "sku": "SP002",
+            "qtyInStock": 20,
+            "image": "https://www.xuanphuc.space",
+            "price": 300.00,
+            "costPrice": 250.00,
+            "optionsId": [8, 9]  ==>(ID phải tồn tại)
+        }
 	]
+}
+```
+- Update: /api/products/{id?}
+    - Chỉ được xóa loại sản phẩm (item) khi chưa có đặt đơn hàng nào
+    - Chỉ được sửa cấu hình sản phẩm (options) khi chưa có đơn đặt hàng nào
+```
+{
+    "productId": 1,  ==>(Không bắt buộc)
+    "name": "Tên sản phẩm",
+    "description": "Mô tả sản phẩm",
+    "image": "http://www.xuanphuc.space",
+    "categoriesId": [3],  ==>(ID phải tồn tại)
+    "items": [
+        {
+            "productItemId": 4,  ==>(ID Item cũ)
+            "sku": "SP001",
+            "qtyInStock": 30,
+            "image": "https://www.xuanphuc.space",
+            "price": 200.00,
+            "costPrice": 150.00,
+            "productId": 1,  ==>(Không bắt buộc)
+            "optionsId": [3, 4]  ==>(ID phải tồn tại)
+        },
+        {
+            "sku": "SP002",  ==>(Item mới không cần ID)
+            "qtyInStock": 20,
+            "image": "https://www.xuanphuc.space",
+            "price": 300.00,
+            "costPrice": 250.00,
+            "productId": 1,  ==>(Không bắt buộc)
+            "optionsId": [5, 6]  ==>(ID phải tồn tại)
+        }
+    ]
 }
 ```

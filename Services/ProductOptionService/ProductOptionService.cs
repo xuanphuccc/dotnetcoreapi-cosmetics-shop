@@ -62,6 +62,14 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
 			return options;
 		}
 
+		// Get one Option by id
+		public async Task<ProductOption> GetOption(int optionId)
+		{
+			var option = await _context.ProductOptions.FirstOrDefaultAsync(po => po.ProductOptionId == optionId);
+
+			return option!;
+		}
+
 		// Check exist Option Type name
 		public async Task<bool> GetExistOptionTypeName(string optionsTypeName)
 		{
@@ -116,6 +124,26 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
 			}
 
 			return optionsType;
+		}
+
+		public async Task<ProductOption> UpdateOption(ProductOption option)
+		{
+			var existOption = await _context.ProductOptions.FirstOrDefaultAsync(o => o.ProductOptionId == option.ProductOptionId);
+			if(existOption == null)
+			{
+				return null!;
+			}
+
+			existOption.Name = option.Name;
+			existOption.Value = option.Value;
+
+			var result = await _context.SaveChangesAsync();
+			if (result == 0)
+			{
+				return null!;
+			}
+
+			return option;
 		}
 	}
 }

@@ -7,25 +7,30 @@ namespace web_api_cosmetics_shop.Services.ProductService
 	{
 		// Get
 		Task<List<Product>> GetAllProducts();
-		Task<Product> GetProductById(int id);
+		Task<Product> GetProductById(int productId);
 		Task<List<ProductCategory>> GetCategories(Product product);
-		Task<List<ProductItem>> GetItems(Product product);
+		Task<List<ProductItem>> GetAllItems(Product product);
+		Task<ProductItem> GetItem(int productItemId);
 		Task<List<ProductConfiguration>> GetConfigurations(ProductItem product);
 		
 		// Add
 		Task<Product> AddProduct(Product product);
 		Task<ProductItem> AddProductItem(ProductItem productItem);
-		Task<ProductConfiguration> AddProductOption(ProductConfiguration productConfiguration);
+		Task<ProductConfiguration> AddProductConfiguration(ProductConfiguration productConfiguration);
 		Task<ProductCategory> AddProductCategory(ProductCategory productCategory);
 
 		// Update
 		Task<Product> UpdateProduct(Product product);
+		Task<ProductItem> UpdateProductItem(ProductItem productItem);
 
 		// Remove
 		Task<int> RemoveProduct(Product product);
-		Task<int> RemoveProductItems(Product product);
-		Task<int> RemoveProductCategories(Product product);
-		Task<int> RemoveProductOptions(ProductItem product);
+		Task<int> RemoveAllProductItems(Product product);
+		Task<int> RemoveProductItem(ProductItem productItem);
+		Task<bool> IsHasOrderItem(ProductItem productItem);
+		Task<int> RemoveAllProductCategories(Product product);
+		Task<int> RemoveProductCategory(ProductCategory productCategory);
+		Task<int> RemoveAllProductConfigurations(ProductItem productItem);
 		
 	}
 }

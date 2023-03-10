@@ -16,6 +16,9 @@ namespace web_api_cosmetics_shop.Models.DTO
 		public string? Image { get; set; }
 
 		[Required]
+		public bool IsDisplay { get; set; }
+
+		[Required]
 		public List<int>? CategoriesId { get; set; }
 
 		[Required]

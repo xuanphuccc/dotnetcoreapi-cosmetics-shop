@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Net.WebSockets;
 using web_api_cosmetics_shop.Data;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
@@ -36,7 +37,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return productItem;
 		}
 
-		public async Task<ProductConfiguration> AddProductOption(ProductConfiguration productConfiguration)
+		public async Task<ProductConfiguration> AddProductConfiguration(ProductConfiguration productConfiguration)
 		{
 			await _context.ProductConfigurations.AddAsync(productConfiguration);
 			var addProductOptionResult = await _context.SaveChangesAsync();
@@ -79,10 +80,18 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return categories;
 		}
 
-		public async Task<List<ProductItem>> GetItems(Product product)
+		public async Task<List<ProductItem>> GetAllItems(Product product)
 		{
 			var items = await _context.ProductItems.Where(pi => pi.ProductId == product.ProductId).ToListAsync();
 			return items;
+		}
+
+		public async Task<ProductItem> GetItem(int productItemId)
+		{
+			var item = await _context.ProductItems
+						.FirstOrDefaultAsync(pi => pi.ProductItemId == productItemId);
+
+			return item!;
 		}
 
 		public async Task<List<ProductConfiguration>> GetConfigurations(ProductItem productItem)
@@ -101,7 +110,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return result;
 		}
 
-		public async Task<int> RemoveProductItems(Product product)
+		public async Task<int> RemoveAllProductItems(Product product)
 		{
 			var productItems = await _context.ProductItems
 											.Where(pi => pi.ProductId == product.ProductId)
@@ -112,7 +121,23 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return result;
 		}
 
-		public async Task<int> RemoveProductCategories(Product product)
+		public async Task<int> RemoveProductItem(ProductItem productItem)
+		{
+			_context.Remove(productItem);
+			var result = await _context.SaveChangesAsync();
+
+			return result;
+		}
+
+		public async Task<bool> IsHasOrderItem(ProductItem productItem)
+		{
+			var isHasOrderItem = await _context.OrderItems
+								.AnyAsync(oi => oi.ProductItemId == productItem.ProductItemId);
+
+			return isHasOrderItem;
+		}
+
+		public async Task<int> RemoveAllProductCategories(Product product)
 		{
 			var categories = await _context.ProductCategories
 												.Where(c => c.ProductId == product.ProductId)
@@ -124,7 +149,15 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return result;
 		}
 
-		public async Task<int> RemoveProductOptions(ProductItem productItem)
+		public async Task<int> RemoveProductCategory(ProductCategory productCategory)
+		{
+			_context.Remove(productCategory);
+			var result = await _context.SaveChangesAsync();
+
+			return result;
+		}
+
+		public async Task<int> RemoveAllProductConfigurations(ProductItem productItem)
 		{
 			var productOptions = await _context.ProductConfigurations
 											.Where(po => po.ProductItemId == productItem.ProductItemId)
@@ -149,6 +182,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			existProduct.Name = product.Name;
 			existProduct.Description = product.Description;
 			existProduct.Image = product.Image;
+			existProduct.IsDisplay = product.IsDisplay;
 
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
@@ -157,6 +191,29 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			}
 
 			return product;
+		}
+
+		public async Task<ProductItem> UpdateProductItem(ProductItem productItem)
+		{
+			var existProductItem = await GetItem(productItem.ProductItemId);
+			if(existProductItem == null)
+			{
+				return null!;
+			}
+
+			existProductItem.SKU = productItem.SKU;
+			existProductItem.QtyInStock = productItem.QtyInStock;
+			existProductItem.Image = productItem.Image;
+			existProductItem.Price = productItem.Price;
+			existProductItem.CostPrice = productItem.CostPrice;
+
+			var result = await _context.SaveChangesAsync();
+			if(result == 0)
+			{
+				return null!;
+			}
+
+			return productItem;
 		}
 	}
 }

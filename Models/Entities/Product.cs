@@ -16,6 +16,9 @@ namespace web_api_cosmetics_shop.Models.Entities
         public string? Description { get; set; }
         public string? Image { get; set; }
 
+        [Required]
+        public bool IsDisplay { get; set; }
+
 
         public List<ProductItem>? ProductItems { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.WebSockets;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.ProductService;
@@ -45,7 +46,7 @@ namespace web_api_cosmetics_shop.Controllers
 								.ToList();
 
 			// Getting Product Items
-			var productItems = await _productService.GetItems(product);
+			var productItems = await _productService.GetAllItems(product);
 
 			// Converting ProductItem to ProductItemDTO
 			List<ProductItemDTO> productItemDtos = new List<ProductItemDTO>();
@@ -123,11 +124,12 @@ namespace web_api_cosmetics_shop.Controllers
 					Name = productDto.Name,
 					Description = productDto.Description,
 					Image = productDto.Image,
+					IsDisplay = productDto.IsDisplay,
 				};
 				var createdProduct = await _productService.AddProduct(product);
 				if (createdProduct == null)
 				{
-					return BadRequest(new ErrorDTO() { Title = "Can not create product", Status = 400 });
+					return BadRequest(new ErrorDTO() { Title = "Can not create product", Status = 500 });
 				}
 				// Get information
 				productDto.ProductId = createdProduct.ProductId;
@@ -144,7 +146,7 @@ namespace web_api_cosmetics_shop.Controllers
 					var createdProductCategory = await _productService.AddProductCategory(productCategory);
 					if (createdProductCategory == null)
 					{
-						return BadRequest(new ErrorDTO() { Title = "Can not create product category", Status = 400 });
+						return BadRequest(new ErrorDTO() { Title = "Can not create product category", Status = 500 });
 					}
 				}
 
@@ -163,7 +165,7 @@ namespace web_api_cosmetics_shop.Controllers
 					var createdProductItem = await _productService.AddProductItem(productItem);
 					if (createdProductItem == null)
 					{
-						return BadRequest(new ErrorDTO() { Title = "Can not create product item", Status = 400 });
+						return BadRequest(new ErrorDTO() { Title = "Can not create product item", Status = 500 });
 					}
 					// Get information
 					item.ProductItemId = createdProductItem.ProductItemId;
@@ -183,10 +185,10 @@ namespace web_api_cosmetics_shop.Controllers
 							ProductOptionId = optionId
 						};
 
-						var createdProductOption = await _productService.AddProductOption(option);
+						var createdProductOption = await _productService.AddProductConfiguration(option);
 						if (createdProductOption == null)
 						{
-							return BadRequest(new ErrorDTO() { Title = "Can not create product option", Status = 400 });
+							return BadRequest(new ErrorDTO() { Title = "Can not create product option", Status = 500 });
 						}
 					}
 				}
@@ -228,97 +230,219 @@ namespace web_api_cosmetics_shop.Controllers
 					ProductId = existProduct.ProductId,
 					Name = productDto.Name,
 					Description = productDto.Description,
-					Image = productDto.Image
+					Image = productDto.Image,
+					IsDisplay = productDto.IsDisplay
 				};
 
 				//# Update Product
 				if (
 					existProduct.Name != newProduct.Name ||
 					existProduct.Description != newProduct.Description ||
-					existProduct.Image != newProduct.Image)
+					existProduct.Image != newProduct.Image ||
+					existProduct.IsDisplay != newProduct.IsDisplay)
 				{
 					var result = await _productService.UpdateProduct(newProduct);
 					if (result == null)
 					{
-						return StatusCode(StatusCodes.Status500InternalServerError);
+						return StatusCode(StatusCodes.Status500InternalServerError, new ErrorDTO() { Title = "Can not update product", Status = 500 });
 					}
 				}
 
 
-				//# Update Product Categories
-				// Remove old Product Categories
-				await _productService.RemoveProductCategories(existProduct);
+				// ----- Update Product Categories -----
+				// Get old Categories
+				var oldCategories = await _productService.GetCategories(existProduct);
+				var oldCategoriesId = oldCategories.Select(c => c.CategoryId).ToList();
 
-				// Creating new Product Categories
-				foreach (var categoryId in productDto.CategoriesId)
+				// Get new Categories id
+				var newCategoriesId = productDto.CategoriesId;
+
+				// Remove Categories list: in old categories and not in new categories
+				foreach(var category in oldCategories)
 				{
-					var productCategory = new ProductCategory()
+					if (!newCategoriesId.Contains(category.CategoryId!.Value))
 					{
-						ProductId = existProduct.ProductId,
-						CategoryId = categoryId,
-					};
-
-					var createdProductCategory = await _productService.AddProductCategory(productCategory);
-					if (createdProductCategory == null)
-					{
-						return BadRequest(new ErrorDTO() { Title = "Can not create product category", Status = 500 });
-					}
-				}
-
-				//# Update Product Items and Product Options
-				// Remove old Product Items and Product Options
-				var existItems = await _productService.GetItems(existProduct);
-				foreach (var item in existItems)
-				{
-					await _productService.RemoveProductOptions(item);
-				}
-
-				var removeOldItemsResult = await _productService.RemoveProductItems(existProduct);
-				if (removeOldItemsResult == 0)
-				{
-					return BadRequest(new ErrorDTO() { Title = "Can not remove product items", Status = 500 });
-				}
-
-				// Creating Product Items
-				foreach (var item in productDto.Items)
-				{
-					var productItem = new ProductItem()
-					{
-						ProductId = existProduct.ProductId,
-						SKU = item.SKU,
-						QtyInStock = item.QtyInStock,
-						Image = item.Image,
-						Price = item.Price,
-						CostPrice = item.CostPrice
-					};
-					var createdProductItem = await _productService.AddProductItem(productItem);
-					if (createdProductItem == null)
-					{
-						return BadRequest(new ErrorDTO() { Title = "Can not create product item", Status = 400 });
-					}
-					item.ProductItemId = createdProductItem.ProductItemId;
-					item.ProductId = existProduct.ProductId;
-
-					// Creating Product Options
-					if (item.OptionsId == null)
-					{
-						return BadRequest();
-					}
-					foreach (var optionId in item.OptionsId)
-					{
-						var option = new ProductConfiguration()
+						var removeCategoryResult = await _productService.RemoveProductCategory(category);
+						if(removeCategoryResult == 0)
 						{
-							ProductItemId = createdProductItem.ProductItemId,
-							ProductOptionId = optionId
-						};
-
-						var createdProductOption = await _productService.AddProductOption(option);
-						if (createdProductOption == null)
-						{
-							return BadRequest(new ErrorDTO() { Title = "Can not create product option", Status = 400 });
+							return StatusCode(
+								StatusCodes.Status500InternalServerError, 
+								new ErrorDTO() { Title = "Can not update product category", Status = 500 });
 						}
 					}
 				}
+
+				// Add Categories list: in new categories and not in old categories
+				foreach (var categoryId in newCategoriesId)
+				{
+					if (!oldCategoriesId.Contains(categoryId))
+					{
+						var productCategory = new ProductCategory()
+						{
+							ProductId = existProduct.ProductId,
+							CategoryId = categoryId,
+						};
+
+						var createdProductCategory = await _productService.AddProductCategory(productCategory);
+						if (createdProductCategory == null)
+						{
+							return StatusCode(
+								StatusCodes.Status500InternalServerError,
+								new ErrorDTO() { Title = "Can not update product category", Status = 500 });
+						}
+					}
+				}
+				// ----- End Update Product Categories -----
+
+
+
+				// ----- Update Product Items and Product Options -----
+				var oldProductItems = await _productService.GetAllItems(existProduct);
+				var oldProductItemsId = oldProductItems.Select(pi => pi.ProductItemId);
+
+				var newProductItems = productDto.Items;
+				var newProductItemsId = newProductItems.Select(pi => pi.ProductItemId);
+
+				// Remove Product Items list: in old Product Items and not in new Product Items
+				foreach(var item in oldProductItems)
+				{
+					if(!newProductItemsId.Contains(item.ProductItemId))
+					{
+						// Only delete product item if there are no orders
+						if (!(await _productService.IsHasOrderItem(item)))
+						{
+							var removeProductItemResult = await _productService.RemoveProductItem(item);
+							if (removeProductItemResult == 0)
+							{
+								return StatusCode(
+									StatusCodes.Status500InternalServerError,
+									new ErrorDTO() { Title = "Can not update product item", Status = 500 });
+							}
+						}
+						else
+						{
+							return BadRequest(new ErrorDTO() { Title = "Can not delete item has order", Status = 400 });
+						}
+					}
+				}
+
+				// Add Product Items list: in new Product Items and not in old Product Items
+				foreach (var item in newProductItems)
+				{
+					// Add new Item
+					if (!oldProductItemsId.Contains(item.ProductItemId))
+					{
+						var productItem = new ProductItem()
+						{
+							ProductId = existProduct.ProductId,
+							SKU = item.SKU,
+							QtyInStock = item.QtyInStock,
+							Image = item.Image,
+							Price = item.Price,
+							CostPrice = item.CostPrice
+						};
+						var createdProductItem = await _productService.AddProductItem(productItem);
+						if (createdProductItem == null)
+						{
+							return StatusCode(
+									StatusCodes.Status500InternalServerError,
+									new ErrorDTO() { Title = "Can not update product item", Status = 500 });
+						}
+						item.ProductItemId = createdProductItem.ProductItemId;
+						item.ProductId = existProduct.ProductId;
+
+						// Creating Product Options
+						if (item.OptionsId == null)
+						{
+							return BadRequest(new ErrorDTO() { Title = "optionsId is required", Status = 400 });
+						}
+						foreach (var optionId in item.OptionsId)
+						{
+							var option = new ProductConfiguration()
+							{
+								ProductItemId = createdProductItem.ProductItemId,
+								ProductOptionId = optionId
+							};
+
+							var createdProductOption = await _productService.AddProductConfiguration(option);
+							if (createdProductOption == null)
+							{
+								return StatusCode(
+									StatusCodes.Status500InternalServerError,
+									new ErrorDTO() { Title = "Can not create product option", Status = 500 });
+							}
+						}
+					}
+
+					// Update old Item
+					if(oldProductItemsId.Contains(item.ProductItemId))
+					{
+						var existProductItem = await _productService.GetItem(item.ProductItemId);
+						if (existProductItem == null)
+						{
+							return NotFound(new ErrorDTO() { Title = "Product item not found", Status = 404 });
+						}
+
+						var updateProductItem = new ProductItem()
+						{
+							ProductItemId = existProductItem.ProductItemId,
+							SKU = item.SKU,
+							QtyInStock = item.QtyInStock,
+							Image = item.Image,
+							Price = item.Price,
+							CostPrice = item.CostPrice
+						};
+
+						if(
+							existProductItem.SKU != updateProductItem.SKU ||
+							existProductItem.QtyInStock != updateProductItem.QtyInStock ||
+							existProductItem.Image != updateProductItem.Image ||
+							existProductItem.Price != updateProductItem.Price ||
+							existProductItem.CostPrice != updateProductItem.CostPrice)
+						{
+							var updateProductItemResult = await _productService.UpdateProductItem(updateProductItem);
+							if(updateProductItemResult == null)
+							{
+								return StatusCode(
+									StatusCodes.Status500InternalServerError,
+									new ErrorDTO() { Title = "Can not create product option", Status = 500 });
+							}
+						}
+
+						// Only update options if there are no orders
+						if (!(await _productService.IsHasOrderItem(existProductItem)))
+						{
+							// Remove Product Item Options
+							await _productService.RemoveAllProductConfigurations(existProductItem);
+
+							// Creating Product Item Options
+							if (item.OptionsId == null)
+							{
+								return BadRequest(new ErrorDTO() { Title = "optionsId is required", Status = 400 });
+							}
+							foreach (var optionId in item.OptionsId)
+							{
+								var option = new ProductConfiguration()
+								{
+									ProductItemId = existProductItem.ProductItemId,
+									ProductOptionId = optionId
+								};
+
+								var createdProductOption = await _productService.AddProductConfiguration(option);
+								if (createdProductOption == null)
+								{
+									return StatusCode(StatusCodes.Status500InternalServerError,
+													new ErrorDTO() { Title = "Can not create product option", Status = 500 });
+								}
+							}
+						}
+						else
+						{
+							return BadRequest(new ErrorDTO() { Title = "Can not update item option has order", Status = 400 });
+						}
+					}
+				}
+				// ----- End Update Product Items and Product Options -----
 
 				return Ok(productDto);
 			}
@@ -343,33 +467,43 @@ namespace web_api_cosmetics_shop.Controllers
 				return NotFound();
 			}
 
-			var productItems = await _productService.GetItems(product);
+			var productItems = await _productService.GetAllItems(product);
 
-			var hasRemoveProduct = await ConvertToProductDtoAsync(product);
+			// Check order
+            foreach (var item in productItems)
+            {
+				if (await _productService.IsHasOrderItem(item))
+				{
+					return BadRequest(new ErrorDTO() { Title = "Can not delete product has order", Status = 400 });
+				}
+			}
+
+            var hasRemoveProduct = await ConvertToProductDtoAsync(product);
 
 			try
 			{
-				// Removing Categories
-				await _productService.RemoveProductCategories(product);
+				//// Removing Categories
+				//await _productService.RemoveAllProductCategories(product);
 
-				// Removing Product Options
-				foreach (var item in productItems)
-				{
-					await _productService.RemoveProductOptions(item);
-				}
+				//// Removing Product Options
+				//foreach (var item in productItems)
+				//{
+				//	await _productService.RemoveAllProductConfigurations(item);
+				//}
 
-				// Removing Product Items
-				var removeItemsResult = await _productService.RemoveProductItems(product);
-				if (removeItemsResult == 0)
-				{
-					return StatusCode(StatusCodes.Status500InternalServerError);
-				}
+				//// Removing Product Items
+				//var removeItemsResult = await _productService.RemoveAllProductItems(product);
+				//if (removeItemsResult == 0)
+				//{
+				//	return StatusCode(StatusCodes.Status500InternalServerError);
+				//}
 
 				// Removing Product
 				var removeProductResult = await _productService.RemoveProduct(product);
 				if (removeProductResult == 0)
 				{
-					return StatusCode(StatusCodes.Status500InternalServerError);
+					return StatusCode(StatusCodes.Status500InternalServerError,
+									new ErrorDTO() { Title = "Can not delete product", Status = 500 });
 				}
 
 				return Ok(hasRemoveProduct);

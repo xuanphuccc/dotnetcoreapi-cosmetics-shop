@@ -7,8 +7,9 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
 	{
 		// Get
 		Task<List<ProductOptionType>> GetAllOptionsTypes();
-		Task<ProductOptionType> GetOptionsTypeById(int id);
+		Task<ProductOptionType> GetOptionsTypeById(int optionTypeId);
 		Task<List<ProductOption>> GetOptions(ProductOptionType optionsType);
+		Task<ProductOption> GetOption(int optionId);
 		Task<bool> GetExistOptionTypeName(string optionsTypeName);
 
 		// Add
@@ -17,6 +18,7 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
 
 		// Update
 		Task<ProductOptionType> UpdateOptionsType(ProductOptionType optionsType);
+		Task<ProductOption> UpdateOption(ProductOption option);
 
 		// Remove
 		Task<int> RemoveOptionsType(ProductOptionType optionsType);
