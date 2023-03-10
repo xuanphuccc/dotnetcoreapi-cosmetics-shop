@@ -21,5 +21,6 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
 		// Remove
 		Task<int> RemoveOptionsType(ProductOptionType optionsType);
 		Task<int> RemoveOptions(ProductOptionType optionsType);
+		Task<int> RemoveOption(ProductOption option);
 	}
 }

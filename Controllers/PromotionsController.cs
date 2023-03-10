@@ -59,24 +59,31 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest(new ErrorDTO() { Title = "Name already exist", Status = 400 });
 			}
 
-			var newPromotion = new Promotion()
-            {
-                Name = promotion.Name,
-                Description = promotion.Description,
-                DiscountRate = promotion.DiscountRate,
-                StartDate = promotion.StartDate,
-                EndDate = promotion.EndDate
-            };
+			try
+			{
+				var newPromotion = new Promotion()
+				{
+					Name = promotion.Name,
+					Description = promotion.Description,
+					DiscountRate = promotion.DiscountRate,
+					StartDate = promotion.StartDate,
+					EndDate = promotion.EndDate
+				};
 
-            // Creating Promotion
-            var createdPromotion = await _promotionService.AddPromotionAsync(newPromotion);
-            if(createdPromotion == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+				// Creating Promotion
+				var createdPromotion = await _promotionService.AddPromotionAsync(newPromotion);
+				if (createdPromotion == null)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError);
+				}
 
-            return CreatedAtAction(nameof(GetPromotion), new { id = createdPromotion.PromotionId }, createdPromotion);
-        }
+				return CreatedAtAction(nameof(GetPromotion), new { id = createdPromotion.PromotionId }, createdPromotion);
+			}
+			catch (Exception error)
+			{
+				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+			}
+		}
 
 		// PUT: /api/promotions/{id}
 		[HttpPut("{id?}")]
@@ -101,25 +108,32 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest(new ErrorDTO() { Title = "Name already exist", Status = 400 });
 			}
 
-			var newPromotion = new Promotion()
+			try
 			{
-                PromotionId = existPromotion.PromotionId,
-				Name = promotion.Name,
-				Description = promotion.Description,
-				DiscountRate = promotion.DiscountRate,
-				StartDate = promotion.StartDate,
-				EndDate = promotion.EndDate
-			};
+				var newPromotion = new Promotion()
+				{
+					PromotionId = existPromotion.PromotionId,
+					Name = promotion.Name,
+					Description = promotion.Description,
+					DiscountRate = promotion.DiscountRate,
+					StartDate = promotion.StartDate,
+					EndDate = promotion.EndDate
+				};
 
-            // Updating Promotion
-            var result = await _promotionService.UpdatePromotionAsync(newPromotion);
-            if (result == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+				// Updating Promotion
+				var result = await _promotionService.UpdatePromotionAsync(newPromotion);
+				if (result == null)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError);
+				}
 
-            return Ok(result);
-        }
+				return Ok(result);
+			}
+			catch (Exception error)
+			{
+				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+			}
+		}
 
 		// DELETE: /api/promotions/{id}
 		[HttpDelete("{id?}")]
@@ -137,14 +151,21 @@ namespace web_api_cosmetics_shop.Controllers
                 return NotFound();
             }
 
-            // Removing Promotion
-            var result = await _promotionService.RemovePromotionAsync(existPromotion);
-            if (result == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+			try
+			{
+				// Removing Promotion
+				var result = await _promotionService.RemovePromotionAsync(existPromotion);
+				if (result == null)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError);
+				}
 
-            return Ok(result);
-        }
+				return Ok(result);
+			}
+			catch (Exception error)
+			{
+				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+			}
+		}
     }
 }

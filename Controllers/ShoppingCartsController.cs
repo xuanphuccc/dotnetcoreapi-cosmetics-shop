@@ -108,16 +108,14 @@ namespace web_api_cosmetics_shop.Controllers
 					};
 
 					var resultCreateShoppingCart = await _shoppingCartService.AddShoppingCart(newShoppingCart);
-
-					// Get created information
-					existShoppingCart = resultCreateShoppingCart;
-					shoppingCartDTO.CartId = resultCreateShoppingCart.CartId;
-
 					if (resultCreateShoppingCart == null)
 					{
 						return StatusCode(StatusCodes.Status500InternalServerError);
 					}
 
+					// Get created information
+					existShoppingCart = resultCreateShoppingCart;
+					shoppingCartDTO.CartId = resultCreateShoppingCart.CartId;
 				}
 				catch(Exception error)
 				{
@@ -138,10 +136,10 @@ namespace web_api_cosmetics_shop.Controllers
 						Qty = item.Qty,
 					};
 
+					//  Increase the quantity of the existing Product
 					var existCartItem = await _shoppingCartService.IsExistProductItem(item.ProductItemId.Value);
 					if (existCartItem != null)
 					{
-						//  Increase the quantity of the existing Product
 						var increaseResult = await _shoppingCartService.IncreaseQtyOfShoppingCartItem(existCartItem, item.Qty);
 
 						// Get information
@@ -153,15 +151,14 @@ namespace web_api_cosmetics_shop.Controllers
 					{
 						// Add new ProductItem
 						var addItemResult = await _shoppingCartService.AddShoppingCartItem(newShoppingCartItem);
-
-						// Get information
-						item.CartItemId = addItemResult.CartItemId;
-						item.CartId = addItemResult.CartId;
-
 						if (addItemResult == null)
 						{
 							return StatusCode(StatusCodes.Status500InternalServerError);
 						}
+
+						// Get information
+						item.CartItemId = addItemResult.CartItemId;
+						item.CartId = addItemResult.CartId;
 					}
 				}
 				catch(Exception error)

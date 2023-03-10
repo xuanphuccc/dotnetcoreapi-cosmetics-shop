@@ -56,22 +56,29 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest(new ErrorDTO() {Title = "Name already exist", Status = 400});
 			}
 
-			var newCategory = new Category()
+			try
 			{
-				Name = category.Name,
-				Image = category.Image,
-				PromotionId = category.PromotionId
-			};
+				var newCategory = new Category()
+				{
+					Name = category.Name,
+					Image = category.Image,
+					PromotionId = category.PromotionId
+				};
 
-			// Creating Category
-			var createdCategory = await _categoryService.AddCategory(newCategory);
+				// Creating Category
+				var createdCategory = await _categoryService.AddCategory(newCategory);
 
-			if(createdCategory == null)
-			{
-				return StatusCode(StatusCodes.Status500InternalServerError);
+				if (createdCategory == null)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError);
+				}
+
+				return CreatedAtAction(nameof(GetCategory), new {id = createdCategory.CategoryId}, createdCategory);
 			}
-
-			return CreatedAtAction(nameof(GetCategory), new {id = createdCategory.CategoryId}, createdCategory);
+			catch (Exception error)
+			{
+				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+			}
 		}
 
 		[HttpPut("{id?}")]
@@ -90,27 +97,34 @@ namespace web_api_cosmetics_shop.Controllers
 
 			// Check existing Category name
 			var isExistCategoryName = await _categoryService.GetExistCategoryNameAsync(category.Name);
-			if (isExistCategoryName == true)
+			if (isExistCategoryName == true && category.Name != existCategory.Name)
 			{
 				return BadRequest(new ErrorDTO() { Title = "Name already exist", Status = 400 });
 			}
 
-			var newCategory = new Category()
+			try
 			{
-				CategoryId = existCategory.CategoryId,
-				Name = category.Name,
-				Image = category.Image,
-				PromotionId = category.PromotionId
-			};
+				var newCategory = new Category()
+				{
+					CategoryId = existCategory.CategoryId,
+					Name = category.Name,
+					Image = category.Image,
+					PromotionId = category.PromotionId
+				};
 
-			// Updating Category
-			var result = await _categoryService.UpdateCategory(newCategory);
-			if(result == null)
-			{
-				return StatusCode(StatusCodes.Status500InternalServerError);
+				// Updating Category
+				var result = await _categoryService.UpdateCategory(newCategory);
+				if (result == null)
+				{
+					return BadRequest(new ErrorDTO() { Title = "Can not update category", Status = 400 });
+				}
+
+				return Ok(result);
 			}
-
-			return Ok(result);
+			catch (Exception error)
+			{
+				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+			}
 		}
 
 		[HttpDelete("{id?}")]
@@ -128,14 +142,21 @@ namespace web_api_cosmetics_shop.Controllers
 				return NotFound();
 			}
 
-			// Removing Category
-			var result = await _categoryService.RemoveCategory(existCategory);
-			if (result == null)
+			try
 			{
-				return StatusCode(StatusCodes.Status500InternalServerError);
-			}
+				// Removing Category
+				var result = await _categoryService.RemoveCategory(existCategory);
+				if (result == null)
+				{
+					return BadRequest(new ErrorDTO() { Title = "Can not delete category", Status = 400 });
+				}
 
-			return Ok(result);
+				return Ok(result);
+			}
+			catch (Exception error)
+			{
+				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+			}
 		}
 	}
 }

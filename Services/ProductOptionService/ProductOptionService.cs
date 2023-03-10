@@ -90,61 +90,15 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
 			return result;
 		}
 
+		public async Task<int> RemoveOption(ProductOption option)
+		{
+			_context.Remove(option);
+			var result = await _context.SaveChangesAsync();
+
+			return result;
+		}
 
 		//------------ Update ------------
-		//public async Task<ProductOptionTypeDTO> UpdateProductOptions(ProductOptionTypeDTO productOptionTypeDTO)
-		//{
-		//	if(productOptionTypeDTO.Options == null)
-		//	{
-		//		return null;
-		//	}
-
-		//	// Get existing Options Type
-		//	var existOptionsType = await _context.ProductOptionTypes.FirstOrDefaultAsync(opt => opt.OptionTypeId == productOptionTypeDTO.OptionTypeId);
-		//	if(existOptionsType == null)
-		//	{
-		//		return null;
-		//	}
-
-		//	// Updating Option Type
-		//	if(existOptionsType.Name != productOptionTypeDTO.Name)
-		//	{
-		//		existOptionsType.Name = productOptionTypeDTO.Name;
-		//		var optionsTypeResult = await _context.SaveChangesAsync();
-		//	}
-
-		//	// Get existing Options
-		//	var existOptions = await (from option in _context.ProductOptions
-		//						where option.OptionTypeId == existOptionsType.OptionTypeId
-		//						select option).ToListAsync();
-
-		//	// Removing old Options
-		//	_context.RemoveRange(existOptions);
-		//	var removeOptionsResult = await _context.SaveChangesAsync();
-
-		//	// Adding new Options
-		//          foreach (var item in productOptionTypeDTO.Options)
-		//          {
-		//		var newOption = new ProductOption()
-		//		{
-		//			OptionTypeId = existOptionsType.OptionTypeId,
-		//			Name = item.Name,
-		//			Value = item.Value
-		//		};
-
-		//		await _context.ProductOptions.AddAsync(newOption);
-		//		var optionResult = await _context.SaveChangesAsync();
-		//		// Get created Option id
-		//		item.ProductOptionId = newOption.ProductOptionId;
-		//		if(optionResult == 0)
-		//		{
-		//			return null;
-		//		}
-		//          }
-
-		//          return productOptionTypeDTO;
-		//}
-
 		public async Task<ProductOptionType> UpdateOptionsType(ProductOptionType optionsType)
 		{
 			var existOptionsType = await GetOptionsTypeById(optionsType.OptionTypeId);
