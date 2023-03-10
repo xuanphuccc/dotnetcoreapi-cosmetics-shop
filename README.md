@@ -97,7 +97,7 @@
 - Get all: /api/products
 - Get: /api/products/{id?}
 - Delete: /api/products/{id?}
-    - Chỉ được xóa sản phẩm khi chưa có đơn đặt hàng nào
+    - Chỉ được xóa sản phẩm khi chưa có đơn đặt hàng nào 😂
 - Post: /api/products
 ```
 {
@@ -157,4 +157,15 @@
         }
     ]
 }
+```
+
+## Shopping Cart
+- Get all: /api/shoppingcarts
+- Get: /api/shoppingcarts/{id?}
+- Delete: /api/shoppingcarts/{id?}
+- Post: /api/shoppingcarts
+```
+```
+- Update: /api/shoppingcarts/{id?}
+```
 ```
