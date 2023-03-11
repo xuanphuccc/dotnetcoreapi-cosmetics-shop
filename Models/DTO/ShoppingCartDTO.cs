@@ -8,7 +8,8 @@ namespace web_api_cosmetics_shop.Models.DTO
 	{
 		public int CartId { get; set; }
 
-		public string? UserId { get; set; }
+		[Required]
+		public string UserId { get; set; } = string.Empty;
 
 		[Required]
 		public List<ShoppingCartItemDTO>? Items { get; set; }
@@ -23,6 +24,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 
 		public int? CartId { get; set; }
 
+		[Required]
 		public int? ProductItemId { get; set; }
 	}
 }

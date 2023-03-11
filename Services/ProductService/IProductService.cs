@@ -8,7 +8,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 		// Get
 		Task<List<Product>> GetAllProducts();
 		Task<Product> GetProductById(int productId);
-		Task<List<ProductCategory>> GetCategories(Product product);
+		Task<List<ProductCategory>> GetAllCategories(Product product);
 		Task<List<ProductItem>> GetAllItems(Product product);
 		Task<ProductItem> GetItem(int productItemId);
 		Task<List<ProductConfiguration>> GetConfigurations(ProductItem product);
@@ -25,12 +25,9 @@ namespace web_api_cosmetics_shop.Services.ProductService
 
 		// Remove
 		Task<int> RemoveProduct(Product product);
-		Task<int> RemoveAllProductItems(Product product);
 		Task<int> RemoveProductItem(ProductItem productItem);
 		Task<bool> IsHasOrderItem(ProductItem productItem);
-		Task<int> RemoveAllProductCategories(Product product);
 		Task<int> RemoveProductCategory(ProductCategory productCategory);
 		Task<int> RemoveAllProductConfigurations(ProductItem productItem);
-		
 	}
 }

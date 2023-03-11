@@ -165,7 +165,33 @@
 - Delete: /api/shoppingcarts/{id?}
 - Post: /api/shoppingcarts
 ```
+{
+    "userId": "KH001",  ==>(Bắt buộc: ID User)
+    "items": [
+        {
+            "productItemId": 8,  ==>(Bắt buộc: ID loại sản phẩm)
+            "qty": 1
+        }
+    ]
+}
 ```
 - Update: /api/shoppingcarts/{id?}
 ```
+{
+    "cartId": 4,
+    "userId": "KH001",
+    "items": [
+        {
+            "cartItemId": 1,  ==>(ID sản phẩm cũ)
+            "qty": 1,
+            "cartId": 4,  ==>(Không bắt buộc: ID giỏ hàng)
+            "productItemId": 8
+        },
+        {
+            "qty": 1,  ==>(Thêm sản phẩm mới: không cần ID)
+            "cartId": 4,  ==>(Không bắt buộc: ID giỏ hàng)
+            "productItemId": 9
+        }
+    ]
+}
 ```

@@ -74,7 +74,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return product!;
 		}
 
-		public async Task<List<ProductCategory>> GetCategories(Product product)
+		public async Task<List<ProductCategory>> GetAllCategories(Product product)
 		{
 			var categories = await _context.ProductCategories.Where(c => c.ProductId == product.ProductId).ToListAsync();
 			return categories;
@@ -110,17 +110,6 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return result;
 		}
 
-		public async Task<int> RemoveAllProductItems(Product product)
-		{
-			var productItems = await _context.ProductItems
-											.Where(pi => pi.ProductId == product.ProductId)
-											.ToListAsync();
-			_context.RemoveRange(productItems);
-			var result = await _context.SaveChangesAsync();
-
-			return result;
-		}
-
 		public async Task<int> RemoveProductItem(ProductItem productItem)
 		{
 			_context.Remove(productItem);
@@ -135,18 +124,6 @@ namespace web_api_cosmetics_shop.Services.ProductService
 								.AnyAsync(oi => oi.ProductItemId == productItem.ProductItemId);
 
 			return isHasOrderItem;
-		}
-
-		public async Task<int> RemoveAllProductCategories(Product product)
-		{
-			var categories = await _context.ProductCategories
-												.Where(c => c.ProductId == product.ProductId)
-												.ToListAsync();
-
-			_context.RemoveRange(categories);
-			var result = await _context.SaveChangesAsync();
-
-			return result;
 		}
 
 		public async Task<int> RemoveProductCategory(ProductCategory productCategory)
@@ -193,6 +170,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return product;
 		}
 
+		// Update Product Item
 		public async Task<ProductItem> UpdateProductItem(ProductItem productItem)
 		{
 			var existProductItem = await GetItem(productItem.ProductItemId);

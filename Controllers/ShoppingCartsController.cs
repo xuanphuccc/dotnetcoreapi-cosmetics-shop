@@ -18,7 +18,7 @@ namespace web_api_cosmetics_shop.Controllers
 		[NonAction]
 		private async Task<ShoppingCartDTO> ConvertToShoppingCartDto(ShoppingCart shoppingCart)
 		{
-			var shoppingCartItems = await _shoppingCartService.GetShoppingCartItems(shoppingCart);
+			var shoppingCartItems = await _shoppingCartService.GetAllShoppingCartItems(shoppingCart);
 
 			List<ShoppingCartItemDTO> items = new List<ShoppingCartItemDTO>();
 			foreach (var item in shoppingCartItems)
@@ -80,21 +80,22 @@ namespace web_api_cosmetics_shop.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> CreateShoppingCarts(ShoppingCartDTO shoppingCartDTO)
+		public async Task<IActionResult> CreateShoppingCarts(ShoppingCartDTO shoppingCartDto)
 		{
 			if(
-				shoppingCartDTO == null || 
-				shoppingCartDTO.Items == null || 
-				shoppingCartDTO.UserId == null
+				shoppingCartDto == null || 
+				shoppingCartDto.Items == null || 
+				shoppingCartDto.Items.Count == 0 ||
+				shoppingCartDto.UserId == null
 				)
 			{
 				return BadRequest();
 			}
 
-			var existShoppingCart = await _shoppingCartService.GetShoppingCart(shoppingCartDTO.UserId);
+			var existShoppingCart = await _shoppingCartService.GetShoppingCart(shoppingCartDto.UserId);
 			if(existShoppingCart != null)
 			{
-				shoppingCartDTO.CartId = existShoppingCart.CartId;
+				shoppingCartDto.CartId = existShoppingCart.CartId;
 			}
 
 			// If the cart does not exist, create a new cart for user
@@ -104,18 +105,20 @@ namespace web_api_cosmetics_shop.Controllers
 				{
 					var newShoppingCart = new ShoppingCart()
 					{
-						UserId = shoppingCartDTO.UserId,
+						UserId = shoppingCartDto.UserId,
 					};
 
 					var resultCreateShoppingCart = await _shoppingCartService.AddShoppingCart(newShoppingCart);
 					if (resultCreateShoppingCart == null)
 					{
-						return StatusCode(StatusCodes.Status500InternalServerError);
+						return StatusCode(
+								StatusCodes.Status500InternalServerError,
+								new ErrorDTO() { Title = "Can not create shopping cart", Status = 500 });
 					}
 
 					// Get created information
 					existShoppingCart = resultCreateShoppingCart;
-					shoppingCartDTO.CartId = resultCreateShoppingCart.CartId;
+					shoppingCartDto.CartId = resultCreateShoppingCart.CartId;
 				}
 				catch(Exception error)
 				{
@@ -125,13 +128,13 @@ namespace web_api_cosmetics_shop.Controllers
 
 			// If the productItemId does not exist, add the productItem,
 			// otherwise increase the quantity of the existing product
-			foreach (var item in shoppingCartDTO.Items)
+			foreach (var item in shoppingCartDto.Items)
             {
 				try
 				{
 					var newShoppingCartItem = new ShoppingCartItem()
 					{
-						CartId = shoppingCartDTO.CartId,
+						CartId = existShoppingCart.CartId,
 						ProductItemId = item.ProductItemId,
 						Qty = item.Qty,
 					};
@@ -153,7 +156,9 @@ namespace web_api_cosmetics_shop.Controllers
 						var addItemResult = await _shoppingCartService.AddShoppingCartItem(newShoppingCartItem);
 						if (addItemResult == null)
 						{
-							return StatusCode(StatusCodes.Status500InternalServerError);
+							return StatusCode(
+									StatusCodes.Status500InternalServerError,
+									new ErrorDTO() { Title = "Can not add shopping cart item", Status = 500 });
 						}
 
 						// Get information
@@ -167,7 +172,121 @@ namespace web_api_cosmetics_shop.Controllers
 				}
             }
 
-            return CreatedAtAction(nameof(GetShoppingCart), new { id = shoppingCartDTO.UserId }, shoppingCartDTO);
+            return CreatedAtAction(nameof(GetShoppingCart), new { id = shoppingCartDto.UserId }, shoppingCartDto);
+		}
+
+		[HttpPut("{id?}")]
+		public async Task<IActionResult> UpdateShoppingCart([FromRoute] int? id, [FromBody] ShoppingCartDTO shoppingCartDto)
+		{
+			if(
+				!id.HasValue ||
+				shoppingCartDto == null ||
+				shoppingCartDto.Items == null ||
+				shoppingCartDto.Items.Count == 0 ||
+				shoppingCartDto.UserId == null)
+			{
+				return BadRequest();
+			}
+
+			var existShoppingCart = await _shoppingCartService.GetShoppingCart(shoppingCartDto.UserId);
+			if(existShoppingCart == null)
+			{
+				return NotFound();
+			}
+
+			var oldShoppingCartItems = await _shoppingCartService.GetAllShoppingCartItems(existShoppingCart);
+			var oldShopingCartItemsId = oldShoppingCartItems.Select(sc => sc.CartItemId).ToList();
+
+			var newShoppingCartItems = shoppingCartDto.Items;
+			var newShoppingCartItemsId = newShoppingCartItems.Select(sc => sc.CartItemId).ToList();
+
+            // Remove shopping cart items list
+			try
+			{
+				foreach (var item in oldShoppingCartItems)
+				{
+					if (!newShoppingCartItemsId.Contains(item.CartItemId))
+					{
+						var removeOldCartItemResult = await _shoppingCartService.RemoveShoppingCartItem(item);
+						if (removeOldCartItemResult == 0)
+						{
+							return StatusCode(
+									StatusCodes.Status500InternalServerError,
+									new ErrorDTO() { Title = "Can not delete shopping cart item", Status = 500 });
+						}
+					}
+				}
+			}
+			catch (Exception error)
+			{
+				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+			}
+
+
+			// Add shopping cart items list
+			try
+			{
+				foreach (var item in newShoppingCartItems)
+				{
+					// Add new shopping cart item
+					if (!oldShopingCartItemsId.Contains(item.CartItemId))
+					{
+						var newShoppingCartItem = new ShoppingCartItem()
+						{
+							CartId = existShoppingCart.CartId,
+							ProductItemId = item.ProductItemId,
+							Qty = item.Qty,
+						};
+
+						// Add new ProductItem
+						var addItemResult = await _shoppingCartService.AddShoppingCartItem(newShoppingCartItem);
+						if (addItemResult == null)
+						{
+							return StatusCode(
+									StatusCodes.Status500InternalServerError,
+									new ErrorDTO() { Title = "Can not delete shopping cart item", Status = 500 });
+						}
+
+						// Get information
+						item.CartItemId = addItemResult.CartItemId;
+						item.CartId = addItemResult.CartId;
+					}
+
+					// Update old shopping cart item
+					if (oldShopingCartItemsId.Contains(item.CartItemId))
+					{
+						var existCartItem = await _shoppingCartService.GetShoppingCartItem(item.CartItemId);
+						if(existCartItem == null)
+						{
+							return NotFound(new ErrorDTO() { Title = "Shopping cart item not found", Status = 404 });
+						}
+
+						var updateShoppingCartItem = new ShoppingCartItem()
+						{
+							CartItemId = existCartItem.CartItemId,
+							Qty = item.Qty,
+						};
+
+						if(updateShoppingCartItem.Qty != existCartItem.Qty)
+						{
+							var updateItemResult = await _shoppingCartService.UpdateShoppingCartItem(updateShoppingCartItem);
+							if (updateItemResult == null)
+							{
+								return StatusCode(
+										StatusCodes.Status500InternalServerError,
+										new ErrorDTO() { Title = "Can not update shopping cart item", Status = 500 });
+							}
+						}
+
+					}
+				}
+			}
+			catch(Exception error)
+			{
+				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+			}
+			
+			return Ok(shoppingCartDto);
 		}
 	}
 }

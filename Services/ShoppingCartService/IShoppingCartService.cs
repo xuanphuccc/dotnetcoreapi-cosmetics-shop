@@ -7,7 +7,8 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 		// Get
 		Task<ShoppingCart> GetShoppingCart(string userId);
 		Task<List<ShoppingCart>> GetAllShoppingCarts();
-		Task<List<ShoppingCartItem>> GetShoppingCartItems(ShoppingCart shoppingCart);
+		Task<List<ShoppingCartItem>> GetAllShoppingCartItems(ShoppingCart shoppingCart);
+		Task<ShoppingCartItem> GetShoppingCartItem(int shoppingCartItemId);
 
 		// Add
 		Task<ShoppingCart> AddShoppingCart(ShoppingCart shoppingCart);

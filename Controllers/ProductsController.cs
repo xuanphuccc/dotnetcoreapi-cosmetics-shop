@@ -41,7 +41,7 @@ namespace web_api_cosmetics_shop.Controllers
 		private async Task<ProductDTO> ConvertToProductDtoAsync(Product product)
 		{
 			// Getting Product Categories
-			var categoriesId = (await _productService.GetCategories(product))
+			var categoriesId = (await _productService.GetAllCategories(product))
 								.Select(c => { return c.CategoryId != null ? c.CategoryId.Value : 0; })
 								.ToList();
 
@@ -251,7 +251,7 @@ namespace web_api_cosmetics_shop.Controllers
 
 				// ----- Update Product Categories -----
 				// Get old Categories
-				var oldCategories = await _productService.GetCategories(existProduct);
+				var oldCategories = await _productService.GetAllCategories(existProduct);
 				var oldCategoriesId = oldCategories.Select(c => c.CategoryId).ToList();
 
 				// Get new Categories id
@@ -482,22 +482,6 @@ namespace web_api_cosmetics_shop.Controllers
 
 			try
 			{
-				//// Removing Categories
-				//await _productService.RemoveAllProductCategories(product);
-
-				//// Removing Product Options
-				//foreach (var item in productItems)
-				//{
-				//	await _productService.RemoveAllProductConfigurations(item);
-				//}
-
-				//// Removing Product Items
-				//var removeItemsResult = await _productService.RemoveAllProductItems(product);
-				//if (removeItemsResult == 0)
-				//{
-				//	return StatusCode(StatusCodes.Status500InternalServerError);
-				//}
-
 				// Removing Product
 				var removeProductResult = await _productService.RemoveProduct(product);
 				if (removeProductResult == 0)

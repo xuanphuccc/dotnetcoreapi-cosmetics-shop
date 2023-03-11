@@ -52,7 +52,7 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 			return shoppingCart!;
 		}
 
-		public async Task<List<ShoppingCartItem>> GetShoppingCartItems(ShoppingCart shoppingCart)
+		public async Task<List<ShoppingCartItem>> GetAllShoppingCartItems(ShoppingCart shoppingCart)
 		{
 			var shoppingCartItems = await _context.ShoppingCartItems
 										.Where(ci => ci.CartId == shoppingCart.CartId)
@@ -60,6 +60,15 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 
 			return shoppingCartItems;
 		}
+
+		public async Task<ShoppingCartItem> GetShoppingCartItem(int cartItemId)
+		{
+			var shoppingCartItem = await _context.ShoppingCartItems
+									.FirstOrDefaultAsync(ci => ci.CartItemId == cartItemId);
+
+			return shoppingCartItem!;
+		}
+
 
 		// ---------------- Remove ----------------
 		public async Task<int> RemoveShoppingCartItem(ShoppingCartItem shoppingCartItem)
