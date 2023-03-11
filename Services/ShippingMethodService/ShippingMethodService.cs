@@ -63,7 +63,7 @@ namespace web_api_cosmetics_shop.Services.ShippingMethodService
 				return null!;
 			}
 
-			return shippingMethod;
+			return existShippingMethod;
 		}
 	}
 }

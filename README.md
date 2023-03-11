@@ -196,7 +196,7 @@
 }
 ```
 
-## Order Statuses
+## Shipping method
 - Get all: /api/shippingmethods
 - Get: /api/shippingmethods/{id?}
 - Delete: /api/shippingmethods/{id?}
@@ -210,8 +210,26 @@
 - Update: /api/shippingmethods/{id?}
 ```
 {
-    "shippingMethodId": 5,
+    "shippingMethodId": 5,  ==>(Không bắt buộc)
     "name": "Ninja Van",
     "price": 29000.00
+}
+```
+
+## Order Status
+- Get all: /api/orderstatuses
+- Get: /api/orderstatuses/{id?}
+- Delete: /api/orderstatuses/{id?}
+- Post: /api/orderstatuses
+```
+{
+    "status": "Đang chuẩn bị"
+}
+```
+- Update: /api/shippingmethods/{id?}
+```
+{
+    "oderStatusId": 1,  ==>(Không bắt buộc)
+    "status": "Đang chuẩn bị"
 }
 ```

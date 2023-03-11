@@ -6,6 +6,7 @@ using web_api_cosmetics_shop.Services.ProductOptionService;
 using web_api_cosmetics_shop.Services.ProductService;
 using web_api_cosmetics_shop.Services.ShoppingCartService;
 using web_api_cosmetics_shop.Services.ShippingMethodService;
+using web_api_cosmetics_shop.Services.OrderStatusService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddScoped<IProductOptionService, ProductOptionService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IShippingMethodService, ShippingMethodService>();
+builder.Services.AddScoped<IOrderStatusService, OrderStatusService>();
 
 // Add Cors
 builder.Services.AddCors(options =>
