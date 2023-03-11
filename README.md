@@ -195,3 +195,23 @@
     ]
 }
 ```
+
+## Order Statuses
+- Get all: /api/shippingmethods
+- Get: /api/shippingmethods/{id?}
+- Delete: /api/shippingmethods/{id?}
+- Post: /api/shippingmethods
+```
+{
+    "name": "Ninja Van",
+    "price": 29000.00
+}
+```
+- Update: /api/shippingmethods/{id?}
+```
+{
+    "shippingMethodId": 5,
+    "name": "Ninja Van",
+    "price": 29000.00
+}
+```
