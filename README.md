@@ -252,3 +252,31 @@
     "value": "xuanphuc"
 }
 ```
+
+## Payment Method
+- Get all: /api/paymentmethods
+- Get: /api/paymentmethods/{id?}
+- Delete: /api/paymentmethods/{id?}
+- Post: /api/paymentmethods
+```
+{
+    "userId": "KH001",
+    "paymentTypeId": 1,
+    "provider": "Visa",
+    "accountNumber": "23412341234123",
+    "expiryDate": "2026-12-31",
+    "isDefault": true
+}
+```
+- Update: /api/paymentmethods/{id?}
+```
+{
+    "paymentMethodId": 1,
+    "provider": "Mastercard",
+    "accountNumber": "23412341234123",
+    "expiryDate": "2026-12-31T00:00:00",
+    "isDefault": true,
+    "paymentTypeId": 1,
+    "userId": "KH001"
+}
+```
