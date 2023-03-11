@@ -12,5 +12,6 @@ namespace web_api_cosmetics_shop.Models.Entities
         public List<PaymentMethod>? PaymentMethods { get; set; }
         public List<ShoppingCart>? ShoppingCarts { get; set; }
         public List<UserReview>? UserReviews { get; set; }
+        public List<Wishlist>? Wishlists { get; set; }
     }
 }

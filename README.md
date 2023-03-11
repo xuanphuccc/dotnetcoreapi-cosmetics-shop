@@ -233,3 +233,22 @@
     "status": "Đang chuẩn bị"
 }
 ```
+
+
+## Payment Type
+- Get all: /api/paymenttypes
+- Get: /api/paymenttypes/{id?}
+- Delete: /api/paymenttypes/{id?}
+- Post: /api/paymenttypes
+```
+{
+    "value": "xuanphuc"
+}
+```
+- Update: /api/paymenttypes/{id?}
+```
+{
+    "paymentTypeId": 3,
+    "value": "xuanphuc"
+}
+```

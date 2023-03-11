@@ -21,7 +21,7 @@ namespace web_api_cosmetics_shop.Models.Entities
 
 
         public List<ProductItem>? ProductItems { get; set; }
-
         public List<ProductCategory>? ProductCategories { get; set; }
+        public List<Wishlist>? Wishlists { get; set; }
     }
 }

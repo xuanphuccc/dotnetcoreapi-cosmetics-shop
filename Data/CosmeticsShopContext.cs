@@ -28,7 +28,7 @@ namespace web_api_cosmetics_shop.Data
 
             modelBuilder.Entity<ProductCategory>(entity => {
                 // trong 1 category không thể có 2 sản phẩm giống nhau
-                entity.HasIndex(productCategory => new { productCategory.CategoryId, productCategory.ProductId })
+                entity.HasIndex(pc => new { pc.CategoryId, pc.ProductId })
                       .IsUnique();
 
                 // Xóa Category -> Xóa ProductCategory
@@ -53,7 +53,7 @@ namespace web_api_cosmetics_shop.Data
             {
                 // 1 ProductItem chỉ có 1 loại option
                 // VD: 1 loại áo chỉ có 1 loại size M
-                entity.HasIndex(productConfiguration => new { productConfiguration.ProductItemId, productConfiguration.ProductOptionId })
+                entity.HasIndex(pg => new { pg.ProductItemId, pg.ProductOptionId })
                       .IsUnique();
 
                 // Xóa ProductItem -> xóa ProductConfiguration
@@ -78,7 +78,7 @@ namespace web_api_cosmetics_shop.Data
                 // Trong 1 giỏ hàng chỉ có 1 loại sản phẩm
                 // VD: Chỉ có 1 áo size M với số lượng là 2
                 // không phải 2 áo size M với số lượng là 1
-                entity.HasIndex(shoppingCartItem => new { shoppingCartItem.CartId, shoppingCartItem.ProductItemId })
+                entity.HasIndex(sc => new { sc.CartId, sc.ProductItemId })
                       .IsUnique();
 
                 // Xóa ProductItem -> Xóa ShoppingCartItem
@@ -118,10 +118,26 @@ namespace web_api_cosmetics_shop.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<Wishlist>(entity => {
+                // 1 User và 1 Product chỉ xuất hiện 1 lần
+                entity.HasIndex(w => new { w.UserId, w.ProductId })
+                      .IsUnique();
+
+                // Xóa User -> xóa Wishlist
+                entity.HasOne(w => w.AppUser)
+                      .WithMany(u => u.Wishlists)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Xóa Product -> xóa Wishlist
+                entity.HasOne(w => w.Product)
+                      .WithMany(p => p.Wishlists)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
 			modelBuilder.Entity<UserReview>(entity =>
 			{
 				// Một sản phẩm đã mua chỉ có thể có 1 đánh giá
-				entity.HasIndex(orderItem => new { orderItem.UserId, orderItem.OrderItemId })
+				entity.HasIndex(ur => new { ur.UserId, ur.OrderItemId })
 					  .IsUnique();
 
                 // Xóa User -> xóa UserReview
@@ -139,7 +155,7 @@ namespace web_api_cosmetics_shop.Data
             {
                 // một giỏ hàng thì một loại sản phẩm
                 // chỉ xuất hiện một lần
-                entity.HasIndex(orderItem => new {orderItem.OrderId, orderItem.ProductItemId})
+                entity.HasIndex(oi => new {oi.OrderId, oi.ProductItemId})
                       .IsUnique();
 
                 // Xóa ProductItem -> xóa OrderItem
@@ -188,6 +204,7 @@ namespace web_api_cosmetics_shop.Data
 
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
 
         public DbSet<PaymentType> PaymentTypes { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
