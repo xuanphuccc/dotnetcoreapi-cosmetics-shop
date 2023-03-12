@@ -30,6 +30,12 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			return paymentMethods;
 		}
 
+		public async Task<List<PaymentMethod>> GetUserPaymentMethods(string userId)
+		{
+			var userPaymentMethods = await _context.PaymentMethods.Where(p => p.UserId == userId).ToListAsync();
+			return userPaymentMethods;
+		}
+
 		public async Task<PaymentMethod> GetPaymentMethod(int paymentMethodId)
 		{
 			var paymentMethod = await _context.PaymentMethods.FirstOrDefaultAsync(p => p.PaymentMethodId == paymentMethodId);

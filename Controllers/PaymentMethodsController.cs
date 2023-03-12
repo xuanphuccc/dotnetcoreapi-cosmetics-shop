@@ -46,20 +46,21 @@ namespace web_api_cosmetics_shop.Controllers
 		}
 
 		[HttpGet("{id?}")]
-		public async Task<IActionResult> GetPaymentMethod([FromRoute] int? id)
+		public async Task<IActionResult> GetUserPaymentMethods([FromRoute] string? id)
 		{
-			if(!id.HasValue)
+			if(string.IsNullOrEmpty(id))
 			{
 				return BadRequest();
 			}
 
-			var paymentMethod = await _paymentMethodService.GetPaymentMethod(id.Value);
-			if(paymentMethod == null)
-			{
-				return NotFound();
-			}
+			var userPaymentMethods = await _paymentMethodService.GetUserPaymentMethods(id);
+			List<PaymentMethodDTO> userPaymentMethodsList = new List<PaymentMethodDTO>();
+            foreach (var item in userPaymentMethods)
+            {
+                userPaymentMethodsList.Add(ConvertToPaymentMethodDto(item));
+            }
 
-			return Ok(ConvertToPaymentMethodDto(paymentMethod));
+            return Ok(userPaymentMethodsList);
 		}
 
 		[HttpPost]
@@ -89,7 +90,7 @@ namespace web_api_cosmetics_shop.Controllers
 									new ErrorDTO() { Title = "Can not create payment method", Status = 500 });
 				}
 
-				return CreatedAtAction(nameof(GetPaymentMethod),
+				return CreatedAtAction(nameof(GetUserPaymentMethods),
 				new { id = createdPaymentMethod.PaymentMethodId },
 				ConvertToPaymentMethodDto(createdPaymentMethod));
 			}

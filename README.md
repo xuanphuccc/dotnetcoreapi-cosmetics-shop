@@ -280,3 +280,35 @@
     "userId": "KH001"
 }
 ```
+
+## Address
+- Get all: /api/addresses
+- Get: /api/addresses/{userid?}
+- Delete: /api/addresses/{id?}
+- Post: /api/addresses
+```
+{
+    "userId": "KH001",
+    "fullName": "Tran Xuan Phuc",
+    "city": "Hanoi",
+    "district": "Cau Giay",
+    "ward": "Quan Hoa",
+    "addressLine": "27, 79 Duong Quang Ham",
+    "phoneNumber": "0923424523",
+    "isDefault": true
+}
+```
+- Update: /api/addresses/{id?}
+```
+{
+    "addressId": 1,
+    "fullName": "Tran Xuan Phuc",
+    "city": "Hanoi",
+    "district": "Cau Giay",
+    "ward": "Quan Hoa",
+    "addressLine": "79 Duong Quang Ham",
+    "phoneNumber": "0923424523",
+    "isDefault": true,
+    "userId": "KH001"
+}
+```

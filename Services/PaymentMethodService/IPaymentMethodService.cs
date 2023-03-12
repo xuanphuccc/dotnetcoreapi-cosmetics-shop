@@ -6,6 +6,7 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 	{
 		//Method
 		Task<List<PaymentMethod>> GetAllPaymentMethods();
+		Task<List<PaymentMethod>> GetUserPaymentMethods(string userId);
 		Task<PaymentMethod> GetPaymentMethod(int paymentMethodId);
 
 		// Add
