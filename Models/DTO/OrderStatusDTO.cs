@@ -4,7 +4,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 {
 	public class OrderStatusDTO
 	{
-		public int OderStatusId { get; set; }
+		public int OrderStatusId { get; set; }
 
 		[Required]
 		[StringLength(100)]

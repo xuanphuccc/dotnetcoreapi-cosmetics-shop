@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
+using web_api_cosmetics_shop.Services.ProductService;
 using web_api_cosmetics_shop.Services.ShoppingCartService;
 
 namespace web_api_cosmetics_shop.Controllers
@@ -11,8 +12,12 @@ namespace web_api_cosmetics_shop.Controllers
 	public class ShoppingCartsController : ControllerBase
 	{
 		private readonly IShoppingCartService _shoppingCartService;
-		public ShoppingCartsController(IShoppingCartService shoppingCartService) {
+		private readonly IProductService _productService;
+		public ShoppingCartsController(
+			IShoppingCartService shoppingCartService,
+			IProductService productService) {
 			_shoppingCartService = shoppingCartService;
+			_productService = productService;
 		}
 
 		[NonAction]
@@ -23,12 +28,18 @@ namespace web_api_cosmetics_shop.Controllers
 			List<ShoppingCartItemDTO> items = new List<ShoppingCartItemDTO>();
 			foreach (var item in shoppingCartItems)
 			{
+				// Get product
+				var productItem = await _productService.GetItem(item.ProductItemId!.Value);
+				var product = await _productService.GetProductById(productItem.ProductId.Value);
+				var productDto = await _productService.ConvertToProductDtoAsync(product, item.ProductItemId.Value);
+
 				var shoppingCartItemDto = new ShoppingCartItemDTO()
 				{
-					CartId = item.CartId,
+					CartId = item.CartId!.Value,
 					CartItemId = item.CartItemId,
-					ProductItemId = item.ProductItemId,
-					Qty = item.Qty
+					ProductItemId = item.ProductItemId.Value,
+					Qty = item.Qty,
+					Product = productDto
 				};
 
 				items.Add(shoppingCartItemDto);
@@ -37,7 +48,7 @@ namespace web_api_cosmetics_shop.Controllers
 			var shoppingCartDto = new ShoppingCartDTO()
 			{
 				CartId = shoppingCart.CartId,
-				UserId = shoppingCart.UserId,
+				UserId = shoppingCart.UserId!,
 				Items = items
 			};
 
@@ -140,7 +151,7 @@ namespace web_api_cosmetics_shop.Controllers
 					};
 
 					//  Increase the quantity of the existing Product
-					var existCartItem = await _shoppingCartService.IsExistProductItem(item.ProductItemId.Value);
+					var existCartItem = await _shoppingCartService.IsExistProductItem(item.ProductItemId);
 					if (existCartItem != null)
 					{
 						var increaseResult = await _shoppingCartService.IncreaseQtyOfShoppingCartItem(existCartItem, item.Qty);
@@ -148,7 +159,7 @@ namespace web_api_cosmetics_shop.Controllers
 						// Get information
 						item.Qty = increaseResult;
 						item.CartItemId = existCartItem.CartItemId;
-						item.CartId = existCartItem.CartId;
+						item.CartId = existCartItem.CartId!.Value;
 					}
 					else
 					{
@@ -163,7 +174,7 @@ namespace web_api_cosmetics_shop.Controllers
 
 						// Get information
 						item.CartItemId = addItemResult.CartItemId;
-						item.CartId = addItemResult.CartId;
+						item.CartId = addItemResult.CartId!.Value;
 					}
 				}
 				catch(Exception error)
@@ -249,7 +260,7 @@ namespace web_api_cosmetics_shop.Controllers
 
 						// Get information
 						item.CartItemId = addItemResult.CartItemId;
-						item.CartId = addItemResult.CartId;
+						item.CartId = addItemResult.CartId!.Value;
 					}
 
 					// Update old shopping cart item

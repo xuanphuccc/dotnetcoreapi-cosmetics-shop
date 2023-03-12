@@ -13,5 +13,6 @@ namespace web_api_cosmetics_shop.Models.Entities
         public List<ShoppingCart>? ShoppingCarts { get; set; }
         public List<UserReview>? UserReviews { get; set; }
         public List<Wishlist>? Wishlists { get; set; }
+        public List<ShopOrder>? ShopOrders { get; set; }
     }
 }

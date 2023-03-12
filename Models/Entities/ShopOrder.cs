@@ -14,8 +14,11 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public decimal OrderTotal { get; set; }
 
+		public string? UserId { get; set; }
+        [ForeignKey("UserId")]
+        public AppUser? AppUser { get; set; }
 
-        public int? PaymentMethodId { get; set; }
+		public int? PaymentMethodId { get; set; }
         [ForeignKey("PaymentMethodId")]
         public PaymentMethod? PaymentMethod { get; set; }
 
@@ -27,8 +30,8 @@ namespace web_api_cosmetics_shop.Models.Entities
         [ForeignKey("ShippingMethodId")]
         public ShippingMethod? ShippingMethod { get; set; }
 
-        public int? OderStatusId { get; set; }
-        [ForeignKey("OderStatusId")]
+        public int? OrderStatusId { get; set; }
+        [ForeignKey("OrderStatusId")]
         public OrderStatus? OrderStatus { get; set; }
 
         public List<OrderItem>? Items { get; set; }

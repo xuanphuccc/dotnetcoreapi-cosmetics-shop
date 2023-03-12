@@ -22,9 +22,12 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[Required]
 		public int Qty { get; set; }
 
-		public int? CartId { get; set; }
+		[Required]
+		public int CartId { get; set; }
 
 		[Required]
-		public int? ProductItemId { get; set; }
+		public int ProductItemId { get; set; }
+
+		public ProductDTO? Product { get; set; }
 	}
 }

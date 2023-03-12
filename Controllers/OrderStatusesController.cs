@@ -23,7 +23,7 @@ namespace web_api_cosmetics_shop.Controllers
 		{
 			var orderStatusDto = new OrderStatusDTO()
 			{
-				OderStatusId = orderStatus.OderStatusId,
+				OrderStatusId = orderStatus.OrderStatusId,
 				Status = orderStatus.Status
 			};
 
@@ -89,7 +89,7 @@ namespace web_api_cosmetics_shop.Controllers
 
 				return CreatedAtAction(
 					nameof(GetOrderStatus),
-					new { id = addResult.OderStatusId },
+					new { id = addResult.OrderStatusId },
 					ConvertToOrderStatusDto(addResult));
 			}
 			catch (Exception error)
@@ -117,7 +117,7 @@ namespace web_api_cosmetics_shop.Controllers
 			{
 				var updateOrderStatus = new OrderStatus()
 				{
-					OderStatusId = existOrderStatus.OderStatusId,
+					OrderStatusId = existOrderStatus.OrderStatusId,
 					Status = orderStatusDto.Status
 				};
 

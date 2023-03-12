@@ -5,7 +5,7 @@ namespace web_api_cosmetics_shop.Models.Entities
     public class OrderStatus
     {
         [Key]
-        public int OderStatusId { get; set; }
+        public int OrderStatusId { get; set; }
 
         [Required]
         [StringLength(100)]

@@ -171,6 +171,11 @@ namespace web_api_cosmetics_shop.Data
 
             modelBuilder.Entity<ShopOrder>(entity =>
             {
+                // Xóa User -> NoAction
+                entity.HasOne(so => so.AppUser)
+                      .WithMany(u => u.ShopOrders)
+                      .OnDelete(DeleteBehavior.NoAction);
+
                 // Xóa Address -> SetNull ShopOrder
                 entity.HasOne(so => so.Address)
                       .WithMany(a => a.ShopOrders)

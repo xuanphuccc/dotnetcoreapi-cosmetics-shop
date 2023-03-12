@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using web_api_cosmetics_shop.Data;
 
@@ -11,9 +12,10 @@ using web_api_cosmetics_shop.Data;
 namespace web_api_cosmetics_shop.Migrations
 {
     [DbContext(typeof(CosmeticsShopContext))]
-    partial class CosmeticsShopContextModelSnapshot : ModelSnapshot
+    [Migration("20230312100153_ShopOrder_AppUser_Constraint")]
+    partial class ShopOrder_AppUser_Constraint
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -142,18 +144,18 @@ namespace web_api_cosmetics_shop.Migrations
 
             modelBuilder.Entity("web_api_cosmetics_shop.Models.Entities.OrderStatus", b =>
                 {
-                    b.Property<int>("OrderStatusId")
+                    b.Property<int>("OderStatusId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderStatusId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OderStatusId"), 1L, 1);
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("OrderStatusId");
+                    b.HasKey("OderStatusId");
 
                     b.ToTable("OrderStatuses");
                 });
@@ -437,11 +439,11 @@ namespace web_api_cosmetics_shop.Migrations
                     b.Property<int?>("AddressId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("OderStatusId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("OrderStatusId")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("OrderTotal")
                         .HasColumnType("decimal(18,2)");
@@ -459,7 +461,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasIndex("AddressId");
 
-                    b.HasIndex("OrderStatusId");
+                    b.HasIndex("OderStatusId");
 
                     b.HasIndex("PaymentMethodId");
 
@@ -697,7 +699,7 @@ namespace web_api_cosmetics_shop.Migrations
 
                     b.HasOne("web_api_cosmetics_shop.Models.Entities.OrderStatus", "OrderStatus")
                         .WithMany("ShopOrders")
-                        .HasForeignKey("OrderStatusId")
+                        .HasForeignKey("OderStatusId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("web_api_cosmetics_shop.Models.Entities.PaymentMethod", "PaymentMethod")

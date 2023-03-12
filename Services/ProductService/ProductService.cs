@@ -193,5 +193,60 @@ namespace web_api_cosmetics_shop.Services.ProductService
 
 			return productItem;
 		}
+
+
+		// Convert DTO
+		public async Task<ProductDTO> ConvertToProductDtoAsync(Product product, int itemId = 0)
+		{
+			// Getting Product Categories
+			var categoriesId = (await GetAllCategories(product))
+								.Select(c => { return c.CategoryId != null ? c.CategoryId.Value : 0; })
+								.ToList();
+
+			// Getting Product Items
+			var productItems = await GetAllItems(product);
+			if(itemId != 0)
+			{
+				// Getting one product item
+				productItems = productItems.Where(pi => pi.ProductItemId == itemId).ToList();
+			}
+
+			// Converting ProductItem to ProductItemDTO
+			List<ProductItemDTO> productItemDtos = new List<ProductItemDTO>();
+			foreach (var productItem in productItems)
+			{
+				// Getting Product Options
+				var productOptionsId = (await GetConfigurations(productItem))
+										.Select(pc => { return pc.ProductOptionId != null ? pc.ProductOptionId.Value : 0; })
+										.ToList();
+
+				var productItemDto = new ProductItemDTO()
+				{
+					ProductItemId = productItem.ProductItemId,
+					ProductId = productItem.ProductId,
+					SKU = productItem.SKU,
+					QtyInStock = productItem.QtyInStock,
+					Image = productItem.Image,
+					Price = productItem.Price,
+					CostPrice = productItem.CostPrice,
+					OptionsId = productOptionsId
+				};
+
+				productItemDtos.Add(productItemDto);
+			}
+
+			// Converting Product to ProductDTO
+			var productDto = new ProductDTO()
+			{
+				ProductId = product.ProductId,
+				Name = product.Name,
+				Description = product.Description,
+				Image = product.Image,
+				CategoriesId = categoriesId,
+				Items = productItemDtos
+			};
+
+			return productDto;
+		}
 	}
 }

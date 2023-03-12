@@ -32,59 +32,11 @@ namespace web_api_cosmetics_shop.Controllers
 				return NotFound();
 			}
 
-			var productDto = await ConvertToProductDtoAsync(product);
+			var productDto = await _productService.ConvertToProductDtoAsync(product);
 
 			return Ok(productDto);
 		}
-
-		[NonAction]
-		private async Task<ProductDTO> ConvertToProductDtoAsync(Product product)
-		{
-			// Getting Product Categories
-			var categoriesId = (await _productService.GetAllCategories(product))
-								.Select(c => { return c.CategoryId != null ? c.CategoryId.Value : 0; })
-								.ToList();
-
-			// Getting Product Items
-			var productItems = await _productService.GetAllItems(product);
-
-			// Converting ProductItem to ProductItemDTO
-			List<ProductItemDTO> productItemDtos = new List<ProductItemDTO>();
-			foreach (var productItem in productItems)
-			{
-				// Getting Product Options
-				var productOptionsId = (await _productService.GetConfigurations(productItem))
-										.Select(pc => { return pc.ProductOptionId != null ? pc.ProductOptionId.Value : 0; })
-										.ToList();
-
-				var productItemDto = new ProductItemDTO()
-				{
-					ProductItemId = productItem.ProductItemId,
-					ProductId = productItem.ProductId,
-					SKU = productItem.SKU,
-					QtyInStock = productItem.QtyInStock,
-					Image = productItem.Image,
-					Price = productItem.Price,
-					CostPrice = productItem.CostPrice,
-					OptionsId = productOptionsId
-				};
-
-				productItemDtos.Add(productItemDto);
-			}
-
-			// Converting Product to ProductDTO
-			var productDto = new ProductDTO()
-			{
-				ProductId = product.ProductId,
-				Name = product.Name,
-				Description = product.Description,
-				Image = product.Image,
-				CategoriesId = categoriesId,
-				Items = productItemDtos
-			};
-
-			return productDto;
-		}
+		
 
 		// ---------- Get All Product ----------
 		[HttpGet]
@@ -95,7 +47,7 @@ namespace web_api_cosmetics_shop.Controllers
 			List<ProductDTO> productsDtos = new List<ProductDTO>();
 			foreach(var product in products)
 			{
-				var productDto = await ConvertToProductDtoAsync(product);
+				var productDto = await _productService.ConvertToProductDtoAsync(product);
 				productsDtos.Add(productDto);
 			}
 
@@ -478,7 +430,7 @@ namespace web_api_cosmetics_shop.Controllers
 				}
 			}
 
-            var hasRemoveProduct = await ConvertToProductDtoAsync(product);
+            var hasRemoveProduct = await _productService.ConvertToProductDtoAsync(product);
 
 			try
 			{

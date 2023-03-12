@@ -32,7 +32,7 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 
 		public async Task<OrderStatus> GetOrderStatus(int orderStatusId)
 		{
-			var orderStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.OderStatusId == orderStatusId);
+			var orderStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.OrderStatusId == orderStatusId);
 
 			return orderStatus!;
 		}
@@ -47,7 +47,7 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 
 		public async Task<OrderStatus> UpdateOrderStatus(OrderStatus orderStatus)
 		{
-			var existOrderStatus = await GetOrderStatus(orderStatus.OderStatusId);
+			var existOrderStatus = await GetOrderStatus(orderStatus.OrderStatusId);
 			if(existOrderStatus == null)
 			{
 				return null!;

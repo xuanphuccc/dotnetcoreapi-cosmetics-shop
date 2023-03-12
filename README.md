@@ -312,3 +312,29 @@
     "userId": "KH001"
 }
 ```
+
+## Wishlist
+- Get all: /api/wishlists
+- Get: /api/wishlists/{userid?}
+- Delete: /api/wishlists/{id?}
+- Post: /api/wishlists
+```
+
+```
+- Update: /api/wishlists/{id?}
+```
+
+```
+
+## ShopOrder
+- Get all: /api/shoporders
+- Get: /api/shoporders/{userid?}
+- Delete: /api/shoporders/{id?}
+- Post: /api/shoporders
+```
+
+```
+- Update: /api/shoporders/{id?}
+```
+
+```

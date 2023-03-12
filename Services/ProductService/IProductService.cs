@@ -29,5 +29,8 @@ namespace web_api_cosmetics_shop.Services.ProductService
 		Task<bool> IsHasOrderItem(ProductItem productItem);
 		Task<int> RemoveProductCategory(ProductCategory productCategory);
 		Task<int> RemoveAllProductConfigurations(ProductItem productItem);
+
+		// Convert
+		Task<ProductDTO> ConvertToProductDtoAsync(Product product, int itemId = 0);
 	}
 }
