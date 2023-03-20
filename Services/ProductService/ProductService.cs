@@ -159,6 +159,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			existProduct.Name = product.Name;
 			existProduct.Description = product.Description;
 			existProduct.Image = product.Image;
+			existProduct.ProviderId = product.ProviderId;
 			existProduct.IsDisplay = product.IsDisplay;
 
 			var result = await _context.SaveChangesAsync();
@@ -242,6 +243,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 				Name = product.Name,
 				Description = product.Description,
 				Image = product.Image,
+				ProviderId = product.ProviderId,
 				CategoriesId = categoriesId,
 				Items = productItemDtos
 			};

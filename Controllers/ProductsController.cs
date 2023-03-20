@@ -76,6 +76,7 @@ namespace web_api_cosmetics_shop.Controllers
 					Name = productDto.Name,
 					Description = productDto.Description,
 					Image = productDto.Image,
+					ProviderId = productDto.ProviderId,
 					IsDisplay = productDto.IsDisplay,
 				};
 				var createdProduct = await _productService.AddProduct(product);
@@ -183,6 +184,7 @@ namespace web_api_cosmetics_shop.Controllers
 					Name = productDto.Name,
 					Description = productDto.Description,
 					Image = productDto.Image,
+					ProviderId = productDto.ProviderId,
 					IsDisplay = productDto.IsDisplay
 				};
 
@@ -191,6 +193,7 @@ namespace web_api_cosmetics_shop.Controllers
 					existProduct.Name != newProduct.Name ||
 					existProduct.Description != newProduct.Description ||
 					existProduct.Image != newProduct.Image ||
+					existProduct.ProviderId != newProduct.ProviderId ||
 					existProduct.IsDisplay != newProduct.IsDisplay)
 				{
 					var result = await _productService.UpdateProduct(newProduct);
@@ -245,7 +248,6 @@ namespace web_api_cosmetics_shop.Controllers
 					}
 				}
 				// ----- End Update Product Categories -----
-
 
 
 				// ----- Update Product Items and Product Options -----
@@ -335,7 +337,7 @@ namespace web_api_cosmetics_shop.Controllers
 							return NotFound(new ErrorDTO() { Title = "Product item not found", Status = 404 });
 						}
 
-						var updateProductItem = new ProductItem()
+                        var updateProductItem = new ProductItem()
 						{
 							ProductItemId = existProductItem.ProductItemId,
 							SKU = item.SKU,
@@ -357,41 +359,35 @@ namespace web_api_cosmetics_shop.Controllers
 							{
 								return StatusCode(
 									StatusCodes.Status500InternalServerError,
-									new ErrorDTO() { Title = "Can not create product option", Status = 500 });
+									new ErrorDTO() { Title = "Can not update product item", Status = 500 });
 							}
 						}
 
-						// Only update options if there are no orders
-						if (!(await _productService.IsHasOrderItem(existProductItem)))
+                       
+                        // Remove Product Item Options
+                        await _productService.RemoveAllProductConfigurations(existProductItem);
+
+						// Creating Product Item Options
+						if (item.OptionsId == null)
 						{
-							// Remove Product Item Options
-							await _productService.RemoveAllProductConfigurations(existProductItem);
-
-							// Creating Product Item Options
-							if (item.OptionsId == null)
-							{
-								return BadRequest(new ErrorDTO() { Title = "optionsId is required", Status = 400 });
-							}
-							foreach (var optionId in item.OptionsId)
-							{
-								var option = new ProductConfiguration()
-								{
-									ProductItemId = existProductItem.ProductItemId,
-									ProductOptionId = optionId
-								};
-
-								var createdProductOption = await _productService.AddProductConfiguration(option);
-								if (createdProductOption == null)
-								{
-									return StatusCode(StatusCodes.Status500InternalServerError,
-													new ErrorDTO() { Title = "Can not create product option", Status = 500 });
-								}
-							}
+							return BadRequest(new ErrorDTO() { Title = "optionsId is required", Status = 400 });
 						}
-						else
+						foreach (var optionId in item.OptionsId)
 						{
-							return BadRequest(new ErrorDTO() { Title = "Can not update item option has order", Status = 400 });
+							var option = new ProductConfiguration()
+							{
+								ProductItemId = existProductItem.ProductItemId,
+								ProductOptionId = optionId
+							};
+
+							var createdProductOption = await _productService.AddProductConfiguration(option);
+							if (createdProductOption == null)
+							{
+								return StatusCode(StatusCodes.Status500InternalServerError,
+												new ErrorDTO() { Title = "Can not create product option", Status = 500 });
+							}
 						}
+						
 					}
 				}
 				// ----- End Update Product Items and Product Options -----
