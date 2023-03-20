@@ -26,6 +26,14 @@ namespace web_api_cosmetics_shop.Data
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
+            modelBuilder.Entity<Product>(entity =>
+            {
+                // Xóa Provider -> SetNull Product
+                entity.HasOne(c => c.Provider)
+                      .WithMany(p => p.Products)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
             modelBuilder.Entity<ProductCategory>(entity => {
                 // trong 1 category không thể có 2 sản phẩm giống nhau
                 entity.HasIndex(pc => new { pc.CategoryId, pc.ProductId })
@@ -201,6 +209,7 @@ namespace web_api_cosmetics_shop.Data
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductCategory> ProductCategories { get; set; }
+        public DbSet<Provider> Providers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductItem> ProductItems { get; set; }
         public DbSet<ProductConfiguration> ProductConfigurations { get; set; }

@@ -12,6 +12,7 @@ using web_api_cosmetics_shop.Services.PaymentMethodService;
 using web_api_cosmetics_shop.Services.AddressService;
 using web_api_cosmetics_shop.Services.WishlistService;
 using web_api_cosmetics_shop.Services.ShopOrderService;
+using web_api_cosmetics_shop.Services.ProviderService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,7 @@ builder.Services.AddScoped<IPaymentMethodService, PaymentMethodService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IShopOrderService, ShopOrderService>();
+builder.Services.AddScoped<IProviderService, ProviderService>();
 
 // Add Cors
 builder.Services.AddCors(options =>

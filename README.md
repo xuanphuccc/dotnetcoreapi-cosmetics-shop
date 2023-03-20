@@ -93,6 +93,24 @@
 }
 ```
 
+## Providers
+- Get all: /api/providers
+- Get: /api/providers/{id?}
+- Delete: /api/providers/{id?}
+- Post: /api/providers
+```
+{
+    "name": "Chanel"
+}
+```
+- Update: /api/providers/{id?}
+```
+{
+    "providerId": 1,
+    "name": "Chanel"
+}
+```
+
 ## Bảng Products
 - Get all: /api/products
 - Get: /api/products/{id?}

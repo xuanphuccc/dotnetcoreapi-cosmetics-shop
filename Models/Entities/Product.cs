@@ -19,6 +19,9 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public bool IsDisplay { get; set; }
 
+        public int? ProviderId { get; set; }
+        [ForeignKey("ProviderId")]
+        public Provider? Provider { get; set; }
 
         public List<ProductItem>? ProductItems { get; set; }
         public List<ProductCategory>? ProductCategories { get; set; }
