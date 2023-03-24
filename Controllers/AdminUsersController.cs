@@ -53,7 +53,7 @@ namespace web_api_cosmetics_shop.Controllers
             });
         }
 
-        [HttpGet("{id?}")]
+        [HttpGet("{currentadmin}")]
         [Authorize]
         public async Task<IActionResult> GetAdminUser([FromRoute] string? id)
         {
