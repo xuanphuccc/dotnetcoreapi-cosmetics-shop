@@ -1,5 +1,7 @@
 using web_api_cosmetics_shop.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using web_api_cosmetics_shop.Services.PromotionService;
 using web_api_cosmetics_shop.Services.CategoryService;
 using web_api_cosmetics_shop.Services.ProductOptionService;
@@ -13,6 +15,8 @@ using web_api_cosmetics_shop.Services.AddressService;
 using web_api_cosmetics_shop.Services.WishlistService;
 using web_api_cosmetics_shop.Services.ShopOrderService;
 using web_api_cosmetics_shop.Services.ProviderService;
+using System.Text;
+using web_api_cosmetics_shop.Services.AdminService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +34,23 @@ builder.Services.AddDbContext<CosmeticsShopContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+
+            ValidateLifetime = true,
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
 // Add Repository
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -44,6 +65,8 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IShopOrderService, ShopOrderService>();
 builder.Services.AddScoped<IProviderService, ProviderService>();
+
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // Add Cors
 builder.Services.AddCors(options =>
@@ -67,6 +90,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

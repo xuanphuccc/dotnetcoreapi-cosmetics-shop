@@ -1,4 +1,5 @@
-﻿using web_api_cosmetics_shop.Models.Entities;
+﻿using web_api_cosmetics_shop.Models.DTO;
+using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.AddressService
 {
@@ -18,5 +19,9 @@ namespace web_api_cosmetics_shop.Services.AddressService
 
 		// Delete
 		Task<int> RemoveAddress(Address address);
-	}
+
+		// Convert to DTO
+		AddressDTO ConvertToAddressDto(Address address);
+
+    }
 }

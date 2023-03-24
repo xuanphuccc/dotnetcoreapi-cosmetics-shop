@@ -3,7 +3,7 @@
 	public class ErrorDTO
 	{
 		public string? Title { get; set; }
-		public int? Status { get; set; }
+		public int? Status { get; set; } = 400;
 		public SubError? Errors { get; set; }
 
 	}

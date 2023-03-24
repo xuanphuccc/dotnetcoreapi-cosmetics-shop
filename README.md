@@ -106,7 +106,7 @@
 - Update: /api/providers/{id?}
 ```
 {
-    "providerId": 1,
+    "providerId": 1, ==>(Không bắt buộc)
     "name": "Chanel"
 }
 ```
@@ -122,6 +122,8 @@
 	"name": "Tên sản phẩm",
 	"description": "Mô tả sản phẩm",
 	"image": "http://www.xuanphuc.space",
+    "providerId": 1,
+    "isDisplay": true,
 	"categoriesId": [2, 3],  ==>(ID phải tồn tại)
 	"items": [
 		{
@@ -145,13 +147,14 @@
 ```
 - Update: /api/products/{id?}
     - Chỉ được xóa loại sản phẩm (item) khi chưa có đặt đơn hàng nào
-    - Chỉ được sửa cấu hình sản phẩm (options) khi chưa có đơn đặt hàng nào
 ```
 {
     "productId": 1,  ==>(Không bắt buộc)
     "name": "Tên sản phẩm",
     "description": "Mô tả sản phẩm",
     "image": "http://www.xuanphuc.space",
+    "providerId": 1,
+    "isDisplay": true,
     "categoriesId": [3],  ==>(ID phải tồn tại)
     "items": [
         {
@@ -179,7 +182,7 @@
 
 ## Shopping Cart
 - Get all: /api/shoppingcarts
-- Get: /api/shoppingcarts/{id?}
+- Get: /api/shoppingcarts/{userid?}
 - Delete: /api/shoppingcarts/{id?}
 - Post: /api/shoppingcarts
 ```
@@ -196,19 +199,19 @@
 - Update: /api/shoppingcarts/{id?}
 ```
 {
-    "cartId": 4,
-    "userId": "KH001",
+    "cartId": 4,  ==>(Không bắt buộc: ID giỏ hàng)
+    "userId": "KH001",  ==>(Bắt buộc)
     "items": [
         {
             "cartItemId": 1,  ==>(ID sản phẩm cũ)
             "qty": 1,
             "cartId": 4,  ==>(Không bắt buộc: ID giỏ hàng)
-            "productItemId": 8
+            "productItemId": 8  ==>(Bắt buộc)
         },
         {
             "qty": 1,  ==>(Thêm sản phẩm mới: không cần ID)
             "cartId": 4,  ==>(Không bắt buộc: ID giỏ hàng)
-            "productItemId": 9
+            "productItemId": 9  ==>(Bắt buộc)
         }
     ]
 }
@@ -336,12 +339,12 @@
 - Get: /api/wishlists/{userid?}
 - Delete: /api/wishlists/{id?}
 - Post: /api/wishlists
+    - Thêm một sản phẩm vào giỏ hàng
 ```
-
-```
-- Update: /api/wishlists/{id?}
-```
-
+{
+    "userId": "KH001",
+    "productId": 1
+}
 ```
 
 ## ShopOrder
@@ -350,7 +353,19 @@
 - Delete: /api/shoporders/{id?}
 - Post: /api/shoporders
 ```
-
+{
+    "userId": "KH001",  ==>(Bắt buộc)
+    "paymentMethodId": 1,  ==>(Bắt buộc)
+    "addressId": 1, ==>(Bắt buộc)
+    "shippingMethodId": 1,  ==>(Bắt buộc)
+    "orderStatusId": 1,  ==>(Bắt buộc)
+    "items": [
+        {
+            "productItemId": 8,  ==>(Bắt buộc)
+            "qty": 2  ==>(Bắt buộc)
+        }
+    ]
+}
 ```
 - Update: /api/shoporders/{id?}
 ```

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Data;
+using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.AddressService
@@ -74,5 +75,21 @@ namespace web_api_cosmetics_shop.Services.AddressService
 
 			return existAddress;
 		}
-	}
+
+        public AddressDTO ConvertToAddressDto(Address address)
+        {
+            return new AddressDTO()
+            {
+                AddressId = address.AddressId,
+                UserId = address.UserId,
+                FullName = address.FullName,
+                City = address.City,
+                District = address.District,
+                Ward = address.Ward,
+                AddressLine = address.AddressLine,
+                PhoneNumber = address.PhoneNumber,
+                IsDefault = address.IsDefault,
+            };
+        }
+    }
 }

@@ -204,6 +204,20 @@ namespace web_api_cosmetics_shop.Data
 					  .WithMany(pm => pm.ShopOrders)
 					  .OnDelete(DeleteBehavior.Restrict);
 			});
+
+            modelBuilder.Entity<AdminRole>(entity =>
+            {
+                entity.HasIndex(ar => new { ar.RoleId, ar.AdminUserId })
+                      .IsUnique();
+
+                entity.HasOne(ar => ar.Role)
+                      .WithMany(r => r.AdminRoles)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ar => ar.AdminUser)
+                      .WithMany(au => au.AdminRoles)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
         public DbSet<Promotion> Promotions { get; set; }
@@ -231,5 +245,9 @@ namespace web_api_cosmetics_shop.Data
         public DbSet<ShopOrder> ShopOrders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<UserReview> UserReviews { get; set; }
+
+        public DbSet<AdminUser> AdminUsers { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<AdminRole> AdminRoles { get; set; }
     }
 }

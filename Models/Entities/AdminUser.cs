@@ -1,13 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace web_api_cosmetics_shop.Models.Entities
 {
-    public class AppUser
+    public class AdminUser
     {
         [Key]
-        public string UserId { get; set; } = string.Empty;
+        public string AdminUserId { get; set; } = string.Empty;
 
         [StringLength(50)]
         [Required]
@@ -37,11 +36,6 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         public DateTime? CreatedAt { get; set; }
 
-        public List<Address>? Address { get; set; }
-        public List<PaymentMethod>? PaymentMethods { get; set; }
-        public List<ShoppingCart>? ShoppingCarts { get; set; }
-        public List<UserReview>? UserReviews { get; set; }
-        public List<Wishlist>? Wishlists { get; set; }
-        public List<ShopOrder>? ShopOrders { get; set; }
+        public List<AdminRole>? AdminRoles { get; set; }
     }
 }

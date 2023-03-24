@@ -17,5 +17,8 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 
 		// Remove
 		Task<int> RemoveShopOrder(ShopOrder shopOrder);
+
+		// Cancel order
+		Task<ShopOrder> CancelShopOrder(ShopOrder shopOrder);
 	}
 }

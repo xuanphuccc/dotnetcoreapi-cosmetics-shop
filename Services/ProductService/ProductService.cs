@@ -243,6 +243,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 				Name = product.Name,
 				Description = product.Description,
 				Image = product.Image,
+				IsDisplay = product.IsDisplay,
 				ProviderId = product.ProviderId,
 				CategoriesId = categoriesId,
 				Items = productItemDtos

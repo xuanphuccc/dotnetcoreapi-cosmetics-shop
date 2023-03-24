@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using web_api_cosmetics_shop.Data;
 
@@ -11,9 +12,10 @@ using web_api_cosmetics_shop.Data;
 namespace web_api_cosmetics_shop.Migrations
 {
     [DbContext(typeof(CosmeticsShopContext))]
-    partial class CosmeticsShopContextModelSnapshot : ModelSnapshot
+    [Migration("20230324084141_Add_user_column")]
+    partial class Add_user_column
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,8 +123,8 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("Gender")
-                        .HasColumnType("int");
+                    b.Property<bool?>("Gender")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -166,8 +168,8 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("Gender")
-                        .HasColumnType("int");
+                    b.Property<bool?>("Gender")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Password")
                         .IsRequired()
