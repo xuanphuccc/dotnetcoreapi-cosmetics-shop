@@ -21,17 +21,10 @@ namespace web_api_cosmetics_shop.Data
             modelBuilder.Entity<Category>(entity =>
             {
                 // Xóa Promotion -> SetNull Category
-                entity.HasOne(c => c.Promotion)
-                      .WithMany(p => p.Categories)
-                      .OnDelete(DeleteBehavior.SetNull);
-            });
-
-            modelBuilder.Entity<Product>(entity =>
-            {
-                // Xóa Provider -> SetNull Product
-                entity.HasOne(c => c.Provider)
-                      .WithMany(p => p.Products)
-                      .OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(c => c.Promotion) // category là 1
+                      .WithMany(p => p.Categories)// product là nhiều
+                      .OnDelete(DeleteBehavior.SetNull);// khi delete Promotion category là null chứ không xóa
+                // nếu muốn xóa thì dùng cascade
             });
 
             modelBuilder.Entity<ProductCategory>(entity => {
@@ -49,6 +42,18 @@ namespace web_api_cosmetics_shop.Data
                       .WithMany(p => p.ProductCategories)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                // Xóa Provider -> SetNull Product
+                entity.HasOne(c => c.Provider)
+                      .WithMany(p => p.Products)
+                      .OnDelete(DeleteBehavior.SetNull);// khi delete Provider  Products là null chứ không xóa
+                // nếu muốn xóa thì dùng cascade
+            });
+
+            
 
             modelBuilder.Entity<ProductItem>(entity => {
                 // Xóa Product -> xóa ProductItem
