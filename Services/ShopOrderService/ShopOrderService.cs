@@ -80,5 +80,26 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 			var result = await _context.SaveChangesAsync();
 			return result;
 		}
-	}
+
+        // Cancel shop order
+        public async Task<ShopOrder> CancelShopOrder(ShopOrder shopOrder)
+		{
+			var existOrder = await GetShopOrder(shopOrder.OrderId);
+			if(existOrder == null)
+			{
+				return null!;
+			}
+
+			existOrder.OrderStatusId = 6;
+
+			var result = await _context.SaveChangesAsync();
+			if(result == 0)
+			{
+				return null!;
+			}
+
+			return existOrder;
+		}
+
+    }
 }

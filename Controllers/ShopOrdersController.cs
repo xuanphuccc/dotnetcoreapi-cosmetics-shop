@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
+using web_api_cosmetics_shop.Services.AddressService;
 using web_api_cosmetics_shop.Services.ProductService;
 using web_api_cosmetics_shop.Services.ShippingMethodService;
 using web_api_cosmetics_shop.Services.ShopOrderService;
@@ -16,14 +17,17 @@ namespace web_api_cosmetics_shop.Controllers
 		private readonly IShopOrderService _shopOrderService;
 		private readonly IProductService _productService;
 		private readonly IShippingMethodService _shippingMethodService;
+		private readonly IAddressService _addressService;
 		public ShopOrdersController(
 			IShopOrderService shopOrderService,
 			IProductService productService,
-			IShippingMethodService shippingMethodService)
+			IShippingMethodService shippingMethodService,
+			IAddressService addressService)
 		{
 			_shopOrderService = shopOrderService;
 			_productService = productService;
 			_shippingMethodService = shippingMethodService;
+			_addressService = addressService;
 		}
 
 		[NonAction]
@@ -49,6 +53,9 @@ namespace web_api_cosmetics_shop.Controllers
 				});
             }
 
+			var address = await _addressService.GetAddress(shopOrder.AddressId.Value);
+			var addressDto = _addressService.ConvertToAddressDto(address);
+
             return new ShopOrderDTO()
 			{
 				OrderId = shopOrder.OrderId,
@@ -57,6 +64,7 @@ namespace web_api_cosmetics_shop.Controllers
 				UserId = shopOrder.UserId,
 				PaymentMethodId = shopOrder.PaymentMethodId,
 				AddressId = shopOrder.AddressId,
+				Address = addressDto,
 				ShippingMethodId = shopOrder.ShippingMethodId,
 				OrderStatusId = shopOrder.OrderStatusId,
 				Items = orderItemsDto
@@ -77,7 +85,7 @@ namespace web_api_cosmetics_shop.Controllers
             return Ok(orders);
 		}
 
-		[HttpGet("{id?}")]
+		[HttpGet("user/{id?}")]
 		public async Task<IActionResult> GetUserShopOrders([FromRoute] string? id)
 		{
 			if(string.IsNullOrEmpty(id))
@@ -96,7 +104,24 @@ namespace web_api_cosmetics_shop.Controllers
 			return Ok(orders);
 		}
 
-		[HttpPost]
+        [HttpGet("{id?}")]
+        public async Task<IActionResult> GetOneShopOrder([FromRoute] int? id)
+        {
+            if (!id.HasValue)
+            {
+                return BadRequest();
+            }
+
+            var shopOrder = await _shopOrderService.GetShopOrder(id.Value);
+			if(shopOrder == null)
+			{
+				return NotFound();
+			}
+
+            return Ok(await ConvertToShopOrderDto(shopOrder));
+        }
+
+        [HttpPost]
 		public async Task<IActionResult> AddShopOrder([FromBody] ShopOrderDTO shopOrderDto)
 		{
 			if(shopOrderDto == null || 
@@ -185,6 +210,31 @@ namespace web_api_cosmetics_shop.Controllers
 			{
 				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
 			}
+		}
+
+		[HttpPut("cancel/{id?}")]
+		public async Task<IActionResult> CancelShopOrder([FromRoute] int? id)
+		{
+			if(!id.HasValue)
+			{
+				return BadRequest();
+			}
+
+            var existShopOrder = await _shopOrderService.GetShopOrder(id.Value);
+            if (existShopOrder == null)
+            {
+                return NotFound();
+            }
+
+			var cancelResult = await _shopOrderService.CancelShopOrder(existShopOrder);
+			if(cancelResult == null)
+			{
+                return StatusCode(
+                                StatusCodes.Status500InternalServerError,
+                                new ErrorDTO() { Title = "Can not cancel order", Status = 500 });
+            }
+
+            return Ok(await ConvertToShopOrderDto(existShopOrder));
 		}
 
 		[HttpDelete("{id?}")]

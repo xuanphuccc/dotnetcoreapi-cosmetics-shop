@@ -21,6 +21,8 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[Required]
 		public int? AddressId { get; set; }
 
+		public AddressDTO? Address { get; set; }
+
 		[Required]
 		public int? ShippingMethodId { get; set; }
 

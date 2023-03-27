@@ -103,7 +103,7 @@ namespace web_api_cosmetics_shop.Controllers
 
 			// Check existing Category name
 			var isExistPromotionName = await _promotionService.GetExistPromotionName(promotion.Name);
-			if (isExistPromotionName == true)
+			if (isExistPromotionName == true && promotion.Name != existPromotion.Name)
 			{
 				return BadRequest(new ErrorDTO() { Title = "Name already exist", Status = 400 });
 			}

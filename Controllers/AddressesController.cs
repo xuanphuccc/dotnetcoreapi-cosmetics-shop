@@ -18,22 +18,6 @@ namespace web_api_cosmetics_shop.Controllers
 			_addressService = addressService;
 		}
 
-		[NonAction]
-		private AddressDTO ConvertToAddressDto(Address address)
-		{
-			return new AddressDTO()
-			{
-				AddressId = address.AddressId,
-				UserId = address.UserId,
-				FullName = address.FullName,
-				City = address.City,
-				District = address.District,
-				Ward = address.Ward,
-				AddressLine = address.AddressLine,
-				PhoneNumber = address.PhoneNumber,
-				IsDefault = address.IsDefault,
-			};
-		}
 
 		[HttpGet]
 		public async Task<IActionResult> GetAllAddresses()
@@ -43,7 +27,7 @@ namespace web_api_cosmetics_shop.Controllers
 			List<AddressDTO> addresses = new List<AddressDTO>();
             foreach (var item in allAddresses)
             {
-				addresses.Add(ConvertToAddressDto(item));
+				addresses.Add(_addressService.ConvertToAddressDto(item));
             }
 
 			return Ok(addresses);
@@ -62,7 +46,7 @@ namespace web_api_cosmetics_shop.Controllers
 			List<AddressDTO> listAddress = new List<AddressDTO>();
             foreach (var item in userAddress)
             {
-				listAddress.Add(ConvertToAddressDto(item));
+				listAddress.Add(_addressService.ConvertToAddressDto(item));
             }
 
             return Ok(listAddress);
@@ -101,7 +85,7 @@ namespace web_api_cosmetics_shop.Controllers
 
 				return CreatedAtAction(nameof(GetUserAddresses), 
 									new {id = addResult.UserId}, 
-									ConvertToAddressDto(addResult));
+									_addressService.ConvertToAddressDto(addResult));
 			}
 			catch (Exception error)
 			{
@@ -194,7 +178,7 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
 			}
 
-			return Ok(ConvertToAddressDto(existAddress));
+			return Ok(_addressService.ConvertToAddressDto(existAddress));
 		}
 	}
 }

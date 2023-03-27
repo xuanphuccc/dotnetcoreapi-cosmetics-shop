@@ -1,4 +1,5 @@
-﻿using web_api_cosmetics_shop.Models.DTO;
+﻿using Microsoft.EntityFrameworkCore;
+using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.ProductService
@@ -12,9 +13,12 @@ namespace web_api_cosmetics_shop.Services.ProductService
 		Task<List<ProductItem>> GetAllItems(Product product);
 		Task<ProductItem> GetItem(int productItemId);
 		Task<List<ProductConfiguration>> GetConfigurations(ProductItem product);
-		
-		// Add
-		Task<Product> AddProduct(Product product);
+        IQueryable<Product> GetAllProductsAsQueryable();
+        IQueryable<ProductItem> GetAllProductItemsAsQueryable();
+
+
+        // Add
+        Task<Product> AddProduct(Product product);
 		Task<ProductItem> AddProductItem(ProductItem productItem);
 		Task<ProductConfiguration> AddProductConfiguration(ProductConfiguration productConfiguration);
 		Task<ProductCategory> AddProductCategory(ProductCategory productCategory);

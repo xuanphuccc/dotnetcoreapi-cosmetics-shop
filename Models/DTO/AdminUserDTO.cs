@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace web_api_cosmetics_shop.Models.Entities
+namespace web_api_cosmetics_shop.Models.DTO
 {
-    public class AppUser
+    public class AdminUserDTO
     {
-        [Key]
-        public string UserId { get; set; } = string.Empty;
+        public string? AdminUserId { get; set; }
 
         [StringLength(50)]
         [Required]
@@ -28,20 +27,13 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public string FullName { get; set; } = string.Empty;
 
-        [Column(TypeName = "ntext")]
         public string? Avatar { get; set; }
 
         [Required]
         public int Gender { get; set; }
+
         public DateTime? BirthDate { get; set; }
 
         public DateTime? CreatedAt { get; set; }
-
-        public List<Address>? Address { get; set; }
-        public List<PaymentMethod>? PaymentMethods { get; set; }
-        public List<ShoppingCart>? ShoppingCarts { get; set; }
-        public List<UserReview>? UserReviews { get; set; }
-        public List<Wishlist>? Wishlists { get; set; }
-        public List<ShopOrder>? ShopOrders { get; set; }
     }
 }
