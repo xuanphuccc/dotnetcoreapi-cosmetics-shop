@@ -15,6 +15,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 		Task<List<ProductConfiguration>> GetConfigurations(ProductItem product);
         IQueryable<Product> GetAllProductsAsQueryable();
         IQueryable<ProductItem> GetAllProductItemsAsQueryable();
+        IQueryable<ProductCategory> GetAllProductCategoriedAsQueryable();
 
 
         // Add

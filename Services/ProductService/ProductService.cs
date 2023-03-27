@@ -79,6 +79,10 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			var productItems=_context.ProductItems.AsQueryable();
 			return productItems;
 		}
+        public IQueryable<ProductCategory> GetAllProductCategoriedAsQueryable()
+		{
+			return _context.ProductCategories.AsQueryable();
+		}
 
 
         public async Task<Product> GetProductById(int id)

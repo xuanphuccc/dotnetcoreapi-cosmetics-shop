@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.WebSockets;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
+using web_api_cosmetics_shop.Services.CategoryService;
 using web_api_cosmetics_shop.Services.ProductService;
 using web_api_cosmetics_shop.Services.ProviderService;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -16,10 +18,13 @@ namespace web_api_cosmetics_shop.Controllers
     {
         private readonly IProductService _productService;
         private readonly IProviderService _providerService;
-        public ProductsController(IProductService productService, IProviderService providerService)
+        private readonly ICategoryService _categoryService;
+        public ProductsController(IProductService productService, IProviderService providerService, ICategoryService categoryService)
         {
             _productService = productService;
             _providerService = providerService;
+            _categoryService = categoryService;
+
         }
 
         // ---------- Get Product ----------
@@ -61,7 +66,7 @@ namespace web_api_cosmetics_shop.Controllers
         //}
         //filter product
         [HttpGet]
-        public async Task<IActionResult> GetProducts([FromQuery] decimal? min, [FromQuery] decimal? max, [FromQuery] string? provider, [FromQuery] int? page )
+        public async Task<IActionResult> GetProducts([FromQuery] decimal? min, [FromQuery] decimal? max, [FromQuery] string? provider, string? category, [FromQuery] int? page)
 
         {
 
@@ -69,32 +74,56 @@ namespace web_api_cosmetics_shop.Controllers
             var products = _productService.GetAllProductsAsQueryable();
             var providers = _providerService.GetAllProvidersQueryable();
             var productItems = _productService.GetAllProductItemsAsQueryable();
+            var categorises = _categoryService.GetAllCategoriesQueryable();
+            var productCategory = _productService.GetAllProductCategoriedAsQueryable();
+
             if (!page.HasValue)
             {
                 page = 1;
             }
+            if (!min.HasValue)
+            {
+                min = 0;
+            }
+            if (!max.HasValue)
+            {
+                max = 10000;
+            }
+
             if (!String.IsNullOrEmpty(provider))
             {
                 products = from p in products join pr in providers on p.ProviderId equals pr.ProviderId where pr.Name == provider select p;
+            }
+            if (!String.IsNullOrEmpty(category))
+            {
+                products = from p in products
+                           join pc in productCategory on p.ProductId equals pc.ProductId
+                           join c in categorises on pc.CategoryId equals c.CategoryId
+                           where c.Name == category
+                           select p;
+                //không cần groupby vì so sánh trực tiếp
+
             }
             if (min.HasValue && max.HasValue)
             {
                 products = from p in products
                            join pi in productItems on p.ProductId equals pi.ProductId
                            where pi.Price >= min.Value && pi.Price <= max.Value
-
-                           select p;
+                           //select p;
+                           group p by p.ProductId into g
+                           select g.FirstOrDefault();
+                //không cần groupby vì so sánh khoảng giá sẽ lấy ra các sản phẩm và bị trùng sản phẩm
 
             }
-            
-            var result = products.Skip((page.Value-1)*pageSize).Take(pageSize).ToList();
+            int totalProducts = products.ToList().Count();// tổng số sản phẩm
+            var result = products.Skip((page.Value - 1) * pageSize).Take(pageSize).ToList();
             List<ProductDTO> productsDtos = new List<ProductDTO>();
             foreach (var product in result)
             {
                 var productDto = await _productService.ConvertToProductDtoAsync(product);
                 productsDtos.Add(productDto);
             }
-            int totalProducts = productsDtos.Count();// tổng số sản phẩm
+           
             int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize); // tổng số trang
 
 
