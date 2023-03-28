@@ -53,12 +53,12 @@ namespace web_api_cosmetics_shop.Controllers
             });
         }
 
-        [HttpGet("{account}")]
+        [HttpGet("account")]
         [Authorize]
         public async Task<IActionResult> GetAdminUser()
         {
             var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
-            if(currentIdentityAdmin == null)
+            if (currentIdentityAdmin == null)
             {
                 return NotFound();
             }
@@ -79,19 +79,19 @@ namespace web_api_cosmetics_shop.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> RegisterAdmin([FromBody] AdminUserDTO adminUserDto)
         {
-            if(adminUserDto == null)
+            if (adminUserDto == null)
             {
                 return BadRequest();
             }
 
             var existEmail = await _adminService.GetAdminByEmail(adminUserDto.Email);
-            if(existEmail != null)
+            if (existEmail != null)
             {
-                return BadRequest(new ErrorDTO() { Title = "email already exist"});
+                return BadRequest(new ErrorDTO() { Title = "email already exist" });
             }
 
             var existUserName = await _adminService.GetAdminByUserName(adminUserDto.UserName);
-            if(existUserName != null)
+            if (existUserName != null)
             {
                 return BadRequest(new ErrorDTO() { Title = "username already exist" });
             }
@@ -112,7 +112,8 @@ namespace web_api_cosmetics_shop.Controllers
                 };
 
                 var createdAdmin = await _adminService.Register(newAdmin, adminUserDto.Password);
-                if(createdAdmin == null) {
+                if (createdAdmin == null)
+                {
                     return StatusCode(
                                 StatusCodes.Status500InternalServerError,
                                 new ErrorDTO() { Title = "can not register admin", Status = 500 });
@@ -130,10 +131,10 @@ namespace web_api_cosmetics_shop.Controllers
                 return Ok(new ResponseDTO()
                 {
                     Data = token,
-                    Expired = DateTime.Now.AddMinutes(15)
+                    Expired = DateTime.Now.AddHours(1)
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
             }
@@ -142,7 +143,7 @@ namespace web_api_cosmetics_shop.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginAdmin(UserLoginDTO userLoginDto)
         {
-            if(userLoginDto == null)
+            if (userLoginDto == null)
             {
                 return BadRequest();
             }
@@ -150,7 +151,7 @@ namespace web_api_cosmetics_shop.Controllers
             try
             {
                 var existAdmin = await _adminService.GetAdminByUserName(userLoginDto.UserName);
-                if(existAdmin == null)
+                if (existAdmin == null)
                 {
                     return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
@@ -168,7 +169,7 @@ namespace web_api_cosmetics_shop.Controllers
                 return Ok(new ResponseDTO()
                 {
                     Data = token,
-                    Expired = DateTime.Now.AddMinutes(15)
+                    Expired = DateTime.Now.AddHours(1)
                 });
             }
             catch (Exception ex)
@@ -176,7 +177,7 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
             }
         }
-        
-        
+
+
     }
 }
