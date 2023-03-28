@@ -30,8 +30,7 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Column(TypeName = "ntext")]
         public string? Avatar { get; set; }
 
-        [Required]
-        public int Gender { get; set; }
+        public int? Gender { get; set; }
         public DateTime? BirthDate { get; set; }
 
         public DateTime? CreatedAt { get; set; }

@@ -53,15 +53,10 @@ namespace web_api_cosmetics_shop.Controllers
             });
         }
 
-        [HttpGet("{currentadmin}")]
+        [HttpGet("{account}")]
         [Authorize]
-        public async Task<IActionResult> GetAdminUser([FromRoute] string? id)
+        public async Task<IActionResult> GetAdminUser()
         {
-            if(string.IsNullOrEmpty(id))
-            {
-                return BadRequest();
-            }
-
             var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
             if(currentIdentityAdmin == null)
             {
@@ -127,9 +122,7 @@ namespace web_api_cosmetics_shop.Controllers
                 var loggedAdmin = await _adminService.Login(createdAdmin, adminUserDto.Password);
                 if (loggedAdmin == null)
                 {
-                    return StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorDTO() { Title = "invalid username/password", Status = 400 });
+                    return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
 
                 string token = _adminService.GenerateToken(loggedAdmin);
@@ -159,17 +152,13 @@ namespace web_api_cosmetics_shop.Controllers
                 var existAdmin = await _adminService.GetAdminByUserName(userLoginDto.UserName);
                 if(existAdmin == null)
                 {
-                    return StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorDTO() { Title = "invalid username/password", Status = 400 });
+                    return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
 
                 var loggedAdmin = await _adminService.Login(existAdmin, userLoginDto.Password);
                 if (loggedAdmin == null)
                 {
-                    return StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorDTO() { Title = "invalid username/password", Status = 400 });
+                    return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
 
                 var adminRoles = await _adminService.GetAdminRoles(loggedAdmin);
