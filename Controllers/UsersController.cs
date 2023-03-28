@@ -117,7 +117,7 @@ namespace web_api_cosmetics_shop.Controllers
                 }
 
                 var loggedUser = await _userService.Login(registedUser, registedUser.Password);
-                if(loggedUser == null)
+                if (loggedUser == null)
                 {
                     return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
@@ -127,7 +127,7 @@ namespace web_api_cosmetics_shop.Controllers
                 return Ok(new ResponseDTO()
                 {
                     Data = token,
-                    Expired = DateTime.Now.AddMinutes(15),
+                    Expired = DateTime.Now.AddHours(1)
                 });
             }
             catch (Exception ex)
@@ -139,7 +139,7 @@ namespace web_api_cosmetics_shop.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser(UserLoginDTO userLoginDto)
         {
-            if(userLoginDto == null)
+            if (userLoginDto == null)
             {
                 return BadRequest();
             }
@@ -147,13 +147,13 @@ namespace web_api_cosmetics_shop.Controllers
             try
             {
                 var existUser = await _userService.GetUserByUserName(userLoginDto.UserName);
-                if(existUser == null)
+                if (existUser == null)
                 {
                     return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
 
                 var loggedUser = await _userService.Login(existUser, userLoginDto.Password);
-                if(loggedUser == null)
+                if (loggedUser == null)
                 {
                     return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
@@ -163,7 +163,7 @@ namespace web_api_cosmetics_shop.Controllers
                 return Ok(new ResponseDTO()
                 {
                     Data = token,
-                    Expired = DateTime.Now.AddMinutes(15)
+                    Expired = DateTime.Now.AddHours(1)
                 });
             }
             catch (Exception ex)

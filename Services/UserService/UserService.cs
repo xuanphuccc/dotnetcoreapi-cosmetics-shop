@@ -42,8 +42,9 @@ namespace web_api_cosmetics_shop.Services.UserService
             await _context.AppUsers.AddAsync(appUser);
             var result = await _context.SaveChangesAsync();
 
-            if (result == 0) { 
-                return null!; 
+            if (result == 0)
+            {
+                return null!;
             }
 
             return appUser;
@@ -59,7 +60,7 @@ namespace web_api_cosmetics_shop.Services.UserService
         public AppUser GetCurrentUser(ClaimsPrincipal identityUser)
         {
             var identity = identityUser.Identity as ClaimsIdentity;
-            if(identity == null)
+            if (identity == null)
             {
                 return null!;
             }
@@ -80,7 +81,7 @@ namespace web_api_cosmetics_shop.Services.UserService
             var user = await _context.AppUsers
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
-            if(user == null)
+            if (user == null)
             {
                 return null!;
             }
@@ -93,7 +94,7 @@ namespace web_api_cosmetics_shop.Services.UserService
             var user = await _context.AppUsers
                 .FirstOrDefaultAsync(u => u.UserName == userName);
 
-            if(user == null)
+            if (user == null)
             {
                 return null!;
             }
@@ -106,7 +107,7 @@ namespace web_api_cosmetics_shop.Services.UserService
             var user = await _context.AppUsers
                 .FirstOrDefaultAsync(u => u.Email == email);
 
-            if(user == null)
+            if (user == null)
             {
                 return null!;
             }
@@ -134,7 +135,7 @@ namespace web_api_cosmetics_shop.Services.UserService
               _configuration["Jwt:Issuer"],
               _configuration["Jwt:Audience"],
               claims,
-              expires: DateTime.Now.AddMinutes(15),
+              expires: DateTime.Now.AddHours(1),
               signingCredentials: credentials);
 
             // Return token

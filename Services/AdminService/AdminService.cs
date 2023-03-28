@@ -141,7 +141,7 @@ namespace web_api_cosmetics_shop.Services.AdminService
               _configuration["Jwt:Issuer"],
               _configuration["Jwt:Audience"],
               claims,
-              expires: DateTime.Now.AddMinutes(15),
+              expires: DateTime.Now.AddHours(1),
               signingCredentials: credentials);
 
             // Return token
