@@ -115,7 +115,7 @@ namespace web_api_cosmetics_shop.Controllers
                 //không cần groupby vì so sánh khoảng giá sẽ lấy ra các sản phẩm và bị trùng sản phẩm
 
             }
-            int totalProducts = products.ToList().Count();// tổng số sản phẩm
+            int totalProducts = products.ToList().Count();// tổng số sản phẩm trên trang
             var result = products.Skip((page.Value - 1) * pageSize).Take(pageSize).ToList();
             List<ProductDTO> productsDtos = new List<ProductDTO>();
             foreach (var product in result)
