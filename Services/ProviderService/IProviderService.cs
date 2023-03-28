@@ -7,6 +7,7 @@ namespace web_api_cosmetics_shop.Services.ProviderService
         // Get
         Task<List<Provider>> GetAllProviders();
         Task<Provider> GetProvider(int providerId);
+        IQueryable<Provider> GetAllProvidersQueryable();
 
         // Add
         Task<Provider> AddProvider(Provider provider);

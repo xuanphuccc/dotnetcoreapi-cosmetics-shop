@@ -67,8 +67,25 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			var products = await _context.Products.ToListAsync();
 			return products;
 		}
+        public IQueryable<Product> GetAllProductsAsQueryable()
 
-		public async Task<Product> GetProductById(int id)
+        {
+
+            var products = _context.Products.AsQueryable();
+            return products;
+        }
+        public IQueryable<ProductItem> GetAllProductItemsAsQueryable()
+		{
+			var productItems=_context.ProductItems.AsQueryable();
+			return productItems;
+		}
+        public IQueryable<ProductCategory> GetAllProductCategoriedAsQueryable()
+		{
+			return _context.ProductCategories.AsQueryable();
+		}
+
+
+        public async Task<Product> GetProductById(int id)
 		{
 			var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id);
 			return product!;
@@ -251,5 +268,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 
 			return productDto;
 		}
+
+		
 	}
 }

@@ -16,7 +16,7 @@ namespace web_api_cosmetics_shop.Services.ProviderService
         {
             await _context.AddAsync(provider);
             var result = await _context.SaveChangesAsync();
-            if(result == 0)
+            if (result == 0)
             {
                 return null!;
             }
@@ -33,9 +33,15 @@ namespace web_api_cosmetics_shop.Services.ProviderService
         public async Task<Provider> GetProvider(int providerId)
         {
             var provider = await _context.Providers
-                .FirstOrDefaultAsync(p =>  p.ProviderId == providerId);
+                .FirstOrDefaultAsync(p => p.ProviderId == providerId);
 
             return provider!;
+        }
+
+        public IQueryable<Provider> GetAllProvidersQueryable()
+        {
+            var provider = _context.Providers;
+            return provider;
         }
 
         public async Task<int> RemoveProvider(Provider provider)
@@ -48,7 +54,7 @@ namespace web_api_cosmetics_shop.Services.ProviderService
         public async Task<Provider> UpdateProvider(Provider provider)
         {
             var existProvider = await GetProvider(provider.ProviderId);
-            if(existProvider == null)
+            if (existProvider == null)
             {
                 return null!;
             }
@@ -56,7 +62,7 @@ namespace web_api_cosmetics_shop.Services.ProviderService
             existProvider.Name = provider.Name;
             var result = await _context.SaveChangesAsync();
 
-            if(result == 0)
+            if (result == 0)
             {
                 return null!;
             }
