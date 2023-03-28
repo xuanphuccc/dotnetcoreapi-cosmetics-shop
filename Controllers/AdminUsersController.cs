@@ -53,7 +53,7 @@ namespace web_api_cosmetics_shop.Controllers
             });
         }
 
-        [HttpGet("{account}")]
+        [HttpGet("account")]
         [Authorize]
         public async Task<IActionResult> GetAdminUser()
         {

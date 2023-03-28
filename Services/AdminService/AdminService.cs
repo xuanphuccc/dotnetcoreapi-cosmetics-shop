@@ -22,9 +22,10 @@ namespace web_api_cosmetics_shop.Services.AdminService
         public async Task<AdminUser> Login(AdminUser adminUser, string password)
         {
             var existAdminUser = await _context.AdminUsers
-                            .FirstOrDefaultAsync(au => au.UserName.ToLower() == adminUser.UserName.ToLower() &&
-                                                au.Password == password);
-            if(existAdminUser == null)
+                            .FirstOrDefaultAsync(
+                                au => au.UserName.ToLower() == adminUser.UserName.ToLower() && au.Password == password);
+
+            if (existAdminUser == null)
             {
                 return null!;
             }
@@ -38,7 +39,8 @@ namespace web_api_cosmetics_shop.Services.AdminService
 
             await _context.AdminUsers.AddAsync(adminUser);
             var result = await _context.SaveChangesAsync();
-            if(result == 0)
+
+            if (result == 0)
             {
                 return null!;
             }
@@ -65,16 +67,16 @@ namespace web_api_cosmetics_shop.Services.AdminService
 
             return new AdminUser
             {
-                UserName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value,
-                Email = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Email)?.Value,
-                FullName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Name).Value,
+                UserName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value!,
+                Email = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Email)?.Value!,
+                FullName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Name)?.Value!,
             };
-    }
+        }
 
         public async Task<AdminUser> GetAdminById(string userId)
         {
             var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(au => au.AdminUserId == userId);
-            if(adminUser == null)
+            if (adminUser == null)
             {
                 return null!;
             }
@@ -84,8 +86,8 @@ namespace web_api_cosmetics_shop.Services.AdminService
 
         public async Task<AdminUser> GetAdminByUserName(string userName)
         {
-            var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(au => au.UserName == userName);
-            if(adminUser == null)
+            var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(au => au.UserName.ToLower() == userName.ToLower());
+            if (adminUser == null)
             {
                 return null!;
             }
@@ -95,7 +97,7 @@ namespace web_api_cosmetics_shop.Services.AdminService
 
         public async Task<AdminUser> GetAdminByEmail(string email)
         {
-            var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(au => au.Email == email);
+            var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(au => au.Email.ToLower() == email.ToLower());
             if (adminUser == null)
             {
                 return null!;
@@ -107,9 +109,9 @@ namespace web_api_cosmetics_shop.Services.AdminService
         public async Task<List<Role>> GetAdminRoles(AdminUser adminUser)
         {
             var adminRoles = await (from adminRole in _context.AdminRoles
-                              join role in _context.Roles on adminRole.RoleId equals role.RoleId
-                              where adminRole.AdminUserId == adminUser.AdminUserId
-                              select role).ToListAsync();
+                                    join role in _context.Roles on adminRole.RoleId equals role.RoleId
+                                    where adminRole.AdminUserId == adminUser.AdminUserId
+                                    select role).ToListAsync();
             return adminRoles;
         }
 
@@ -128,14 +130,15 @@ namespace web_api_cosmetics_shop.Services.AdminService
                 new Claim(ClaimTypes.Name, adminUser.FullName),
             };
 
-            if(roles != null)
+            if (roles != null)
             {
                 // Add roles
                 claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r.Name)));
             }
 
             // Create token
-            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
+            var token = new JwtSecurityToken(
+              _configuration["Jwt:Issuer"],
               _configuration["Jwt:Audience"],
               claims,
               expires: DateTime.Now.AddMinutes(15),
