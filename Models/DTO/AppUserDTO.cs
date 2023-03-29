@@ -27,6 +27,8 @@ namespace web_api_cosmetics_shop.Models.DTO
 
         public string? Avatar { get; set; }
 
+        [StringLength(200)]
+        public string? Bio { get; set; }
         public int? Gender { get; set; }
 
         public DateTime? BirthDate { get; set; }
