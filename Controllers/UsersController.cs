@@ -28,6 +28,7 @@ namespace web_api_cosmetics_shop.Controllers
                 PhoneNumber = appUser.PhoneNumber,
                 FullName = appUser.FullName,
                 Avatar = appUser.Avatar,
+                Bio = appUser.Bio,
                 Gender = appUser.Gender,
                 BirthDate = appUser.BirthDate,
                 CreatedAt = appUser.CreatedAt
@@ -171,5 +172,75 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
             }
         }
+
+        [HttpPut("account")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] AppUserDTO appUserDto)
+        {
+            if (appUserDto == null)
+            {
+                return BadRequest();
+            }
+
+            var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
+            if (currentIdentityUser == null)
+            {
+                return NotFound();
+            }
+
+            var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var updateUser = new AppUser()
+                {
+                    UserName = currentUser.UserName,
+                    Email = appUserDto.Email,
+                    PhoneNumber = appUserDto.PhoneNumber,
+                    FullName = appUserDto.FullName,
+                    Avatar = appUserDto.Avatar,
+                    Bio = appUserDto.Bio,
+                    Gender = appUserDto.Gender,
+                    BirthDate = appUserDto.BirthDate,
+                };
+
+                if (currentUser.Email != updateUser.Email ||
+                    currentUser.PhoneNumber != updateUser.PhoneNumber ||
+                    currentUser.FullName != updateUser.FullName ||
+                    currentUser.Avatar != updateUser.Avatar ||
+                    currentUser.Bio != updateUser.Bio ||
+                    currentUser.Gender != updateUser.Gender ||
+                    currentUser.BirthDate != updateUser.BirthDate)
+                {
+                    var updatedUser = await _userService.UpdateUser(updateUser);
+                    if (updatedUser == null)
+                    {
+                        return StatusCode(
+                                    StatusCodes.Status500InternalServerError,
+                                    new ErrorDTO() { Title = "can not update user", Status = 500 });
+                    }
+
+                    return Ok(new ResponseDTO()
+                    {
+                        Data = ConvertToAppUserDto(updatedUser)
+                    });
+                }
+                else
+                {
+                    return StatusCode(
+                        StatusCodes.Status304NotModified,
+                        new ErrorDTO() { Title = "not modified", Status = 304 });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
+            }
+        }
+
     }
 }
