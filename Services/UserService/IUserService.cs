@@ -16,6 +16,9 @@ namespace web_api_cosmetics_shop.Services.UserService
         Task<AppUser> GetUserById(string userId);
         Task<List<AppUser>> GetAllUsers();
 
+        // Update
+        Task<AppUser> UpdateUser(AppUser adminUser);
+
         // Generate token
         string GenerateToken(AppUser appUser);
     }

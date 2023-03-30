@@ -115,6 +115,32 @@ namespace web_api_cosmetics_shop.Services.UserService
             return user;
         }
 
+        // Update
+        public async Task<AppUser> UpdateUser(AppUser appUser)
+        {
+            var existAppUser = await GetUserByUserName(appUser.UserName);
+            if (existAppUser == null)
+            {
+                return null!;
+            }
+
+            existAppUser.Email = appUser.Email;
+            existAppUser.PhoneNumber = appUser.PhoneNumber;
+            existAppUser.FullName = appUser.FullName;
+            existAppUser.Avatar = appUser.Avatar;
+            existAppUser.Bio = appUser.Bio;
+            existAppUser.Gender = appUser.Gender;
+            existAppUser.BirthDate = appUser.BirthDate;
+
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+            {
+                return null!;
+            }
+
+            return existAppUser;
+        }
+
         // Generate token
         public string GenerateToken(AppUser appUser)
         {

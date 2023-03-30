@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using web_api_cosmetics_shop.Data;
+using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.AdminService
@@ -113,6 +115,32 @@ namespace web_api_cosmetics_shop.Services.AdminService
                                     where adminRole.AdminUserId == adminUser.AdminUserId
                                     select role).ToListAsync();
             return adminRoles;
+        }
+
+        // Update
+        public async Task<AdminUser> UpdateAdmin(AdminUser adminUser)
+        {
+            var existAdminUser = await GetAdminByUserName(adminUser.UserName);
+            if (existAdminUser == null)
+            {
+                return null!;
+            }
+
+            existAdminUser.Email = adminUser.Email;
+            existAdminUser.PhoneNumber = adminUser.PhoneNumber;
+            existAdminUser.FullName = adminUser.FullName;
+            existAdminUser.Avatar = adminUser.Avatar;
+            existAdminUser.Bio = adminUser.Bio;
+            existAdminUser.Gender = adminUser.Gender;
+            existAdminUser.BirthDate = adminUser.BirthDate;
+
+            var result = await _context.SaveChangesAsync();
+            if(result == 0)
+            {
+                return null!;
+            }
+
+            return existAdminUser;
         }
 
         // Generate token

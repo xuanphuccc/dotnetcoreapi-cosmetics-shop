@@ -17,6 +17,9 @@ namespace web_api_cosmetics_shop.Services.AdminService
         Task<List<Role>> GetAdminRoles(AdminUser adminUser);
         Task<List<AdminUser>> GetAllAdmins();
 
+        // Update
+        Task<AdminUser> UpdateAdmin(AdminUser adminUser);
+
         // Generate
         string GenerateToken(AdminUser adminUser, List<Role>? roles = null);
     }

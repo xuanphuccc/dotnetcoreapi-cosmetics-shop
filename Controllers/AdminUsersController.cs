@@ -30,6 +30,7 @@ namespace web_api_cosmetics_shop.Controllers
                 PhoneNumber = adminUser.PhoneNumber,
                 FullName = adminUser.FullName,
                 Avatar = adminUser.Avatar,
+                Bio = adminUser.Bio,
                 Gender = adminUser.Gender,
                 BirthDate = adminUser.BirthDate,
                 CreatedAt = adminUser.CreatedAt
@@ -53,9 +54,10 @@ namespace web_api_cosmetics_shop.Controllers
             });
         }
 
+        // Get current logged admin user (by access token)
         [HttpGet("account")]
         [Authorize]
-        public async Task<IActionResult> GetAdminUser()
+        public async Task<IActionResult> GetCurrentAdminUser()
         {
             var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
             if (currentIdentityAdmin == null)
@@ -72,6 +74,28 @@ namespace web_api_cosmetics_shop.Controllers
             return Ok(new ResponseDTO()
             {
                 Data = ConvertToAdminUserDto(currentAdmin),
+            });
+        }
+
+        // Get other admin user (by id)
+        [HttpGet("account/{id?}")]
+        [Authorize]
+        public async Task<IActionResult> GetAdminUser([FromRoute] string? id)
+        {
+            if(string.IsNullOrEmpty(id))
+            {
+                return BadRequest();
+            }
+
+            var existAdmin = await _adminService.GetAdminById(id);
+            if (existAdmin == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToAdminUserDto(existAdmin),
             });
         }
 
@@ -178,6 +202,72 @@ namespace web_api_cosmetics_shop.Controllers
             }
         }
 
+        [HttpPut("account")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] AdminUserDTO adminUserDto)
+        {
+            if (adminUserDto == null)
+            {
+                return BadRequest();
+            }
 
+            var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
+            if (currentIdentityAdmin == null)
+            {
+                return NotFound();
+            }
+
+            var currentAdmin = await _adminService.GetAdminByUserName(currentIdentityAdmin.UserName);
+            if (currentAdmin == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var updateAdmin = new AdminUser()
+                {
+                    UserName = currentAdmin.UserName,
+                    Email = adminUserDto.Email,
+                    PhoneNumber = adminUserDto.PhoneNumber,
+                    FullName = adminUserDto.FullName,
+                    Avatar = adminUserDto.Avatar,
+                    Bio = adminUserDto.Bio,
+                    Gender = adminUserDto.Gender,
+                    BirthDate = adminUserDto.BirthDate,
+                };
+
+                if(currentAdmin.Email != updateAdmin.Email ||
+                    currentAdmin.PhoneNumber != updateAdmin.PhoneNumber ||
+                    currentAdmin.FullName != updateAdmin.FullName ||
+                    currentAdmin.Avatar != updateAdmin.Avatar ||
+                    currentAdmin.Bio != updateAdmin.Bio ||
+                    currentAdmin.Gender != updateAdmin.Gender ||
+                    currentAdmin.BirthDate != updateAdmin.BirthDate)
+                {
+                    var updatedAdmin = await _adminService.UpdateAdmin(updateAdmin);
+                    if (updatedAdmin == null)
+                    {
+                        return StatusCode(
+                                    StatusCodes.Status500InternalServerError,
+                                    new ErrorDTO() { Title = "can not update admin", Status = 500 });
+                    }
+
+                    return Ok(new ResponseDTO()
+                    {
+                        Data = ConvertToAdminUserDto(updatedAdmin)
+                    });
+                } else
+                {
+                    return StatusCode(
+                        StatusCodes.Status304NotModified, 
+                        new ErrorDTO() { Title = "not modified", Status = 304 });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
+            }
+        }
     }
 }
