@@ -54,9 +54,10 @@ namespace web_api_cosmetics_shop.Controllers
             });
         }
 
+        // Get current logged admin user (by access token)
         [HttpGet("account")]
         [Authorize]
-        public async Task<IActionResult> GetAdminUser()
+        public async Task<IActionResult> GetCurrentAdminUser()
         {
             var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
             if (currentIdentityAdmin == null)
@@ -73,6 +74,28 @@ namespace web_api_cosmetics_shop.Controllers
             return Ok(new ResponseDTO()
             {
                 Data = ConvertToAdminUserDto(currentAdmin),
+            });
+        }
+
+        // Get other admin user (by id)
+        [HttpGet("account/{id?}")]
+        [Authorize]
+        public async Task<IActionResult> GetAdminUser([FromRoute] string? id)
+        {
+            if(string.IsNullOrEmpty(id))
+            {
+                return BadRequest();
+            }
+
+            var existAdmin = await _adminService.GetAdminById(id);
+            if (existAdmin == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToAdminUserDto(existAdmin),
             });
         }
 
