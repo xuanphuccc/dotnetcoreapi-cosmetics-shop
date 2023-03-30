@@ -52,6 +52,7 @@ namespace web_api_cosmetics_shop.Controllers
             });
         }
 
+        // Get current logged user (by access token)
         [HttpGet("account")]
         [Authorize]
         public async Task<IActionResult> GetCurrentUser()
@@ -71,6 +72,28 @@ namespace web_api_cosmetics_shop.Controllers
             return Ok(new ResponseDTO()
             {
                 Data = ConvertToAppUserDto(currentUser)
+            });
+        }
+
+        // Get other user (by id)
+        [HttpGet("account/{id?}")]
+        [Authorize]
+        public async Task<IActionResult> GetUser([FromRoute] string? id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest();
+            }
+
+            var existUser = await _userService.GetUserById(id);
+            if (existUser == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToAppUserDto(existUser),
             });
         }
 
