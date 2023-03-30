@@ -287,7 +287,7 @@ namespace web_api_cosmetics_shop.Controllers
 
                 // ----- Update Product Categories -----
                 // Get old Categories
-                var oldCategories = await _productService.GetAllCategories(existProduct);
+                var oldCategories = await _productService.getProductCategories(existProduct);
                 var oldCategoriesId = oldCategories.Select(c => c.CategoryId).ToList();
 
                 // Get new Categories id
