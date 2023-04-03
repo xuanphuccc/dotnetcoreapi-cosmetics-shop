@@ -12,8 +12,8 @@ using web_api_cosmetics_shop.Data;
 namespace web_api_cosmetics_shop.Migrations
 {
     [DbContext(typeof(CosmeticsShopContext))]
-    [Migration("20230324084141_Add_user_column")]
-    partial class Add_user_column
+    [Migration("20230403140854_init-project")]
+    partial class initproject
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -108,6 +108,10 @@ namespace web_api_cosmetics_shop.Migrations
                     b.Property<string>("Avatar")
                         .HasColumnType("ntext");
 
+                    b.Property<string>("Bio")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
@@ -120,11 +124,12 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool?>("Gender")
-                        .HasColumnType("bit");
+                    b.Property<int?>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -153,6 +158,10 @@ namespace web_api_cosmetics_shop.Migrations
                     b.Property<string>("Avatar")
                         .HasColumnType("ntext");
 
+                    b.Property<string>("Bio")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
@@ -165,11 +174,12 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool?>("Gender")
-                        .HasColumnType("bit");
+                    b.Property<int?>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<string>("Password")
                         .IsRequired()

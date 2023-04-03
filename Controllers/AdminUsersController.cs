@@ -5,6 +5,7 @@ using System.Security.Claims;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.AdminService;
+using web_api_cosmetics_shop.Services.RoleService;
 
 namespace web_api_cosmetics_shop.Controllers
 {
@@ -13,15 +14,25 @@ namespace web_api_cosmetics_shop.Controllers
     public class AdminUsersController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly IRoleService _roleService;
 
-        public AdminUsersController(IAdminService adminService)
+        public AdminUsersController(IAdminService adminService, IRoleService roleService)
         {
             _adminService = adminService;
+            _roleService = roleService;
         }
 
         [NonAction]
-        private AdminUserDTO ConvertToAdminUserDto(AdminUser adminUser)
+        private async Task<AdminUserDTO> ConvertToAdminUserDto(AdminUser adminUser)
         {
+            var adminRoles = await _roleService.GetAdminRoles(adminUser);
+
+            List<RoleDTO> adminRolesDto = new List<RoleDTO>();
+            foreach (var item in adminRoles)
+            {
+                adminRolesDto.Add(_roleService.ConvertToRoleDto(item));
+            }
+
             return new AdminUserDTO()
             {
                 AdminUserId = adminUser.AdminUserId,
@@ -33,19 +44,21 @@ namespace web_api_cosmetics_shop.Controllers
                 Bio = adminUser.Bio,
                 Gender = adminUser.Gender,
                 BirthDate = adminUser.BirthDate,
-                CreatedAt = adminUser.CreatedAt
+                CreatedAt = adminUser.CreatedAt,
+                Roles = adminRolesDto
             };
         }
 
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllAdminUsers()
         {
             var adminUsers = await _adminService.GetAllAdmins();
             List<AdminUserDTO> adminUsersList = new List<AdminUserDTO>();
             foreach (var item in adminUsers)
             {
-                adminUsersList.Add(ConvertToAdminUserDto(item));
+                adminUsersList.Add(await ConvertToAdminUserDto(item));
             }
 
             return Ok(new ResponseDTO()
@@ -73,7 +86,7 @@ namespace web_api_cosmetics_shop.Controllers
 
             return Ok(new ResponseDTO()
             {
-                Data = ConvertToAdminUserDto(currentAdmin),
+                Data = await ConvertToAdminUserDto(currentAdmin),
             });
         }
 
@@ -82,7 +95,7 @@ namespace web_api_cosmetics_shop.Controllers
         [Authorize]
         public async Task<IActionResult> GetAdminUser([FromRoute] string? id)
         {
-            if(string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id))
             {
                 return BadRequest();
             }
@@ -95,7 +108,7 @@ namespace web_api_cosmetics_shop.Controllers
 
             return Ok(new ResponseDTO()
             {
-                Data = ConvertToAdminUserDto(existAdmin),
+                Data = await ConvertToAdminUserDto(existAdmin),
             });
         }
 
@@ -186,7 +199,7 @@ namespace web_api_cosmetics_shop.Controllers
                     return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
 
-                var adminRoles = await _adminService.GetAdminRoles(loggedAdmin);
+                var adminRoles = await _roleService.GetAdminRoles(loggedAdmin);
 
                 string token = _adminService.GenerateToken(loggedAdmin, adminRoles);
 
@@ -237,7 +250,7 @@ namespace web_api_cosmetics_shop.Controllers
                     BirthDate = adminUserDto.BirthDate,
                 };
 
-                if(currentAdmin.Email != updateAdmin.Email ||
+                if (currentAdmin.Email != updateAdmin.Email ||
                     currentAdmin.PhoneNumber != updateAdmin.PhoneNumber ||
                     currentAdmin.FullName != updateAdmin.FullName ||
                     currentAdmin.Avatar != updateAdmin.Avatar ||
@@ -255,12 +268,13 @@ namespace web_api_cosmetics_shop.Controllers
 
                     return Ok(new ResponseDTO()
                     {
-                        Data = ConvertToAdminUserDto(updatedAdmin)
+                        Data = await ConvertToAdminUserDto(updatedAdmin)
                     });
-                } else
+                }
+                else
                 {
                     return StatusCode(
-                        StatusCodes.Status304NotModified, 
+                        StatusCodes.Status304NotModified,
                         new ErrorDTO() { Title = "not modified", Status = 304 });
                 }
             }
@@ -268,6 +282,76 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
             }
+        }
+
+        [HttpPut("account/{id?}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateAdminUserRole(string? id, AdminUserDTO adminUserDto)
+        {
+            if (string.IsNullOrEmpty(id) || adminUserDto == null)
+            {
+                return BadRequest();
+            }
+
+            var existAdmin = await _adminService.GetAdminById(id);
+            if (existAdmin == null)
+            {
+                return NotFound();
+            }
+
+            var existAdminRoles = await _roleService.GetAdminRoles(existAdmin);
+            var existAdminRolesId = existAdminRoles.Select(r => r.RoleId).ToList();
+
+            var newAdminRoles = adminUserDto.Roles ?? new List<RoleDTO>();
+            var newAdminRolesId = newAdminRoles.Select(r => r.RoleId).ToList();
+
+            try
+            {
+                // Delete list: in existAdminRoles but not in newAdminRoles
+                foreach (var item in existAdminRoles)
+                {
+                    if(!newAdminRolesId.Contains(item.RoleId))
+                    {
+                        var removeResult = await _roleService.RemoveAdminRole(existAdmin, item);
+                        if(removeResult == null)
+                        {
+                            return StatusCode(
+                                    StatusCodes.Status500InternalServerError,
+                                    new ErrorDTO() { Title = "can not remove role", Status = 500 });
+                        }
+                    }
+                }
+
+                // Add list: in newAdminRoles but not in existAdminRoles
+                foreach (var item in newAdminRoles)
+                {
+                    if(!existAdminRolesId.Contains(item.RoleId))
+                    {
+                        var newAdminRole = new AdminRole()
+                        {
+                            AdminUserId = existAdmin.AdminUserId,
+                            RoleId = item.RoleId,
+                        };
+
+                        var createdResult = await _roleService.AddAdminRole(newAdminRole);
+                        if(createdResult == null)
+                        {
+                            return StatusCode(
+                                    StatusCodes.Status500InternalServerError,
+                                    new ErrorDTO() { Title = "can not add role", Status = 500 });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
+            }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = adminUserDto
+            });
         }
     }
 }
