@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Win32;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
+using web_api_cosmetics_shop.Services.AddressService;
+using web_api_cosmetics_shop.Services.PaymentMethodService;
 using web_api_cosmetics_shop.Services.UserService;
 
 namespace web_api_cosmetics_shop.Controllers
@@ -12,14 +15,51 @@ namespace web_api_cosmetics_shop.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        public UsersController(IUserService userService)
+        private readonly IAddressService _addressService;
+        private readonly IPaymentMethodService _paymentMethodService;
+        public UsersController(IUserService userService, IAddressService addressService, IPaymentMethodService paymentMethodService)
         {
+            _paymentMethodService=paymentMethodService;
+            _addressService = addressService;
             _userService = userService;
         }
 
         [NonAction]
-        private AppUserDTO ConvertToAppUserDto(AppUser appUser)
+        private async Task<AppUserDTO> ConvertToAppUserDto(AppUser appUser)
         {
+            //Get User Adresses
+            var userAddresses = await _addressService.GetUserAddresses(appUser.UserId);
+            List<AddressDTO> addressesDtos = new List<AddressDTO>();
+            foreach (var address in userAddresses)
+            {
+                var addressDto = new AddressDTO()
+                {
+                    FullName= address.FullName,
+                    City= address.City,
+                    District= address.District,
+                    Ward= address.Ward,
+                    AddressLine= address.AddressLine,
+                    PhoneNumber= address.PhoneNumber,
+                    IsDefault= address.IsDefault,
+                };
+                addressesDtos.Add(addressDto);
+            }
+            //Get user payment methods
+            var userPaymentMethods = await _paymentMethodService.GetUserPaymentMethods(appUser.UserId);
+            List<PaymentMethodDTO> paymentMethodDtos = new List<PaymentMethodDTO>();
+            foreach (var paymentMethod in userPaymentMethods)
+            {
+                var paymentMethodDto = new PaymentMethodDTO()
+                {
+                    Provider = paymentMethod.Provider,
+                    AccountNumber = paymentMethod.AccountNumber,
+                    ExpiryDate = paymentMethod.ExpiryDate,
+                    IsDefault = paymentMethod.IsDefault,
+                    PaymentTypeId = paymentMethod.PaymentTypeId,
+                 
+                };
+                paymentMethodDtos.Add(paymentMethodDto);
+            }
             return new AppUserDTO()
             {
                 UserId = appUser.UserId,
@@ -31,7 +71,9 @@ namespace web_api_cosmetics_shop.Controllers
                 Bio = appUser.Bio,
                 Gender = appUser.Gender,
                 BirthDate = appUser.BirthDate,
-                CreatedAt = appUser.CreatedAt
+                CreatedAt = appUser.CreatedAt,
+                Addresses = addressesDtos,
+				PaymentMethods = paymentMethodDtos
             };
         }
 
@@ -43,7 +85,7 @@ namespace web_api_cosmetics_shop.Controllers
             List<AppUserDTO> users = new List<AppUserDTO>();
             foreach (var user in allUsers)
             {
-                users.Add(ConvertToAppUserDto(user));
+                users.Add( await ConvertToAppUserDto(user));
             }
 
             return Ok(new ResponseDTO()
@@ -71,7 +113,7 @@ namespace web_api_cosmetics_shop.Controllers
 
             return Ok(new ResponseDTO()
             {
-                Data = ConvertToAppUserDto(currentUser)
+                Data = await ConvertToAppUserDto(currentUser)
             });
         }
 

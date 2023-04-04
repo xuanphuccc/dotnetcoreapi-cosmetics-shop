@@ -9,7 +9,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 		// Get
 		Task<List<Product>> GetAllProducts();
 		Task<Product> GetProductById(int productId);
-		Task<List<ProductCategory>> GetAllCategories(Product product);
+		Task<List<ProductCategory>> getProductCategories(Product product);
 		Task<List<ProductItem>> GetAllItems(Product product);
 		Task<ProductItem> GetItem(int productItemId);
 		Task<List<ProductConfiguration>> GetConfigurations(ProductItem product);

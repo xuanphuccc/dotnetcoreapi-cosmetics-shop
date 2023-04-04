@@ -91,7 +91,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return product!;
 		}
 
-		public async Task<List<ProductCategory>> GetAllCategories(Product product)
+		public async Task<List<ProductCategory>> getProductCategories(Product product)
 		{
 			var categories = await _context.ProductCategories.Where(c => c.ProductId == product.ProductId).ToListAsync();
 			return categories;
@@ -217,7 +217,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 		public async Task<ProductDTO> ConvertToProductDtoAsync(Product product, int itemId = 0)
 		{
 			// Getting Product Categories
-			var categoriesId = (await GetAllCategories(product))
+			var categoriesId = (await getProductCategories(product))
 								.Select(c => { return c.CategoryId != null ? c.CategoryId.Value : 0; })
 								.ToList();
 
