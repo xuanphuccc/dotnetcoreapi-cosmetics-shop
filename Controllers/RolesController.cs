@@ -104,7 +104,7 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
-            var existRole = await _roleService.GetRoleById(roleDto.RoleId);
+            var existRole = await _roleService.GetRoleById(id.Value);
             if (existRole == null)
             {
                 return NotFound();
