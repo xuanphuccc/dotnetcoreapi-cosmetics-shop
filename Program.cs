@@ -18,6 +18,7 @@ using web_api_cosmetics_shop.Services.ProviderService;
 using System.Text;
 using web_api_cosmetics_shop.Services.AdminService;
 using web_api_cosmetics_shop.Services.UserService;
+using web_api_cosmetics_shop.Services.RoleService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +70,7 @@ builder.Services.AddScoped<IProviderService, ProviderService>();
 
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 // Add Cors
 builder.Services.AddCors(options =>
