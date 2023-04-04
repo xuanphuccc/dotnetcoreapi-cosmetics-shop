@@ -37,5 +37,7 @@ namespace web_api_cosmetics_shop.Models.DTO
         public DateTime? BirthDate { get; set; }
 
         public DateTime? CreatedAt { get; set; }
+
+        public List<RoleDTO>? Roles { get; set; }
     }
 }
