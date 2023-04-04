@@ -63,6 +63,7 @@ namespace web_api_cosmetics_shop.Controllers
             return new AppUserDTO()
             {
                 UserId = appUser.UserId,
+                Password= appUser.Password,
                 UserName = appUser.UserName,
                 Email = appUser.Email,
                 PhoneNumber = appUser.PhoneNumber,
