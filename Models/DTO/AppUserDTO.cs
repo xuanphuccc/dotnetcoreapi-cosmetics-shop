@@ -35,7 +35,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 
         public DateTime? CreatedAt { get; set; }
         public List<AddressDTO> Addresses { get; set; }
-        public List<PaymentMethodDTO> paymentMethods { get; set; }
+        public List<PaymentMethodDTO> PaymentMethods { get; set; }
 
     }
 }

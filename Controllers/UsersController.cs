@@ -73,7 +73,7 @@ namespace web_api_cosmetics_shop.Controllers
                 BirthDate = appUser.BirthDate,
                 CreatedAt = appUser.CreatedAt,
                 Addresses = addressesDtos,
-                paymentMethods= paymentMethodDtos
+				PaymentMethods = paymentMethodDtos
             };
         }
 
@@ -113,7 +113,7 @@ namespace web_api_cosmetics_shop.Controllers
 
             return Ok(new ResponseDTO()
             {
-                Data = ConvertToAppUserDto(currentUser)
+                Data = await ConvertToAppUserDto(currentUser)
             });
         }
 
