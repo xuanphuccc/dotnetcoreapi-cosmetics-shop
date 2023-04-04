@@ -14,7 +14,6 @@ namespace web_api_cosmetics_shop.Services.AdminService
         Task<AdminUser> GetAdminByUserName(string userName);
         Task<AdminUser> GetAdminByEmail(string email);
         Task<AdminUser> GetAdminById(string userId);
-        Task<List<Role>> GetAdminRoles(AdminUser adminUser);
         Task<List<AdminUser>> GetAllAdmins();
 
         // Update

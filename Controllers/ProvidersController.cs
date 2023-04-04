@@ -130,7 +130,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [HttpDelete("{id?}")]
-        public async Task<IActionResult> RemovProvider([FromRoute] int? id)
+        public async Task<IActionResult> RemoveProvider([FromRoute] int? id)
         {
             if (!id.HasValue)
             {

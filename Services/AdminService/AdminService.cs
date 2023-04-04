@@ -108,15 +108,6 @@ namespace web_api_cosmetics_shop.Services.AdminService
             return adminUser;
         }
 
-        public async Task<List<Role>> GetAdminRoles(AdminUser adminUser)
-        {
-            var adminRoles = await (from adminRole in _context.AdminRoles
-                                    join role in _context.Roles on adminRole.RoleId equals role.RoleId
-                                    where adminRole.AdminUserId == adminUser.AdminUserId
-                                    select role).ToListAsync();
-            return adminRoles;
-        }
-
         // Update
         public async Task<AdminUser> UpdateAdmin(AdminUser adminUser)
         {
