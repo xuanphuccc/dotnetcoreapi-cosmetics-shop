@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.ProductService;
+using web_api_cosmetics_shop.Services.UserService;
 using web_api_cosmetics_shop.Services.WishlistService;
 
 namespace web_api_cosmetics_shop.Controllers
@@ -14,12 +15,15 @@ namespace web_api_cosmetics_shop.Controllers
 	{
 		private readonly IWishlistService _wishlistService;
 		private readonly IProductService _productService;
+		private readonly IUserService _userService;
 		public WishlistsController(
 			IWishlistService wishlistService, 
-			IProductService productService)
+			IProductService productService,
+			IUserService userService)
 		{
 			_wishlistService = wishlistService;
 			_productService = productService;
+			_userService = userService;
 		}
 
 
@@ -72,12 +76,26 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest();
 			}
 
-			// Add wishlist item
-			try
+			// Logged user
+            var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
+            if (currentIdentityUser == null)
+            {
+                return NotFound();
+            }
+
+			// Exist user from database
+            var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            // Add wishlist item
+            try
 			{
 				var newWishlist = new Wishlist()
 				{
-					UserId = wishlistDto.UserId,
+					UserId = currentUser.UserId,
 					ProductId = wishlistDto.ProductId,
 				};
 
