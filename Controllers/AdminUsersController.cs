@@ -168,7 +168,7 @@ namespace web_api_cosmetics_shop.Controllers
                 return Ok(new ResponseDTO()
                 {
                     Data = token,
-                    Expired = DateTime.Now.AddHours(1)
+                    Expired = DateTime.Now.AddHours(4)
                 });
             }
             catch (Exception ex)
@@ -206,7 +206,7 @@ namespace web_api_cosmetics_shop.Controllers
                 return Ok(new ResponseDTO()
                 {
                     Data = token,
-                    Expired = DateTime.Now.AddHours(1)
+                    Expired = DateTime.Now.AddHours(4)
                 });
             }
             catch (Exception ex)
