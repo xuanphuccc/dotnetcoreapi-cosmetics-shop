@@ -41,6 +41,7 @@ namespace web_api_cosmetics_shop.Controllers
                     AddressLine= address.AddressLine,
                     PhoneNumber= address.PhoneNumber,
                     IsDefault= address.IsDefault,
+                    AddressId= address.AddressId,
                 };
                 addressesDtos.Add(addressDto);
             }
@@ -56,6 +57,7 @@ namespace web_api_cosmetics_shop.Controllers
                     ExpiryDate = paymentMethod.ExpiryDate,
                     IsDefault = paymentMethod.IsDefault,
                     PaymentTypeId = paymentMethod.PaymentTypeId,
+                    PaymentMethodId= paymentMethod.PaymentMethodId,
                  
                 };
                 paymentMethodDtos.Add(paymentMethodDto);
@@ -291,7 +293,7 @@ namespace web_api_cosmetics_shop.Controllers
 
                     return Ok(new ResponseDTO()
                     {
-                        Data = ConvertToAppUserDto(updatedUser)
+                        Data = await ConvertToAppUserDto(updatedUser)
                     });
                 }
                 else
