@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Data;
+using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.PaymentMethodService
@@ -70,5 +71,20 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 
 			return existPaymentMethod;
 		}
+		public PaymentMethodDTO ConvertToPaymentMethodDto(PaymentMethod paymentMethod)
+		{
+
+			return new PaymentMethodDTO()
+			{
+				Provider = paymentMethod.Provider,
+				AccountNumber = paymentMethod.AccountNumber,
+				ExpiryDate = paymentMethod.ExpiryDate,
+				IsDefault = paymentMethod.IsDefault,
+				PaymentTypeId = paymentMethod.PaymentTypeId,
+				PaymentMethodId = paymentMethod.PaymentMethodId,
+
+			};
+		}
 	}
+
 }

@@ -33,7 +33,6 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[Required]
 		public bool IsDefault { get; set; }
 
-		[Required]
 		public string? UserId { get; set; }
 	}
 }

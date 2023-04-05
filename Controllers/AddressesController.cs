@@ -5,6 +5,7 @@ using System.Net;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.AddressService;
+using web_api_cosmetics_shop.Services.UserService;
 
 namespace web_api_cosmetics_shop.Controllers
 {
@@ -13,9 +14,11 @@ namespace web_api_cosmetics_shop.Controllers
 	public class AddressesController : ControllerBase
 	{
 		private readonly IAddressService _addressService;
-		public AddressesController(IAddressService addressService)
+		private readonly IUserService _userService;
+		public AddressesController(IAddressService addressService, IUserService userService)
 		{
 			_addressService = addressService;
+			_userService= userService;
 		}
 
 
@@ -61,12 +64,22 @@ namespace web_api_cosmetics_shop.Controllers
 			}
 
 			// ** need to double check the user's id
+			var userIdentity = _userService.GetCurrentUser(HttpContext.User);
+			if(userIdentity== null)
+			{
+				return NotFound();
+			}
+			var currentUser = await _userService.GetUserByUserName(userIdentity.UserName);
+			if (currentUser == null)
+			{
+				return NotFound();
+			}
 			// Add new address
 			try
 			{
 				var newAddress = new Address()
 				{
-					UserId = addressDto.UserId,
+					UserId = currentUser.UserId,
 					FullName = addressDto.FullName,
 					City = addressDto.City,
 					District = addressDto.District,
@@ -95,14 +108,14 @@ namespace web_api_cosmetics_shop.Controllers
 		}
 
 		[HttpPut("{id?}")]
-		public async Task<IActionResult> UpdateAddress([FromRoute] string? id,[FromBody] AddressDTO addressDto)
+		public async Task<IActionResult> UpdateAddress([FromRoute] int? id,[FromBody] AddressDTO addressDto)
 		{
-			if (string.IsNullOrEmpty(id) || addressDto == null)
+			if (!id.HasValue || addressDto == null)
 			{
 				return BadRequest();
 			}
 
-			var existAddress = await _addressService.GetAddress(addressDto.AddressId);
+			var existAddress = await _addressService.GetAddress(id.Value);
 			if(existAddress == null)
 			{
 				return NotFound();

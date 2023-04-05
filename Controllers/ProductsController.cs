@@ -112,7 +112,7 @@ namespace web_api_cosmetics_shop.Controllers
                            //select p;
                            group p by p.ProductId into g
                            select g.FirstOrDefault();
-                //không cần groupby vì so sánh khoảng giá sẽ lấy ra các sản phẩm và bị trùng sản phẩm
+                //groupby vì so sánh khoảng giá sẽ lấy ra các sản phẩm và bị trùng sản phẩm
 
             }
             int totalProducts = products.ToList().Count();// tổng số sản phẩm trên trang
@@ -287,7 +287,7 @@ namespace web_api_cosmetics_shop.Controllers
 
                 // ----- Update Product Categories -----
                 // Get old Categories
-                var oldCategories = await _productService.GetAllCategories(existProduct);
+                var oldCategories = await _productService.getProductCategories(existProduct);
                 var oldCategoriesId = oldCategories.Select(c => c.CategoryId).ToList();
 
                 // Get new Categories id

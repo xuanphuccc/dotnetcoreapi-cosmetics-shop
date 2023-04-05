@@ -1,4 +1,5 @@
-﻿using web_api_cosmetics_shop.Models.Entities;
+﻿using web_api_cosmetics_shop.Models.DTO;
+using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.PaymentMethodService
 {
@@ -17,5 +18,6 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 
 		// Delete
 		Task<int> RemovePaymentMethod(PaymentMethod paymentMethod);
+		PaymentMethodDTO ConvertToPaymentMethodDto(PaymentMethod paymentMethod);
 	}
 }
