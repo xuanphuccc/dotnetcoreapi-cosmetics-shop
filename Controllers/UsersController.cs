@@ -32,17 +32,7 @@ namespace web_api_cosmetics_shop.Controllers
             List<AddressDTO> addressesDtos = new List<AddressDTO>();
             foreach (var address in userAddresses)
             {
-                var addressDto = new AddressDTO()
-                {
-                    FullName= address.FullName,
-                    City= address.City,
-                    District= address.District,
-                    Ward= address.Ward,
-                    AddressLine= address.AddressLine,
-                    PhoneNumber= address.PhoneNumber,
-                    IsDefault= address.IsDefault,
-                    AddressId= address.AddressId,
-                };
+                var addressDto = _addressService.ConvertToAddressDto(address);
                 addressesDtos.Add(addressDto);
             }
             //Get user payment methods
@@ -50,17 +40,9 @@ namespace web_api_cosmetics_shop.Controllers
             List<PaymentMethodDTO> paymentMethodDtos = new List<PaymentMethodDTO>();
             foreach (var paymentMethod in userPaymentMethods)
             {
-                var paymentMethodDto = new PaymentMethodDTO()
-                {
-                    Provider = paymentMethod.Provider,
-                    AccountNumber = paymentMethod.AccountNumber,
-                    ExpiryDate = paymentMethod.ExpiryDate,
-                    IsDefault = paymentMethod.IsDefault,
-                    PaymentTypeId = paymentMethod.PaymentTypeId,
-                    PaymentMethodId= paymentMethod.PaymentMethodId,
-                 
-                };
-                paymentMethodDtos.Add(paymentMethodDto);
+                var paymentMethodDto = _paymentMethodService.ConvertToPaymentMethodDto(paymentMethod);
+
+				paymentMethodDtos.Add(paymentMethodDto);
             }
             return new AppUserDTO()
             {
