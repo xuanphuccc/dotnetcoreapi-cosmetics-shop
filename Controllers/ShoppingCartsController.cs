@@ -4,6 +4,7 @@ using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.ProductService;
 using web_api_cosmetics_shop.Services.ShoppingCartService;
+using web_api_cosmetics_shop.Services.UserService;
 
 namespace web_api_cosmetics_shop.Controllers
 {
@@ -13,11 +14,14 @@ namespace web_api_cosmetics_shop.Controllers
 	{
 		private readonly IShoppingCartService _shoppingCartService;
 		private readonly IProductService _productService;
+		private readonly IUserService _userService;
 		public ShoppingCartsController(
 			IShoppingCartService shoppingCartService,
-			IProductService productService) {
+			IProductService productService,
+			IUserService userService) {
 			_shoppingCartService = shoppingCartService;
 			_productService = productService;
+			_userService = userService;
 		}
 
 		[NonAction]
@@ -103,20 +107,35 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest();
 			}
 
+			// Exist shopping cart
 			var existShoppingCart = await _shoppingCartService.GetShoppingCart(shoppingCartDto.UserId);
 			if(existShoppingCart != null)
 			{
 				shoppingCartDto.CartId = existShoppingCart.CartId;
 			}
 
-			// If the cart does not exist, create a new cart for user
-			if (existShoppingCart == null)
+			// Logged user
+            var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
+            if (currentIdentityUser == null)
+            {
+                return NotFound();
+            }
+
+			// Exist user from database
+            var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            // If the cart does not exist, create a new cart for user
+            if (existShoppingCart == null)
 			{
 				try
 				{
 					var newShoppingCart = new ShoppingCart()
 					{
-						UserId = shoppingCartDto.UserId,
+						UserId = currentUser.UserId,
 					};
 
 					var resultCreateShoppingCart = await _shoppingCartService.AddShoppingCart(newShoppingCart);

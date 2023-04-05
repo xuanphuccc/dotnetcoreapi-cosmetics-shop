@@ -59,7 +59,10 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			}
 
 			existPaymentMethod.Provider = paymentMethod.Provider;
+			existPaymentMethod.CardholderName = paymentMethod.CardholderName;
 			existPaymentMethod.AccountNumber = paymentMethod.AccountNumber;
+			existPaymentMethod.SecurityCode = paymentMethod.SecurityCode;
+			existPaymentMethod.PostalCode = paymentMethod.PostalCode;
 			existPaymentMethod.ExpiryDate = paymentMethod.ExpiryDate;
 			existPaymentMethod.IsDefault = paymentMethod.IsDefault;
 
@@ -71,20 +74,24 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 
 			return existPaymentMethod;
 		}
-		public PaymentMethodDTO ConvertToPaymentMethodDto(PaymentMethod paymentMethod)
-		{
-
-			return new PaymentMethodDTO()
-			{
-				Provider = paymentMethod.Provider,
-				AccountNumber = paymentMethod.AccountNumber,
-				ExpiryDate = paymentMethod.ExpiryDate,
-				IsDefault = paymentMethod.IsDefault,
-				PaymentTypeId = paymentMethod.PaymentTypeId,
-				PaymentMethodId = paymentMethod.PaymentMethodId,
-
-			};
-		}
-	}
+		
+		// Convert
+        public PaymentMethodDTO ConvertToPaymentMethodDto(PaymentMethod paymentMethod)
+        {
+            return new PaymentMethodDTO()
+            {
+                PaymentMethodId = paymentMethod.PaymentMethodId,
+                UserId = paymentMethod.UserId,
+                PaymentTypeId = paymentMethod.PaymentTypeId,
+                Provider = paymentMethod.Provider,
+                CardholderName = paymentMethod.CardholderName,
+                AccountNumber = paymentMethod.AccountNumber,
+                SecurityCode = paymentMethod.SecurityCode,
+                PostalCode = paymentMethod.PostalCode,
+                ExpiryDate = paymentMethod.ExpiryDate,
+                IsDefault = paymentMethod.IsDefault
+            };
+        }
+    }
 
 }

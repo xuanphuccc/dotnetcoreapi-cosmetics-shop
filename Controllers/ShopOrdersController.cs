@@ -7,6 +7,7 @@ using web_api_cosmetics_shop.Services.AddressService;
 using web_api_cosmetics_shop.Services.ProductService;
 using web_api_cosmetics_shop.Services.ShippingMethodService;
 using web_api_cosmetics_shop.Services.ShopOrderService;
+using web_api_cosmetics_shop.Services.UserService;
 
 namespace web_api_cosmetics_shop.Controllers
 {
@@ -18,16 +19,19 @@ namespace web_api_cosmetics_shop.Controllers
 		private readonly IProductService _productService;
 		private readonly IShippingMethodService _shippingMethodService;
 		private readonly IAddressService _addressService;
+		private readonly IUserService _userService;
 		public ShopOrdersController(
 			IShopOrderService shopOrderService,
 			IProductService productService,
 			IShippingMethodService shippingMethodService,
-			IAddressService addressService)
+			IAddressService addressService,
+			IUserService userService)
 		{
 			_shopOrderService = shopOrderService;
 			_productService = productService;
 			_shippingMethodService = shippingMethodService;
 			_addressService = addressService;
+			_userService = userService;
 		}
 
 		[NonAction]
@@ -131,12 +135,26 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest();
 			}
 
-			try
+			// Logged user
+            var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
+            if (currentIdentityUser == null)
+            {
+                return NotFound();
+            }
+
+			// Exist user from database
+            var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            try
 			{
 				var newShopOrder = new ShopOrder()
 				{
 					OrderDate = DateTime.Now,
-					UserId = shopOrderDto.UserId,
+					UserId = currentUser.UserId,
 					PaymentMethodId = shopOrderDto.PaymentMethodId,
 					AddressId = shopOrderDto.AddressId,
 					ShippingMethodId = shopOrderDto.ShippingMethodId,
@@ -202,7 +220,7 @@ namespace web_api_cosmetics_shop.Controllers
                 }
 
 				return CreatedAtAction(nameof(GetUserShopOrders),
-					new { id = createdShopOrder.UserId},
+					new { id = createdShopOrder?.UserId},
 					await ConvertToShopOrderDto(createdShopOrder));
 
 			}
@@ -258,7 +276,7 @@ namespace web_api_cosmetics_shop.Controllers
 				{
 					return StatusCode(
 								StatusCodes.Status500InternalServerError,
-								new ErrorDTO() { Title = "Can not cancel shop order", Status = 500 });
+								new ErrorDTO() { Title = "Can not delete shop order", Status = 500 });
 				}
 			}
 			catch (Exception error)

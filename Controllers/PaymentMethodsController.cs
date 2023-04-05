@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.PaymentMethodService;
+using web_api_cosmetics_shop.Services.UserService;
 
 namespace web_api_cosmetics_shop.Controllers
 {
@@ -11,25 +12,13 @@ namespace web_api_cosmetics_shop.Controllers
 	public class PaymentMethodsController : ControllerBase
 	{
 		private readonly IPaymentMethodService _paymentMethodService;
-		public PaymentMethodsController(IPaymentMethodService paymentMethodService)
+		private readonly IUserService _userService;
+		public PaymentMethodsController(IPaymentMethodService paymentMethodService, IUserService userService)
 		{
 			_paymentMethodService = paymentMethodService;
+			_userService = userService;
 		}
-
-		[NonAction]
-		private PaymentMethodDTO ConvertToPaymentMethodDto(PaymentMethod paymentMethod)
-		{
-			return new PaymentMethodDTO()
-			{
-				PaymentMethodId = paymentMethod.PaymentMethodId,
-				UserId = paymentMethod.UserId,
-				PaymentTypeId = paymentMethod.PaymentTypeId,
-				Provider = paymentMethod.Provider,
-				AccountNumber = paymentMethod.AccountNumber,
-				ExpiryDate = paymentMethod.ExpiryDate,
-				IsDefault = paymentMethod.IsDefault
-			};
-		}
+		
 
 		[HttpGet]
 		public async Task<IActionResult> GetAllPaymentMethods()
@@ -39,7 +28,7 @@ namespace web_api_cosmetics_shop.Controllers
 			List<PaymentMethodDTO> paymentMethodDtos = new List<PaymentMethodDTO>();
             foreach (var item in paymentMethods)
             {
-				paymentMethodDtos.Add(ConvertToPaymentMethodDto(item));
+				paymentMethodDtos.Add(_paymentMethodService.ConvertToPaymentMethodDto(item));
             }
 
             return Ok(paymentMethodDtos);
@@ -57,7 +46,7 @@ namespace web_api_cosmetics_shop.Controllers
 			List<PaymentMethodDTO> userPaymentMethodsList = new List<PaymentMethodDTO>();
             foreach (var item in userPaymentMethods)
             {
-                userPaymentMethodsList.Add(ConvertToPaymentMethodDto(item));
+                userPaymentMethodsList.Add(_paymentMethodService.ConvertToPaymentMethodDto(item));
             }
 
             return Ok(userPaymentMethodsList);
@@ -71,14 +60,29 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest();
 			}
 
-			try
+            var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
+            if (currentIdentityUser == null)
+            {
+                return NotFound();
+            }
+
+            var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            try
 			{
 				var newPaymentMethod = new PaymentMethod()
 				{
-					UserId = paymentMethodDto.UserId,
+					UserId = currentUser.UserId,
 					PaymentTypeId = paymentMethodDto.PaymentTypeId,
 					Provider = paymentMethodDto.Provider,
+					CardholderName = paymentMethodDto.CardholderName,
 					AccountNumber = paymentMethodDto.AccountNumber,
+					SecurityCode = paymentMethodDto.SecurityCode,
+					PostalCode = paymentMethodDto.PostalCode,
 					ExpiryDate = paymentMethodDto.ExpiryDate,
 					IsDefault = paymentMethodDto.IsDefault
 				};
@@ -92,7 +96,7 @@ namespace web_api_cosmetics_shop.Controllers
 
 				return CreatedAtAction(nameof(GetUserPaymentMethods),
 				new { id = createdPaymentMethod.PaymentMethodId },
-				ConvertToPaymentMethodDto(createdPaymentMethod));
+				_paymentMethodService.ConvertToPaymentMethodDto(createdPaymentMethod));
 			}
 			catch (Exception error)
 			{
@@ -119,8 +123,12 @@ namespace web_api_cosmetics_shop.Controllers
 				var newPaymentMethod = new PaymentMethod()
 				{
 					PaymentMethodId = existPaymentMethod.PaymentMethodId,
+					PaymentTypeId = paymentMethodDto.PaymentTypeId,
 					Provider = paymentMethodDto.Provider,
+					CardholderName = paymentMethodDto.CardholderName,
 					AccountNumber = paymentMethodDto.AccountNumber,
+					SecurityCode = paymentMethodDto.SecurityCode,
+					PostalCode = paymentMethodDto.PostalCode,
 					ExpiryDate = paymentMethodDto.ExpiryDate,
 					IsDefault = paymentMethodDto.IsDefault
 				};
@@ -175,7 +183,7 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
 			}
 
-			return Ok(ConvertToPaymentMethodDto(existPaymentMethod));
+			return Ok(_paymentMethodService.ConvertToPaymentMethodDto(existPaymentMethod));
 		}
 	}
 }
