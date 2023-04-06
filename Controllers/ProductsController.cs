@@ -70,7 +70,7 @@ namespace web_api_cosmetics_shop.Controllers
 
         {
 
-            int pageSize = 2;//Số sp trên trang
+            int pageSize = 10;//Số sp trên trang
             var products = _productService.GetAllProductsAsQueryable();
             var providers = _providerService.GetAllProvidersQueryable();
             var productItems = _productService.GetAllProductItemsAsQueryable();
