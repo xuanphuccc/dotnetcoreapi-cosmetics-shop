@@ -205,20 +205,32 @@ namespace web_api_cosmetics_shop.Controllers
             return CreatedAtAction(nameof(GetShoppingCart), new { id = shoppingCartDto.UserId }, shoppingCartDto);
 		}
 
-		[HttpPut("{id?}")]
-		public async Task<IActionResult> UpdateShoppingCart([FromRoute] int? id, [FromBody] ShoppingCartDTO shoppingCartDto)
+		[HttpPut]
+		public async Task<IActionResult> UpdateShoppingCart( [FromBody] ShoppingCartDTO shoppingCartDto)
 		{
 			if(
-				!id.HasValue ||
+				
 				shoppingCartDto == null ||
 				shoppingCartDto.Items == null ||
-				shoppingCartDto.Items.Count == 0 ||
 				shoppingCartDto.UserId == null)
 			{
 				return BadRequest();
 			}
+			// Logged user
+			var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
+			if (currentIdentityUser == null)
+			{
+				return NotFound();
+			}
 
-			var existShoppingCart = await _shoppingCartService.GetShoppingCart(shoppingCartDto.UserId);
+			// Exist user from database
+			var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
+			if (currentUser == null)
+			{
+				return NotFound();
+			}
+
+			var existShoppingCart = await _shoppingCartService.GetShoppingCart(currentUser.UserId);
 			if(existShoppingCart == null)
 			{
 				return NotFound();
