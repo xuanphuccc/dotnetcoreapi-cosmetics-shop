@@ -107,13 +107,6 @@ namespace web_api_cosmetics_shop.Controllers
 				return BadRequest();
 			}
 
-			// Exist shopping cart
-			var existShoppingCart = await _shoppingCartService.GetShoppingCart(shoppingCartDto.UserId);
-			if(existShoppingCart != null)
-			{
-				shoppingCartDto.CartId = existShoppingCart.CartId;
-			}
-
 			// Logged user
             var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
             if (currentIdentityUser == null)
@@ -127,6 +120,13 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 return NotFound();
             }
+
+			// Exist shopping cart
+			var existShoppingCart = await _shoppingCartService.GetShoppingCart(currentUser.UserId);
+			if(existShoppingCart != null)
+			{
+				shoppingCartDto.CartId = existShoppingCart.CartId;
+			}
 
             // If the cart does not exist, create a new cart for user
             if (existShoppingCart == null)

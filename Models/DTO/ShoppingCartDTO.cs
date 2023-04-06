@@ -8,7 +8,6 @@ namespace web_api_cosmetics_shop.Models.DTO
 	{
 		public int CartId { get; set; }
 
-		[Required]
 		public string UserId { get; set; } = string.Empty;
 
 		[Required]
