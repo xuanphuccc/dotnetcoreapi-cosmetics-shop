@@ -12,10 +12,13 @@ namespace web_api_cosmetics_shop.Models.DTO
 
 		public decimal OrderTotal { get; set; }
 
-		[Required]
+        public decimal? ShippingCost { get; set; }
+
+        public decimal? DiscountMoney { get; set; }
+
+        [Required]
 		public string? UserId { get; set; }
 
-		[Required]
 		public int? PaymentMethodId { get; set; }
 
 		[Required]

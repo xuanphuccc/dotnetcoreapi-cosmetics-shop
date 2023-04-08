@@ -14,6 +14,10 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public decimal OrderTotal { get; set; }
 
+        public decimal? ShippingCost { get; set; }
+
+        public decimal? DiscountMoney { get; set; }
+
 		public string? UserId { get; set; }
         [ForeignKey("UserId")]
         public AppUser? AppUser { get; set; }
