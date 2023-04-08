@@ -53,6 +53,7 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 				return null!;
 			}
 
+			existOrderStatus.Name = orderStatus.Name;
 			existOrderStatus.Status = orderStatus.Status;
 
 			var result = await _context.SaveChangesAsync();
