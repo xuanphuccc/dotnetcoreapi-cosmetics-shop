@@ -16,7 +16,7 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 
 		// Update
 		Task<ShoppingCartItem> UpdateShoppingCartItem(ShoppingCartItem shoppingCartItem);
-		Task<ShoppingCartItem> IsExistProductItem(int productItemId);
+		Task<ShoppingCartItem> IsExistProductItem(ShoppingCart shoppingCart, int productItemId);
 		Task<int> IncreaseQtyOfShoppingCartItem(ShoppingCartItem shoppingCartItem, int qty);
 
 		// Remove

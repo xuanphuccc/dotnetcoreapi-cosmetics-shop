@@ -109,7 +109,7 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 				return 0;
 			}
 
-			existShoppingCartItem.Qty = existShoppingCartItem.Qty + qty;
+			existShoppingCartItem.Qty += qty;
 
 			var result = await _context.SaveChangesAsync();
 
@@ -122,9 +122,11 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 			return resultQty;
 		}
 
-		public async Task<ShoppingCartItem> IsExistProductItem(int productItemId)
+		public async Task<ShoppingCartItem> IsExistProductItem(ShoppingCart shoppingCart, int productItemId)
 		{
-			var isExist = await _context.ShoppingCartItems.FirstOrDefaultAsync(ci => ci.ProductItemId == productItemId);
+			var isExist = await _context.ShoppingCartItems.FirstOrDefaultAsync(
+										ci => ci.ProductItemId == productItemId && 
+										ci.CartId == shoppingCart.CartId);
 
 			return isExist!;
 		}
