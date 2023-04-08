@@ -67,7 +67,6 @@ namespace web_api_cosmetics_shop.Controllers
         //filter product
         [HttpGet]
         public async Task<IActionResult> GetProducts([FromQuery] decimal? min, [FromQuery] decimal? max, [FromQuery] string? provider, string? category, [FromQuery] int? page)
-
         {
 
             int pageSize = 10;//Số sp trên trang
@@ -81,14 +80,15 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 page = 1;
             }
-            if (!min.HasValue)
-            {
-                min = 0;
-            }
-            if (!max.HasValue)
-            {
-                max = 10000;
-            }
+
+            //if (!min.HasValue)
+            //{
+            //    min = 0;
+            //}
+            //if (!max.HasValue)
+            //{
+            //    max = 10000;
+            //}
 
             if (!String.IsNullOrEmpty(provider))
             {
@@ -123,7 +123,7 @@ namespace web_api_cosmetics_shop.Controllers
                 var productDto = await _productService.ConvertToProductDtoAsync(product);
                 productsDtos.Add(productDto);
             }
-           
+
             int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize); // tổng số trang
 
 
