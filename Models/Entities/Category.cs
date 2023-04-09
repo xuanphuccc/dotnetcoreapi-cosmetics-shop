@@ -15,7 +15,7 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         public string? Image { get; set; }
 
-        DateTime? CreateAt { get; set; }
+        public DateTime? CreateAt { get; set; }
 
         public int? PromotionId { get; set; }
         [ForeignKey("PromotionId")]

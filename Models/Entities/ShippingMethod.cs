@@ -14,7 +14,7 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public decimal? Price { get; set; }
 
-        DateTime? CreateAt { get; set; }
+        public DateTime? CreateAt { get; set; }
 
         public List<ShopOrder>? ShopOrders { get; set; }
     }

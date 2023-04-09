@@ -20,6 +20,6 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[Required]
 		public DateTime EndDate { get; set; }
 
-        DateTime? CreateAt { get; set; }
+        public DateTime? CreateAt { get; set; }
     }
 }

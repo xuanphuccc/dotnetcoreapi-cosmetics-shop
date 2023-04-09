@@ -33,7 +33,7 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public bool IsDefault { get; set; }
 
-        DateTime? CreateAt { get; set; }
+        public DateTime? CreateAt { get; set; }
 
         public int? PaymentTypeId { get; set; }
         [ForeignKey("PaymentTypeId")]

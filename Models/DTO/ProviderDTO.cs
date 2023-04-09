@@ -10,6 +10,6 @@ namespace web_api_cosmetics_shop.Models.DTO
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        DateTime? CreateAt { get; set; }
+        public DateTime? CreateAt { get; set; }
     }
 }

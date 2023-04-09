@@ -21,7 +21,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[Required]
 		public int Qty { get; set; }
 
-        DateTime? CreateAt { get; set; }
+        public DateTime? CreateAt { get; set; }
 
         [Required]
 		public int CartId { get; set; }

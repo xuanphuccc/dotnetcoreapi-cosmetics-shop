@@ -25,7 +25,7 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public DateTime EndDate { get; set; }
 
-        DateTime? CreateAt { get; set; }
+        public DateTime? CreateAt { get; set; }
 
         // Collection navigation
         public List<Category>? Categories { get; set; }
