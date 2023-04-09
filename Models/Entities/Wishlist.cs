@@ -15,5 +15,7 @@ namespace web_api_cosmetics_shop.Models.Entities
 		public int? ProductId { get; set; }
 		[ForeignKey("ProductId")]
 		public Product? Product { get; set; }
-	}
+
+        DateTime? CreateAt { get; set; }
+    }
 }

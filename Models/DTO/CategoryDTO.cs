@@ -10,6 +10,8 @@ namespace web_api_cosmetics_shop.Models.DTO
 
 		public string? Image { get; set; }
 
-		public int? PromotionId { get; set; }
+        DateTime? CreateAt { get; set; }
+
+        public int? PromotionId { get; set; }
 	}
 }
