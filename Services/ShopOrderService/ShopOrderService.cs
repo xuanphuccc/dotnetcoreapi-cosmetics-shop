@@ -90,7 +90,12 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 				return null!;
 			}
 
-			existOrder.OrderStatusId = 6;
+			var cancelStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.Status.Contains("cancel"));
+
+			if(cancelStatus != null)
+			{
+                existOrder.OrderStatusId = cancelStatus.OrderStatusId;
+            }
 
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
