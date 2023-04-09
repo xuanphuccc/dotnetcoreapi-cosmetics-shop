@@ -31,7 +31,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[Required]
 		public bool IsDefault { get; set; }
 
-		public DateTime CreateAt { get; set; }
+		public DateTime? CreateAt { get; set; }
 
 		public int? PaymentTypeId { get; set; }
 

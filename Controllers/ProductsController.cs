@@ -159,6 +159,7 @@ namespace web_api_cosmetics_shop.Controllers
                     Image = productDto.Image,
                     ProviderId = productDto.ProviderId,
                     IsDisplay = productDto.IsDisplay,
+                    CreateAt = DateTime.Now
                 };
                 var createdProduct = await _productService.AddProduct(product);
                 if (createdProduct == null)

@@ -24,7 +24,8 @@ namespace web_api_cosmetics_shop.Controllers
 			{
 				ShippingMethodId = shippingMethod.ShippingMethodId,
 				Name = shippingMethod.Name,
-				Price = shippingMethod.Price
+				Price = shippingMethod.Price,
+				CreateAt = shippingMethod.CreateAt,
 			};
 
 			return shippingMethodDto;
@@ -79,7 +80,8 @@ namespace web_api_cosmetics_shop.Controllers
 				var newShippingMethod = new ShippingMethod()
 				{
 					Name = shippingMethodDto.Name,
-					Price = shippingMethodDto.Price
+					Price = shippingMethodDto.Price,
+					CreateAt = DateTime.Now,
 				};
 
 				var createdShippingMethod = await _shippingMethodService.AddShippingMethod(newShippingMethod);

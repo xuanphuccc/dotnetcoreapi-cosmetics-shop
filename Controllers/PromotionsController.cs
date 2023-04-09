@@ -67,7 +67,8 @@ namespace web_api_cosmetics_shop.Controllers
 					Description = promotion.Description,
 					DiscountRate = promotion.DiscountRate,
 					StartDate = promotion.StartDate,
-					EndDate = promotion.EndDate
+					EndDate = promotion.EndDate,
+					CreateAt = DateTime.Now
 				};
 
 				// Creating Promotion

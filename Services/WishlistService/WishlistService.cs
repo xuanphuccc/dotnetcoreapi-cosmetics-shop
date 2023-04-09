@@ -58,7 +58,8 @@ namespace web_api_cosmetics_shop.Services.WishlistService
 				WishlistId = wishlist.WishlistId,
 				UserId = wishlist.UserId,
 				ProductId = wishlist.ProductId,
-				Product = product
+				Product = product,
+				CreateAt = wishlist.CreateAt
 			};
 		}
 	}

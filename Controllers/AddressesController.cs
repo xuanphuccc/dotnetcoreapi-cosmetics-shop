@@ -87,6 +87,7 @@ namespace web_api_cosmetics_shop.Controllers
 					AddressLine = addressDto.AddressLine,
 					PhoneNumber = addressDto.PhoneNumber,
 					IsDefault = addressDto.IsDefault,
+					CreateAt = DateTime.Now
 				};
 
 				var addResult = await _addressService.AddAddress(newAddress);
