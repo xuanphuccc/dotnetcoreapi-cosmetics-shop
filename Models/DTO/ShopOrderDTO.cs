@@ -16,7 +16,6 @@ namespace web_api_cosmetics_shop.Models.DTO
 
         public decimal? DiscountMoney { get; set; }
 
-        [Required]
 		public string? UserId { get; set; }
 
 		public int? PaymentMethodId { get; set; }
