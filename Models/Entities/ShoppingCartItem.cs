@@ -11,6 +11,7 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public int Qty { get; set; }
 
+        public DateTime? CreateAt { get; set; }
 
         public int? CartId { get; set; }
         [ForeignKey("CartId")]

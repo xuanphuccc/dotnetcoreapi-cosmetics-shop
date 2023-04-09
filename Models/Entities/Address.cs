@@ -35,6 +35,7 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public bool IsDefault { get; set; }
 
+        public DateTime? CreateAt { get; set; }
 
         public string? UserId { get; set; }
         [ForeignKey("UserId")]

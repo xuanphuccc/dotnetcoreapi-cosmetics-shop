@@ -24,6 +24,7 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 ProviderId = provider.ProviderId,
                 Name = provider.Name,
+                CreateAt = provider.CreateAt,
             };
         }
 
@@ -69,7 +70,8 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 var newProvider = new Provider()
                 {
-                    Name = providerDto.Name
+                    Name = providerDto.Name,
+                    CreateAt = DateTime.Now
                 };
 
                 var createdProvider = await _providerService.AddProvider(newProvider);

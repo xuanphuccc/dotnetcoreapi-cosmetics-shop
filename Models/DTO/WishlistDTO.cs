@@ -13,5 +13,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 		public int? ProductId { get; set; }
 
 		public ProductDTO? Product { get; set; }
+
+		public DateTime? CreateAt { get; set; }
 	}
 }

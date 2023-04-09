@@ -97,6 +97,7 @@ namespace web_api_cosmetics_shop.Controllers
 				{
 					UserId = currentUser.UserId,
 					ProductId = wishlistDto.ProductId,
+					CreateAt = DateTime.Now
 				};
 
 				var createdWishList = await _wishlistService.AddWishlist(newWishlist);

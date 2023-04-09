@@ -18,6 +18,8 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[Required]
 		public bool IsDisplay { get; set; }
 
+        public DateTime? CreateAt { get; set; }
+
         public int? ProviderId { get; set; }
 
         [Required]

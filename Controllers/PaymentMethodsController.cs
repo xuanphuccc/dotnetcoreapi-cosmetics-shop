@@ -84,7 +84,8 @@ namespace web_api_cosmetics_shop.Controllers
 					SecurityCode = paymentMethodDto.SecurityCode,
 					PostalCode = paymentMethodDto.PostalCode,
 					ExpiryDate = paymentMethodDto.ExpiryDate,
-					IsDefault = paymentMethodDto.IsDefault
+					IsDefault = paymentMethodDto.IsDefault,
+					CreateAt = DateTime.Now
 				};
 
 				var createdPaymentMethod = await _paymentMethodService.AddPaymentMethod(newPaymentMethod);

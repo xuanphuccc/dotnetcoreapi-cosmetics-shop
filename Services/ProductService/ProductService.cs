@@ -263,7 +263,8 @@ namespace web_api_cosmetics_shop.Services.ProductService
 				IsDisplay = product.IsDisplay,
 				ProviderId = product.ProviderId,
 				CategoriesId = categoriesId,
-				Items = productItemDtos
+				Items = productItemDtos,
+				CreateAt = product.CreateAt
 			};
 
 			return productDto;

@@ -13,5 +13,6 @@ namespace web_api_cosmetics_shop.Models.DTO
 		[Required]
 		public decimal? Price { get; set; }
 
-	}
+        public DateTime? CreateAt { get; set; }
+    }
 }
