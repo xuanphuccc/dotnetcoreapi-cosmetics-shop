@@ -20,5 +20,8 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 
 		// Cancel order
 		Task<ShopOrder> CancelShopOrder(ShopOrder shopOrder);
+
+		// Delivery
+		Task<ShopOrder> DeliveryOrder(ShopOrder shopOrder);
 	}
 }

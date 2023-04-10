@@ -43,9 +43,11 @@ namespace web_api_cosmetics_shop.Models.DTO
 		public string? Image { get; set; }
 
 		[Required]
-		public decimal? Price { get; set; }
+		public decimal Price { get; set; }
 
 		public decimal? CostPrice { get; set; }
+
+		public decimal? DiscountRate { get; set; }
 
 		public int? ProductId { get; set; }
 

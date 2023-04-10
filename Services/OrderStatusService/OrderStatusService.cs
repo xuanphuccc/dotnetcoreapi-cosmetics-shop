@@ -37,7 +37,14 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 			return orderStatus!;
 		}
 
-		public async Task<int> RemoveOrderStatus(OrderStatus orderStatus)
+		public async Task<OrderStatus> GetOrderStatus(string status)
+		{
+			var orderStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.Status.ToLower() == status.ToLower());
+			return orderStatus!;
+		}
+
+
+        public async Task<int> RemoveOrderStatus(OrderStatus orderStatus)
 		{
 			_context.Remove(orderStatus);
 			var result = await _context.SaveChangesAsync();

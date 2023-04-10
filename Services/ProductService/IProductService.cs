@@ -17,6 +17,9 @@ namespace web_api_cosmetics_shop.Services.ProductService
         IQueryable<ProductItem> GetAllProductItemsAsQueryable();
         IQueryable<ProductCategory> GetAllProductCategoriedAsQueryable();
 
+        // Get product item promotions
+        Task<List<Promotion>> GetItemPromotions(int productItemId);
+
 
         // Add
         Task<Product> AddProduct(Product product);

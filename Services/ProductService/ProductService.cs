@@ -117,9 +117,22 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			return configurations;
 		}
 
+        // Get product item promotions
+        public async Task<List<Promotion>> GetItemPromotions(int productItemId)
+        {
+            var promotions = await (from pi in _context.ProductItems
+                                    join p in _context.Products on pi.ProductId equals p.ProductId
+                                    join pc in _context.ProductCategories on p.ProductId equals pc.ProductId
+                                    join c in _context.Categories on pc.CategoryId equals c.CategoryId
+                                    join pr in _context.Promotions on c.PromotionId equals pr.PromotionId
+                                    where pi.ProductItemId == productItemId
+                                    select pr).ToListAsync();
+            return promotions;
+        }
 
-		//---------- Remove ----------
-		public async Task<int> RemoveProduct(Product product)
+
+        //---------- Remove ----------
+        public async Task<int> RemoveProduct(Product product)
 		{
 			_context.Remove(product);
 			var result = await _context.SaveChangesAsync();
@@ -233,10 +246,18 @@ namespace web_api_cosmetics_shop.Services.ProductService
 			List<ProductItemDTO> productItemDtos = new List<ProductItemDTO>();
 			foreach (var productItem in productItems)
 			{
-				// Getting Product Options
+				// Get Product Options
 				var productOptionsId = (await GetConfigurations(productItem))
 										.Select(pc => { return pc.ProductOptionId != null ? pc.ProductOptionId.Value : 0; })
 										.ToList();
+
+				// Get product item promotion
+				var promotions = await GetItemPromotions(productItem.ProductItemId);
+				int maxDiscountRate = 0;
+				if(promotions.Count > 0)
+				{
+                    maxDiscountRate = promotions.Max(p => p.DiscountRate);
+                }
 
 				var productItemDto = new ProductItemDTO()
 				{
@@ -247,6 +268,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 					Image = productItem.Image,
 					Price = productItem.Price,
 					CostPrice = productItem.CostPrice,
+					DiscountRate = maxDiscountRate,
 					OptionsId = productOptionsId
 				};
 

@@ -14,6 +14,8 @@ namespace web_api_cosmetics_shop.Models.Entities
         [Required]
         public decimal Price { get; set; }
 
+        public int? DiscountRate { get; set; }
+
         public int? OrderId { get; set; }
         [ForeignKey("OrderId")]
         public ShopOrder? ShopOrder { get; set; }
