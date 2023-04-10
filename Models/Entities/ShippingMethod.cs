@@ -12,7 +12,7 @@ namespace web_api_cosmetics_shop.Models.Entities
         public string Name { get; set; } = string.Empty;
 
         [Required]
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
 
         public DateTime? CreateAt { get; set; }
 

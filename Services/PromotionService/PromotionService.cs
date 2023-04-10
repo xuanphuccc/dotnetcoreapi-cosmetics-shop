@@ -12,12 +12,14 @@ namespace web_api_cosmetics_shop.Services.PromotionService
             _context = context;
         }
 
+        // Get all promotions
         public async Task<List<Promotion>> GetPromotionsAsync()
         {
             var allPromotions = await _context.Promotions.ToListAsync();
             return allPromotions;
         }
 
+        // Get promotion by id
         public async Task<Promotion> GetPromotionByIdAsync(int id)
         {
             var promotion = await _context.Promotions.FirstOrDefaultAsync(p => p.PromotionId == id);
@@ -29,6 +31,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
             return promotion;
         }
 
+        // Add promotion
         public async Task<Promotion> AddPromotionAsync(Promotion promotion)
         {
             await _context.Promotions.AddAsync(promotion);
@@ -42,6 +45,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
             return promotion;
         }
 
+        // Remove promotion
         public async Task<Promotion> RemovePromotionAsync(Promotion promotion)
         {
             _context.Promotions.Remove(promotion);
@@ -54,6 +58,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
             return promotion;
         }
 
+        // Update promotion
         public async Task<Promotion> UpdatePromotionAsync(Promotion promotion)
         {
             var existPromotion = await _context.Promotions.FirstOrDefaultAsync(p => p.PromotionId == promotion.PromotionId);

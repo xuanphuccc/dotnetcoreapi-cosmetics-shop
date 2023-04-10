@@ -7,6 +7,7 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 		// Get
 		Task<List<OrderStatus>> GetAllOrderStatuses();
 		Task<OrderStatus> GetOrderStatus(int orderStatusId);
+		Task<OrderStatus> GetOrderStatus(string status);
 
 		// Add
 		Task<OrderStatus> AddOrderStatus(OrderStatus orderStatus);

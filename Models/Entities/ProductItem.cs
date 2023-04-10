@@ -18,7 +18,7 @@ namespace web_api_cosmetics_shop.Models.Entities
         public string? Image { get; set; }
 
         [Required]
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
 
         public decimal? CostPrice { get; set; }
 

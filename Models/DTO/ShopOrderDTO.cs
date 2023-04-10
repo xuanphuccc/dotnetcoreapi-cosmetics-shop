@@ -25,10 +25,8 @@ namespace web_api_cosmetics_shop.Models.DTO
 
 		public AddressDTO? Address { get; set; }
 
-		[Required]
 		public int? ShippingMethodId { get; set; }
 
-		[Required]
 		public int? OrderStatusId { get; set; }
 
 		public List<OrderItemDTO>? Items { get; set; }
@@ -43,10 +41,12 @@ namespace web_api_cosmetics_shop.Models.DTO
 
 		public decimal Price { get; set; }
 
-		public int? OrderId { get; set; }
+        public int? DiscountRate { get; set; }
+
+        public int? OrderId { get; set; }
 
 		[Required]
-		public int? ProductItemId { get; set; }
+		public int ProductItemId { get; set; }
 
 		public ProductDTO? Product { get; set; }
 	}

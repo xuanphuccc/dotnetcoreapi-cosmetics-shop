@@ -12,6 +12,7 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 			_context = context;
 		}
 
+		// Add
 		public async Task<OrderItem> AddOrderItem(OrderItem orderItem)
 		{
 			await _context.OrderItems.AddAsync(orderItem);
@@ -36,6 +37,7 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 			return shopOrder;
 		}
 
+		// Get
 		public async Task<List<ShopOrder>> GetAllShopOrders()
 		{
 			var allShopOrders = await _context.ShopOrders.ToListAsync();
@@ -72,9 +74,8 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 			return userShopOrders;
 		}
 
-
-		// Remove
-		public async Task<int> RemoveShopOrder(ShopOrder shopOrder)
+        // Remove
+        public async Task<int> RemoveShopOrder(ShopOrder shopOrder)
 		{
 			_context.Remove(shopOrder);
 			var result = await _context.SaveChangesAsync();
@@ -90,7 +91,19 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 				return null!;
 			}
 
-			var cancelStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.Status.Contains("cancel"));
+			var cancelStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.Status.ToLower() == "canceled");
+			if(cancelStatus == null)
+			{
+                var newCancelOrderStatus = new OrderStatus()
+                {
+                    Name = "Đã huỷ đơn hàng",
+                    Status = "canceled"
+                };
+
+				await _context.OrderStatuses.AddAsync(newCancelOrderStatus);
+				await _context.SaveChangesAsync();
+				cancelStatus = newCancelOrderStatus;
+            }
 
 			if(cancelStatus != null)
 			{
@@ -106,5 +119,41 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 			return existOrder;
 		}
 
+		// Delivery order
+		public async Task<ShopOrder> DeliveryOrder(ShopOrder shopOrder)
+		{
+            var existOrder = await GetShopOrder(shopOrder.OrderId);
+            if (existOrder == null)
+            {
+                return null!;
+            }
+
+            var deliveryStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.Status.ToLower() == "delivery");
+            if (deliveryStatus == null)
+            {
+                var newDeliveryStatus = new OrderStatus()
+                {
+                    Name = "Đang giao hàng",
+                    Status = "delivery"
+                };
+
+                await _context.OrderStatuses.AddAsync(newDeliveryStatus);
+                await _context.SaveChangesAsync();
+                deliveryStatus = newDeliveryStatus;
+            }
+
+            if (deliveryStatus != null)
+            {
+                existOrder.OrderStatusId = deliveryStatus.OrderStatusId;
+            }
+
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+            {
+                return null!;
+            }
+
+            return existOrder;
+        }
     }
 }
