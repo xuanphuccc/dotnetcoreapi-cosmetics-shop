@@ -94,12 +94,12 @@ namespace web_api_cosmetics_shop.Controllers
 			var product = await _productService.GetProductById(wishlistDto.ProductId!.Value);
 			if(product == null)
 			{
-                return BadRequest(new ErrorDTO() { Title = "product not found", Status = 400 });
+                return NotFound(new ErrorDTO() { Title = "product not found", Status = 400 });
             }
 
 			// Check exist wishlist
 			var existWishlist = await _wishlistService.ExistWishlist(currentUser.UserId, product.ProductId);
-            if (product != null)
+            if (existWishlist != null)
             {
                 return BadRequest(new ErrorDTO() { Title = "wishlist already exist", Status = 400 });
             }
