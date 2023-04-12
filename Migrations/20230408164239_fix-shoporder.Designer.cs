@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using web_api_cosmetics_shop.Data;
 
@@ -11,9 +12,10 @@ using web_api_cosmetics_shop.Data;
 namespace web_api_cosmetics_shop.Migrations
 {
     [DbContext(typeof(CosmeticsShopContext))]
-    partial class CosmeticsShopContextModelSnapshot : ModelSnapshot
+    [Migration("20230408164239_fix-shoporder")]
+    partial class fixshoporder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,9 +41,6 @@ namespace web_api_cosmetics_shop.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("District")
                         .IsRequired()
@@ -209,9 +208,6 @@ namespace web_api_cosmetics_shop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"), 1L, 1);
 
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
@@ -237,9 +233,6 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderItemId"), 1L, 1);
-
-                    b.Property<int?>("DiscountRate")
-                        .HasColumnType("int");
 
                     b.Property<int?>("OrderId")
                         .HasColumnType("int");
@@ -305,9 +298,6 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime2");
 
@@ -368,9 +358,6 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"), 1L, 1);
-
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("ntext");
@@ -460,7 +447,8 @@ namespace web_api_cosmetics_shop.Migrations
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
+                        .IsRequired()
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("ProductId")
@@ -535,9 +523,6 @@ namespace web_api_cosmetics_shop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PromotionId"), 1L, 1);
 
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .HasColumnType("ntext");
 
@@ -567,9 +552,6 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProviderId"), 1L, 1);
-
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -607,15 +589,13 @@ namespace web_api_cosmetics_shop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShippingMethodId"), 1L, 1);
 
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
+                        .IsRequired()
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("ShippingMethodId");
@@ -702,9 +682,6 @@ namespace web_api_cosmetics_shop.Migrations
                     b.Property<int?>("CartId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("ProductItemId")
                         .HasColumnType("int");
 
@@ -768,9 +745,6 @@ namespace web_api_cosmetics_shop.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WishlistId"), 1L, 1);
-
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");

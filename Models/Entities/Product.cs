@@ -1,18 +1,32 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace asp_dotnet_core_web_api_cosmetics_shop.Models.Entities
+namespace web_api_cosmetics_shop.Models.Entities
 {
     public class Product
     {
         [Key]
         public int ProductId { get; set; }
 
-        [StringLength(256)]
-        public string? Name { get; set; }
+        [StringLength(450)]
+        [Required]
+        public string Name { get; set; } = string.Empty;
 
         [Column(TypeName = "ntext")]
         public string? Description { get; set; }
         public string? Image { get; set; }
+
+        [Required]
+        public bool IsDisplay { get; set; }
+
+        public DateTime? CreateAt { get; set; }
+
+        public int? ProviderId { get; set; }
+        [ForeignKey("ProviderId")]
+        public Provider? Provider { get; set; }
+
+        public List<ProductItem>? ProductItems { get; set; }
+        public List<ProductCategory>? ProductCategories { get; set; }
+        public List<Wishlist>? Wishlists { get; set; }
     }
 }

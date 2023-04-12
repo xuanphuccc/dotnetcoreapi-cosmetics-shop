@@ -9,10 +9,10 @@
     }
   },
   "profiles": {
-    "asp_dotnet_core_web_api_cosmetics_shop": {
+    "web_api_cosmetics_shop": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7044;http://localhost:5053",
       "environmentVariables": {
