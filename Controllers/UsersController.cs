@@ -155,7 +155,7 @@ namespace web_api_cosmetics_shop.Controllers
                     Avatar = appUserDto.Avatar,
                     Gender = appUserDto.Gender,
                     BirthDate = appUserDto.BirthDate,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                 };
 
                 var registedUser = await _userService.Register(newUser, appUserDto.Password);

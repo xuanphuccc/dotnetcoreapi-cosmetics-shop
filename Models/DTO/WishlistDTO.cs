@@ -6,7 +6,6 @@ namespace web_api_cosmetics_shop.Models.DTO
 	{
 		public int WishlistId { get; set; }
 
-		[Required]
 		public string? UserId { get; set; }
 
 		[Required]

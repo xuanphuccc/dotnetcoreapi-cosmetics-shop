@@ -13,9 +13,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
 		Task<List<ProductItem>> GetAllItems(Product product);
 		Task<ProductItem> GetItem(int productItemId);
 		Task<List<ProductConfiguration>> GetConfigurations(ProductItem product);
-        IQueryable<Product> GetAllProductsAsQueryable();
-        IQueryable<ProductItem> GetAllProductItemsAsQueryable();
-        IQueryable<ProductCategory> GetAllProductCategoriedAsQueryable();
+        
 
         // Get product item promotions
         Task<List<Promotion>> GetItemPromotions(int productItemId);
@@ -40,5 +38,18 @@ namespace web_api_cosmetics_shop.Services.ProductService
 
 		// Convert
 		Task<ProductDTO> ConvertToProductDtoAsync(Product product, int itemId = 0);
-	}
+
+
+        // Filter
+        IQueryable<Product> FillterAllProducts();
+        
+		IQueryable<Product> FilterByProviderName(IQueryable<Product> products, string providerName);
+		IQueryable<Product> FilterByCategoryName(IQueryable<Product> products, string categoryName);
+		IQueryable<Product> FilterByPriceRange(IQueryable<Product> products, decimal min, decimal max);
+
+        IQueryable<Product> FilterSearch(IQueryable<Product> products, string search);
+        IQueryable<Product> FilterSortByCreationTime(IQueryable<Product> products, bool isDesc = true);
+        IQueryable<Product> FilterSortByName(IQueryable<Product> products, bool isDesc = false);
+        IQueryable<Product> FilterByStatus(IQueryable<Product> products, string status);
+    }
 }

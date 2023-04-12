@@ -30,10 +30,6 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 			return category;
 		}
 		
-        public IQueryable<Category> GetAllCategoriesQueryable()
-		{
-			return _context.Categories.AsQueryable();
-		}
         public async Task<Category> AddCategory(Category category)
 		{
 			await _context.AddAsync(category);

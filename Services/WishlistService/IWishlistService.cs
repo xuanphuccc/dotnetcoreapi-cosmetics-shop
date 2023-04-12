@@ -10,6 +10,8 @@ namespace web_api_cosmetics_shop.Services.WishlistService
 		Task<List<Wishlist>> GetUserWishlist(string userId);
 		Task<Wishlist> GetWishlist(int wishlistId);
 
+		Task<Wishlist> ExistWishlist(string userId, int productId);
+
 		// Add
 		Task<Wishlist> AddWishlist(Wishlist wishlist);
 

@@ -38,12 +38,6 @@ namespace web_api_cosmetics_shop.Services.ProviderService
             return provider!;
         }
 
-        public IQueryable<Provider> GetAllProvidersQueryable()
-        {
-            var provider = _context.Providers;
-            return provider;
-        }
-
         public async Task<int> RemoveProvider(Provider provider)
         {
             _context.Remove(provider);

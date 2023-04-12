@@ -17,14 +17,9 @@ namespace web_api_cosmetics_shop.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
-        private readonly IProviderService _providerService;
-        private readonly ICategoryService _categoryService;
-        public ProductsController(IProductService productService, IProviderService providerService, ICategoryService categoryService)
+        public ProductsController(IProductService productService)
         {
             _productService = productService;
-            _providerService = providerService;
-            _categoryService = categoryService;
-
         }
 
         // ---------- Get Product ----------
@@ -49,74 +44,85 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
 
-        //// ---------- Get All Product ----------
-        //[HttpGet]
-        //public async Task<IActionResult> GetProducts()
-        //{
-        //	var products = await _productService.GetAllProducts();
-
-        //	List<ProductDTO> productsDtos = new List<ProductDTO>();
-        //	foreach(var product in products)
-        //	{
-        //		var productDto = await _productService.ConvertToProductDtoAsync(product);
-        //		productsDtos.Add(productDto);
-        //	}
-
-        //	return Ok(productsDtos);
-        //}
-        //filter product
+        // ---------- Get All Product ----------
         [HttpGet]
-        public async Task<IActionResult> GetProducts([FromQuery] decimal? min, [FromQuery] decimal? max, [FromQuery] string? provider, string? category, [FromQuery] int? page)
+        public async Task<IActionResult> GetProducts(
+            [FromQuery] decimal? min,
+            [FromQuery] decimal? max,
+            [FromQuery] string? provider,
+            [FromQuery] string? category,
+            [FromQuery] int? page,
+            [FromQuery] string? search,
+            [FromQuery] string? sort,
+            [FromQuery] string? status)
         {
-
-            int pageSize = 10;//Số sp trên trang
-            var products = _productService.GetAllProductsAsQueryable();
-            var providers = _providerService.GetAllProvidersQueryable();
-            var productItems = _productService.GetAllProductItemsAsQueryable();
-            var categorises = _categoryService.GetAllCategoriesQueryable();
-            var productCategory = _productService.GetAllProductCategoriedAsQueryable();
+            int pageSize = 10;
+            var products = _productService.FillterAllProducts();
 
             if (!page.HasValue)
             {
                 page = 1;
             }
 
-            //if (!min.HasValue)
-            //{
-            //    min = 0;
-            //}
-            //if (!max.HasValue)
-            //{
-            //    max = 10000;
-            //}
-
+            // Filter by provider name
             if (!String.IsNullOrEmpty(provider))
             {
-                products = from p in products join pr in providers on p.ProviderId equals pr.ProviderId where pr.Name == provider select p;
+                products = _productService.FilterByProviderName(products, provider);
             }
+
+            // Filter by category name
             if (!String.IsNullOrEmpty(category))
             {
-                products = from p in products
-                           join pc in productCategory on p.ProductId equals pc.ProductId
-                           join c in categorises on pc.CategoryId equals c.CategoryId
-                           where c.Name == category
-                           select p;
-                //không cần groupby vì so sánh trực tiếp
-
+                products = _productService.FilterByCategoryName(products, category);
             }
+
+            // Filter by price range
             if (min.HasValue && max.HasValue)
             {
-                products = from p in products
-                           join pi in productItems on p.ProductId equals pi.ProductId
-                           where pi.Price >= min.Value && pi.Price <= max.Value
-                           //select p;
-                           group p by p.ProductId into g
-                           select g.FirstOrDefault();
-                //groupby vì so sánh khoảng giá sẽ lấy ra các sản phẩm và bị trùng sản phẩm
-
+                products = _productService.FilterByPriceRange(products, min.Value, max.Value);
             }
-            int totalProducts = products.ToList().Count();// tổng số sản phẩm trên trang
+
+            // Search products
+            if (!string.IsNullOrEmpty(search))
+            {
+                products = _productService.FilterSearch(products, search);
+            }
+
+            // Filter by status (in stock / sold out)
+            if (!string.IsNullOrEmpty(status))
+            {
+                products = _productService.FilterByStatus(products, status);
+            }
+
+            // Sort products
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort)
+                {
+                    case "creationTimeDesc":
+                        products = _productService.FilterSortByCreationTime(products, isDesc: true);
+                        break;
+                    case "creationTimeAsc":
+                        products = _productService.FilterSortByCreationTime(products, isDesc: false);
+                        break;
+                    case "nameDesc":
+                        products = _productService.FilterSortByName(products, isDesc: true);
+                        break;
+                    case "nameAsc":
+                        products = _productService.FilterSortByName(products, isDesc: false);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // tổng số sản phẩm trên trang
+            int totalProducts = products.ToList().Count();
             var result = products.Skip((page.Value - 1) * pageSize).Take(pageSize).ToList();
+            // tổng số trang
+            int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+            // Convert to data tranfer object
             List<ProductDTO> productsDtos = new List<ProductDTO>();
             foreach (var product in result)
             {
@@ -124,16 +130,12 @@ namespace web_api_cosmetics_shop.Controllers
                 productsDtos.Add(productDto);
             }
 
-            int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize); // tổng số trang
-
-
             return Ok(new ResponseDTO()
             {
                 Data = productsDtos,
                 TotalPages = totalPages
             });
         }
-
 
         // ---------- Add Product ----------
         [HttpPost]
@@ -159,7 +161,7 @@ namespace web_api_cosmetics_shop.Controllers
                     Image = productDto.Image,
                     ProviderId = productDto.ProviderId,
                     IsDisplay = productDto.IsDisplay,
-                    CreateAt = DateTime.Now
+                    CreateAt = DateTime.UtcNow,
                 };
                 var createdProduct = await _productService.AddProduct(product);
                 if (createdProduct == null)

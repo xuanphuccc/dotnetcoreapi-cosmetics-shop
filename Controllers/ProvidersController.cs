@@ -71,7 +71,7 @@ namespace web_api_cosmetics_shop.Controllers
                 var newProvider = new Provider()
                 {
                     Name = providerDto.Name,
-                    CreateAt = DateTime.Now
+                    CreateAt = DateTime.UtcNow,
                 };
 
                 var createdProvider = await _providerService.AddProvider(newProvider);
