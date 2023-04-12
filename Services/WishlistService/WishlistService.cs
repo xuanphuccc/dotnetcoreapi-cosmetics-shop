@@ -43,7 +43,15 @@ namespace web_api_cosmetics_shop.Services.WishlistService
 			return wishlist!;
 		}
 
-		public async Task<int> RemoveWishlist(Wishlist wishlist)
+        public async Task<Wishlist> ExistWishlist(string userId, int productId)
+		{
+			var wishlist = await _context.Wishlists.FirstOrDefaultAsync(w => w.UserId == userId && w.ProductId == productId);
+
+			return wishlist!;
+		}
+
+
+        public async Task<int> RemoveWishlist(Wishlist wishlist)
 		{
 			_context.Remove(wishlist);
 			var result = await _context.SaveChangesAsync();

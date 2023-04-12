@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.AddressService;
@@ -94,9 +95,49 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllShopOrders()
+        public async Task<IActionResult> GetAllShopOrders(
+            [FromQuery] string? search,
+            [FromQuery] string? sort,
+            [FromQuery] string? status)
         {
-            var allShopOrders = await _shopOrderService.GetAllShopOrders();
+            var allShopOrdersQuery = _shopOrderService.FilterAllShopOrders();
+
+            // Search Order
+            if (!string.IsNullOrEmpty(search))
+            {
+                allShopOrdersQuery = _shopOrderService.FilterSearch(allShopOrdersQuery, search);
+            }
+
+            // Filter order status
+            if(!string.IsNullOrEmpty(status))
+            {
+                allShopOrdersQuery = _shopOrderService.FilterByStatus(allShopOrdersQuery, status);
+            }
+
+            // Sort order
+            if (sort != null)
+            {
+                switch (sort)
+                {
+                    case "creationTimeDesc":
+                        allShopOrdersQuery = _shopOrderService.FilterSortByCreationTime(allShopOrdersQuery, isDesc: true);
+                        break;
+                    case "creationTimeAsc":
+                        allShopOrdersQuery = _shopOrderService.FilterSortByCreationTime(allShopOrdersQuery, isDesc: false);
+                        break;
+                    case "totalDesc":
+                        allShopOrdersQuery = _shopOrderService.FilterSortByTotal(allShopOrdersQuery, isDesc: true);
+                        break;
+                    case "totalAsc":
+                        allShopOrdersQuery = _shopOrderService.FilterSortByTotal(allShopOrdersQuery, isDesc: false);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // Query to database
+            var allShopOrders = await allShopOrdersQuery.ToListAsync();
 
             List<ShopOrderDTO> orders = new List<ShopOrderDTO>();
             foreach (var item in allShopOrders)
@@ -218,7 +259,7 @@ namespace web_api_cosmetics_shop.Controllers
                         // Get max discount rate from promotions
                         var promotions = await _productService.GetItemPromotions(item.ProductItemId);
                         int maxDiscountRate = 0;
-                        if(promotions.Count > 0)
+                        if (promotions.Count > 0)
                         {
                             maxDiscountRate = promotions.Max(p => p.DiscountRate);
                         }
@@ -252,7 +293,7 @@ namespace web_api_cosmetics_shop.Controllers
                     AddressId = shopOrderDto.AddressId,
                     ShippingMethodId = shopOrderDto.ShippingMethodId,
                     OrderStatusId = initOrderStatus.OrderStatusId,
-                    OrderDate = DateTime.Now,
+                    OrderDate = DateTime.UtcNow,
                     ShippingCost = shippingCost,
                     DiscountMoney = discountMoney,
                     OrderTotal = totalItemsPrice + shippingCost - discountMoney,
@@ -305,7 +346,7 @@ namespace web_api_cosmetics_shop.Controllers
                                 // Update qty in stock
                                 productItem.QtyInStock -= item.Qty;
                                 var descreaseResult = await _productService.UpdateProductItem(productItem);
-                                if(descreaseResult == null)
+                                if (descreaseResult == null)
                                 {
                                     return StatusCode(
                                     StatusCodes.Status500InternalServerError,

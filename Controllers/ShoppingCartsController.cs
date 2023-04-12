@@ -169,7 +169,7 @@ namespace web_api_cosmetics_shop.Controllers
                         CartId = existShoppingCart.CartId,
                         ProductItemId = item.ProductItemId,
                         Qty = item.Qty,
-                        CreateAt = DateTime.Now
+                        CreateAt = DateTime.UtcNow,
                     };
 
                     //  Increase the quantity of the existing Product
@@ -284,7 +284,7 @@ namespace web_api_cosmetics_shop.Controllers
                             CartId = existShoppingCart.CartId,
                             ProductItemId = item.ProductItemId,
                             Qty = item.Qty,
-                            CreateAt = DateTime.Now,
+                            CreateAt = DateTime.UtcNow,
                         };
 
                         // Add new ProductItem

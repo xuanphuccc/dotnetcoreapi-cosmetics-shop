@@ -145,7 +145,7 @@ namespace web_api_cosmetics_shop.Controllers
                     Avatar = adminUserDto.Avatar,
                     Gender = adminUserDto.Gender,
                     BirthDate = adminUserDto.BirthDate,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                 };
 
                 var createdAdmin = await _adminService.Register(newAdmin, adminUserDto.Password);

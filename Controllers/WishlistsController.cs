@@ -90,6 +90,20 @@ namespace web_api_cosmetics_shop.Controllers
                 return NotFound();
             }
 
+			// Check exist product
+			var product = await _productService.GetProductById(wishlistDto.ProductId!.Value);
+			if(product == null)
+			{
+                return BadRequest(new ErrorDTO() { Title = "product not found", Status = 400 });
+            }
+
+			// Check exist wishlist
+			var existWishlist = await _wishlistService.ExistWishlist(currentUser.UserId, product.ProductId);
+            if (product != null)
+            {
+                return BadRequest(new ErrorDTO() { Title = "wishlist already exist", Status = 400 });
+            }
+
             // Add wishlist item
             try
 			{
@@ -97,7 +111,7 @@ namespace web_api_cosmetics_shop.Controllers
 				{
 					UserId = currentUser.UserId,
 					ProductId = wishlistDto.ProductId,
-					CreateAt = DateTime.Now
+					CreateAt = DateTime.UtcNow,
 				};
 
 				var createdWishList = await _wishlistService.AddWishlist(newWishlist);
@@ -105,7 +119,7 @@ namespace web_api_cosmetics_shop.Controllers
 				{
 					return StatusCode(
 								StatusCodes.Status500InternalServerError,
-								new ErrorDTO() { Title = "Can not create wishlist", Status = 500 });
+								new ErrorDTO() { Title = "can not create wishlist", Status = 500 });
 				}
 
 				return CreatedAtAction(nameof(GetUserWishlist), 
@@ -140,7 +154,7 @@ namespace web_api_cosmetics_shop.Controllers
 				{
 					return StatusCode(
 								StatusCodes.Status500InternalServerError,
-								new ErrorDTO() { Title = "Can not remove wishlist", Status = 500 });
+								new ErrorDTO() { Title = "can not remove wishlist", Status = 500 });
 				}
 			}
 			catch (Exception error)

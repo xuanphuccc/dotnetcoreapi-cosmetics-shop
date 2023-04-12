@@ -49,22 +49,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
 
-        //// ---------- Get All Product ----------
-        //[HttpGet]
-        //public async Task<IActionResult> GetProducts()
-        //{
-        //	var products = await _productService.GetAllProducts();
-
-        //	List<ProductDTO> productsDtos = new List<ProductDTO>();
-        //	foreach(var product in products)
-        //	{
-        //		var productDto = await _productService.ConvertToProductDtoAsync(product);
-        //		productsDtos.Add(productDto);
-        //	}
-
-        //	return Ok(productsDtos);
-        //}
-        //filter product
+        // ---------- Get All Product ----------
         [HttpGet]
         public async Task<IActionResult> GetProducts([FromQuery] decimal? min, [FromQuery] decimal? max, [FromQuery] string? provider, string? category, [FromQuery] int? page)
         {
@@ -80,15 +65,6 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 page = 1;
             }
-
-            //if (!min.HasValue)
-            //{
-            //    min = 0;
-            //}
-            //if (!max.HasValue)
-            //{
-            //    max = 10000;
-            //}
 
             if (!String.IsNullOrEmpty(provider))
             {
@@ -115,6 +91,8 @@ namespace web_api_cosmetics_shop.Controllers
                 //groupby vì so sánh khoảng giá sẽ lấy ra các sản phẩm và bị trùng sản phẩm
 
             }
+
+
             int totalProducts = products.ToList().Count();// tổng số sản phẩm trên trang
             var result = products.Skip((page.Value - 1) * pageSize).Take(pageSize).ToList();
             List<ProductDTO> productsDtos = new List<ProductDTO>();
@@ -159,7 +137,7 @@ namespace web_api_cosmetics_shop.Controllers
                     Image = productDto.Image,
                     ProviderId = productDto.ProviderId,
                     IsDisplay = productDto.IsDisplay,
-                    CreateAt = DateTime.Now
+                    CreateAt = DateTime.UtcNow,
                 };
                 var createdProduct = await _productService.AddProduct(product);
                 if (createdProduct == null)

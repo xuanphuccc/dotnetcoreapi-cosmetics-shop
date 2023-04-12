@@ -81,7 +81,7 @@ namespace web_api_cosmetics_shop.Controllers
 				{
 					Name = shippingMethodDto.Name,
 					Price = shippingMethodDto.Price,
-					CreateAt = DateTime.Now,
+					CreateAt = DateTime.UtcNow,
 				};
 
 				var createdShippingMethod = await _shippingMethodService.AddShippingMethod(newShippingMethod);

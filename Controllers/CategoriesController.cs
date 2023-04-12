@@ -63,7 +63,7 @@ namespace web_api_cosmetics_shop.Controllers
 					Name = category.Name,
 					Image = category.Image,
 					PromotionId = category.PromotionId,
-					CreateAt = DateTime.Now
+					CreateAt = DateTime.UtcNow,
 				};
 
 				// Creating Category
