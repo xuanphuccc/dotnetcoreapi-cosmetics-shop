@@ -16,5 +16,11 @@ namespace web_api_cosmetics_shop.Services.ProviderService
 
         // Delete
         Task<int> RemoveProvider(Provider provider);
+
+        // Filter
+        IQueryable<Provider> FilterAllProviders();
+        IQueryable<Provider> FilterSearch(IQueryable<Provider> providers, string search);
+        IQueryable<Provider> FilterSortByCreationTime(IQueryable<Provider> providers, bool isDesc = true);
+        IQueryable<Provider> FilterSortByName(IQueryable<Provider> providers, bool isDesc = false);
     }
 }

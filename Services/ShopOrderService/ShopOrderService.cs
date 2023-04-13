@@ -165,7 +165,7 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
 
         public IQueryable<ShopOrder> FilterSearch(IQueryable<ShopOrder> shopOrders, string search)
         {
-            shopOrders = shopOrders.Where(s => s.OrderId.ToString().ToLower().Contains(search));
+            shopOrders = shopOrders.Where(s => s.OrderId.ToString().ToLower().Contains(search.ToLower()));
 
             return shopOrders;
         }

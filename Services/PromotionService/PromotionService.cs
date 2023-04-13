@@ -100,7 +100,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
         public IQueryable<Promotion> FilterSearch(IQueryable<Promotion> promotions, string search)
         {
-            promotions = promotions.Where(p => p.Name.ToLower().Contains(search));
+            promotions = promotions.Where(p => p.Name.ToLower().Contains(search.ToLower()));
 
             return promotions;
         }
