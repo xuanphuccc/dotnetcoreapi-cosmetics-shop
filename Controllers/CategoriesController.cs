@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.CategoryService;
@@ -17,10 +18,59 @@ namespace web_api_cosmetics_shop.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetCategories()
+		public async Task<IActionResult> GetCategories(
+			[FromQuery] string? search,
+			[FromQuery] string? sort,
+			[FromQuery] string? status)
 		{
-			// Get all Categories
-			var categories = await _categoryService.GetCategoriesAsync();
+			var categoriesQuery = _categoryService.FilterAllCategories();
+
+			// Search categories
+			if(!string.IsNullOrEmpty(search))
+			{
+				categoriesQuery = _categoryService.FilterSearch(categoriesQuery, search);
+			}
+
+			// Sort categories
+			if(!string.IsNullOrEmpty(sort))
+			{
+				switch(sort.ToLower())
+				{
+					case "creationtimedesc":
+						categoriesQuery = _categoryService.FilterSortByCreationTime(categoriesQuery, isDesc: true);
+						break;
+                    case "creationtimeasc":
+                        categoriesQuery = _categoryService.FilterSortByCreationTime(categoriesQuery, isDesc: false);
+                        break;
+                    case "namedesc":
+						categoriesQuery = _categoryService.FilterSortByName(categoriesQuery, isDesc: true);
+                        break;
+                    case "nameasc":
+                        categoriesQuery = _categoryService.FilterSortByName(categoriesQuery, isDesc: false);
+                        break;
+                    default:
+						break;
+				}
+			}
+
+			// Filter categories by sale status (on sale / no sale)
+            if (!string.IsNullOrEmpty(status))
+            {
+                switch (status.ToLower())
+                {
+                    case "onsale":
+						categoriesQuery = _categoryService.FilterBySaleStatus(categoriesQuery, onSale: true);
+                        break;
+                    case "nosale":
+                        categoriesQuery = _categoryService.FilterBySaleStatus(categoriesQuery, onSale: false);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // Get all Categories
+            var categories = await categoriesQuery.ToListAsync();
 			return Ok(categories);
 		}
 
