@@ -4,66 +4,120 @@ using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.ShippingMethodService
 {
-	public class ShippingMethodService : IShippingMethodService
-	{
-		private readonly CosmeticsShopContext _context;
-		public ShippingMethodService(CosmeticsShopContext context)
-		{
-			_context = context;
-		}
+    public class ShippingMethodService : IShippingMethodService
+    {
+        private readonly CosmeticsShopContext _context;
+        public ShippingMethodService(CosmeticsShopContext context)
+        {
+            _context = context;
+        }
 
-		public async Task<ShippingMethod> AddShippingMethod(ShippingMethod shippingMethod)
-		{
-			await _context.ShippingMethods.AddAsync(shippingMethod);
-			var result = await _context.SaveChangesAsync();
-			if(result == 0)
-			{
-				return null!;
-			}
+        public async Task<ShippingMethod> AddShippingMethod(ShippingMethod shippingMethod)
+        {
+            await _context.ShippingMethods.AddAsync(shippingMethod);
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+            {
+                return null!;
+            }
 
-			return shippingMethod;
-		}
+            return shippingMethod;
+        }
 
-		public async Task<List<ShippingMethod>> GetAllShippingMethods()
-		{
-			var shippingMethods = await _context.ShippingMethods.ToListAsync();
+        public async Task<List<ShippingMethod>> GetAllShippingMethods()
+        {
+            var shippingMethods = await _context.ShippingMethods.ToListAsync();
 
-			return shippingMethods;
-		}
+            return shippingMethods;
+        }
 
-		public async Task<ShippingMethod> GetShippingMethod(int shippingMethodId)
-		{
-			var shippingMethod = await _context.ShippingMethods.FirstOrDefaultAsync(s => s.ShippingMethodId == shippingMethodId);
+        public async Task<ShippingMethod> GetShippingMethod(int shippingMethodId)
+        {
+            var shippingMethod = await _context.ShippingMethods.FirstOrDefaultAsync(s => s.ShippingMethodId == shippingMethodId);
 
-			return shippingMethod!;
-		}
+            return shippingMethod!;
+        }
 
-		public async Task<int> RemoveShippingMethod(ShippingMethod shippingMethod)
-		{
-			_context.Remove(shippingMethod);
-			var result = await _context.SaveChangesAsync();
+        public async Task<int> RemoveShippingMethod(ShippingMethod shippingMethod)
+        {
+            _context.Remove(shippingMethod);
+            var result = await _context.SaveChangesAsync();
 
-			return result;
-		}
+            return result;
+        }
 
-		public async Task<ShippingMethod> UpdateShippingMethod(ShippingMethod shippingMethod)
-		{
-			var existShippingMethod = await GetShippingMethod(shippingMethod.ShippingMethodId);
-			if(existShippingMethod == null)
-			{
-				return null!;
-			}
+        public async Task<ShippingMethod> UpdateShippingMethod(ShippingMethod shippingMethod)
+        {
+            var existShippingMethod = await GetShippingMethod(shippingMethod.ShippingMethodId);
+            if (existShippingMethod == null)
+            {
+                return null!;
+            }
 
-			existShippingMethod.Name = shippingMethod.Name;
-			existShippingMethod.Price = shippingMethod.Price;
+            existShippingMethod.Name = shippingMethod.Name;
+            existShippingMethod.Price = shippingMethod.Price;
 
-			var result = await _context.SaveChangesAsync();
-			if(result == 0)
-			{
-				return null!;
-			}
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+            {
+                return null!;
+            }
 
-			return existShippingMethod;
-		}
-	}
+            return existShippingMethod;
+        }
+
+
+        // Filter
+        public IQueryable<ShippingMethod> FilterAllShippingMethods()
+        {
+            var shippingMethods = _context.ShippingMethods.AsQueryable();
+
+            return shippingMethods;
+        }
+        public IQueryable<ShippingMethod> FilterSearch(IQueryable<ShippingMethod> shippingMethods, string search)
+        {
+            shippingMethods = shippingMethods.Where(s => s.Name.ToLower().Contains(search.ToLower()));
+
+            return shippingMethods;
+        }
+        public IQueryable<ShippingMethod> FilterSortByCreationTime(IQueryable<ShippingMethod> shippingMethods, bool isDesc = true)
+        {
+            if(isDesc)
+            {
+                shippingMethods = shippingMethods.OrderByDescending(s => s.CreateAt);
+            }
+            else
+            {
+                shippingMethods = shippingMethods.OrderBy(s => s.CreateAt);
+            }
+
+            return shippingMethods;
+        }
+        public IQueryable<ShippingMethod> FilterSortByName(IQueryable<ShippingMethod> shippingMethods, bool isDesc = false)
+        {
+            if(isDesc)
+            {
+                shippingMethods = shippingMethods.OrderByDescending(s => s.Name);
+            }
+            else
+            {
+                shippingMethods = shippingMethods.OrderBy(s => s.Name);
+            }
+
+            return shippingMethods;
+        }
+        public IQueryable<ShippingMethod> FilterSortByPrice(IQueryable<ShippingMethod> shippingMethods, bool isDesc = false)
+        {
+            if(isDesc)
+            {
+                shippingMethods = shippingMethods.OrderByDescending(s => s.Price);
+            }
+            else
+            {
+                shippingMethods = shippingMethods.OrderBy(s => s.Price);
+            }
+
+            return shippingMethods;
+        }
+    }
 }

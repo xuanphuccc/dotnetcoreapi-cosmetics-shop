@@ -226,7 +226,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
         {
             products = from p in products
                        join pr in _context.Providers on p.ProviderId equals pr.ProviderId
-                       where pr.Name.ToLower().Contains(providerName)
+                       where pr.Name.ToLower().Contains(providerName.ToLower())
                        select p;
 
             return products;
@@ -236,7 +236,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
             products = from p in products
                        join pc in _context.ProductCategories on p.ProductId equals pc.ProductId
                        join c in _context.Categories on pc.CategoryId equals c.CategoryId
-                       where c.Name.ToLower().Contains(categoryName)
+                       where c.Name.ToLower().Contains(categoryName.ToLower())
                        select p;
 
             return products;
@@ -257,7 +257,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
         // Search products
         public IQueryable<Product> FilterSearch(IQueryable<Product> products, string search)
         {
-            products = products.Where(p => p.Name.ToLower().Contains(search));
+            products = products.Where(p => p.Name.ToLower().Contains(search.ToLower()));
 
             return products;
         }
@@ -295,21 +295,35 @@ namespace web_api_cosmetics_shop.Services.ProductService
         // Sort by status
         public IQueryable<Product> FilterByStatus(IQueryable<Product> products, string status)
         {
-            if(status == "inStock")
+            if(status.ToLower() == "instock")
             {
-                products = from p in products
-                           join pi in _context.ProductItems on p.ProductId equals pi.ProductId
-                           where pi.QtyInStock > 0
-                           group p by p.ProductId into g
-                           select g.FirstOrDefault();
+                //products = from p in products
+                //           join pi in _context.ProductItems on p.ProductId equals pi.ProductId
+                //           where pi.QtyInStock > 0
+                //           group p by p.ProductId into g
+                //           select g.FirstOrDefault();
+
+                //products = from p in products
+                //           where p.ProductItems.Any(pi => pi.QtyInStock >= 0)
+                //           group p by p.ProductId into g
+                //           select g.FirstOrDefault();
+
+                //products = products.Where(p => p != null);
             }
-            else if(status == "soldOut")
+            else if(status.ToLower() == "soldout")
             {
-                products = from p in products
-                           join pi in _context.ProductItems on p.ProductId equals pi.ProductId
-                           where pi.QtyInStock <= 0
-                           group p by p.ProductId into g
-                           select g.FirstOrDefault();
+                //products = from p in products
+                //           join pi in _context.ProductItems on p.ProductId equals pi.ProductId
+                //           where pi.QtyInStock <= 0
+                //           group p by p.ProductId into g
+                //           select g.FirstOrDefault();
+
+                //products = from p in products
+                //           where p.ProductItems.Any(pi => pi.QtyInStock <= 0)
+                //           group p by p.ProductId into g
+                //           select g.FirstOrDefault();
+
+                //products = products.Where(p => p != null);
             }
 
             return products;

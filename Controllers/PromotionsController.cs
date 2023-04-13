@@ -40,24 +40,24 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             if(!string.IsNullOrEmpty(sort)) {
-                switch (sort)
+                switch (sort.ToLower())
                 {
-                    case "nameDesc":
+                    case "namedesc":
                         promotions = _promotionService.FilterSortByName(promotions, isDesc: true);
                         break;
-                    case "nameAsc":
+                    case "nameasc":
                         promotions = _promotionService.FilterSortByName(promotions, isDesc: false);
                         break;
-                    case "creationTimeDesc":
+                    case "creationtimedesc":
                         promotions = _promotionService.FilterSortByCreationTime(promotions, isDesc: true);
                         break;
-                    case "creationTimeAsc":
+                    case "creationtimeasc":
                         promotions = _promotionService.FilterSortByCreationTime(promotions, isDesc: false);
                         break;
-                    case "discountDesc":
+                    case "discountdesc":
                         promotions = _promotionService.FilterSortByDiscountRate(promotions, isDesc: true);
                         break;
-                    case "discountAsc":
+                    case "discountasc":
                         promotions = _promotionService.FilterSortByDiscountRate(promotions, isDesc: false);
                         break;
                     default:

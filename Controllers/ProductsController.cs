@@ -97,18 +97,18 @@ namespace web_api_cosmetics_shop.Controllers
             // Sort products
             if (!string.IsNullOrEmpty(sort))
             {
-                switch (sort)
+                switch (sort.ToLower())
                 {
-                    case "creationTimeDesc":
+                    case "creationtimedesc":
                         products = _productService.FilterSortByCreationTime(products, isDesc: true);
                         break;
-                    case "creationTimeAsc":
+                    case "creationtimeasc":
                         products = _productService.FilterSortByCreationTime(products, isDesc: false);
                         break;
-                    case "nameDesc":
+                    case "namedesc":
                         products = _productService.FilterSortByName(products, isDesc: true);
                         break;
-                    case "nameAsc":
+                    case "nameasc":
                         products = _productService.FilterSortByName(products, isDesc: false);
                         break;
                     default:
@@ -117,7 +117,7 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             // tổng số sản phẩm trên trang
-            int totalProducts = products.ToList().Count();
+            int totalProducts = products.Count();
             var result = products.Skip((page.Value - 1) * pageSize).Take(pageSize).ToList();
             // tổng số trang
             int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);

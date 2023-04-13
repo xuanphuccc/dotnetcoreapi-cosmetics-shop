@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.ProviderService;
@@ -29,8 +30,39 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProviders() {
-            var providers = await _providerService.GetAllProviders();
+        public async Task<IActionResult> GetAllProviders(
+            [FromQuery] string? search,
+            [FromQuery] string? sort) {
+
+            var providersQuery = _providerService.FilterAllProviders();
+
+            if(!string.IsNullOrEmpty(search))
+            {
+                providersQuery = _providerService.FilterSearch(providersQuery, search);
+            }
+
+            if(!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower()) {
+                    case "creationtimedesc":
+                        providersQuery = _providerService.FilterSortByCreationTime(providersQuery, isDesc: true);
+                        break;
+                    case "creationtimeasc":
+                        providersQuery = _providerService.FilterSortByCreationTime(providersQuery, isDesc: false);
+                        break;
+                    case "namedesc":
+                        providersQuery = _providerService.FilterSortByName(providersQuery, isDesc: true);
+                        break;
+                    case "nameasc":
+                        providersQuery = _providerService.FilterSortByName(providersQuery, isDesc: false);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+
+            var providers = await providersQuery.ToListAsync();
 
             List<ProviderDTO> providerDtos = new List<ProviderDTO>();
             foreach (var provider in providers)

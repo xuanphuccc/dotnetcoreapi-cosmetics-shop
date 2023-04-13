@@ -63,5 +63,45 @@ namespace web_api_cosmetics_shop.Services.ProviderService
 
             return existProvider;
         }
+
+        // Filter
+        public IQueryable<Provider> FilterAllProviders()
+        {
+            var providers = _context.Providers.AsQueryable();
+
+            return providers;
+        }
+        public IQueryable<Provider> FilterSearch(IQueryable<Provider> providers, string search)
+        {
+            providers = providers.Where(p => p.Name.ToLower().Contains(search.ToLower()));
+
+            return providers;
+        }
+        public IQueryable<Provider> FilterSortByCreationTime(IQueryable<Provider> providers, bool isDesc = true)
+        {
+            if (isDesc)
+            {
+                providers = providers.OrderByDescending(p => p.CreateAt);
+            }
+            else
+            {
+                providers = providers.OrderBy(p => p.CreateAt);
+            }
+
+            return providers;
+        }
+        public IQueryable<Provider> FilterSortByName(IQueryable<Provider> providers, bool isDesc = false)
+        {
+            if (isDesc)
+            {
+                providers = providers.OrderByDescending(p => p.Name);
+            }
+            else
+            {
+                providers = providers.OrderBy(p => p.Name);
+            }
+
+            return providers;
+        }
     }
 }
