@@ -24,5 +24,11 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
 		Task<int> RemoveOptionsType(ProductOptionType optionsType);
 		Task<int> RemoveOptions(ProductOptionType optionsType);
 		Task<int> RemoveOption(ProductOption option);
-	}
+
+
+        // Filter
+        IQueryable<ProductOptionType> FilterAllProductOptionTypes();
+        IQueryable<ProductOptionType> FilterSearch(IQueryable<ProductOptionType> productOptionTypes, string search);
+        IQueryable<ProductOptionType> FilterSortByName(IQueryable<ProductOptionType> productOptionTypes, bool isDesc = false);
+    }
 }

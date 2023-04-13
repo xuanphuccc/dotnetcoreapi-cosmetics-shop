@@ -117,18 +117,18 @@ namespace web_api_cosmetics_shop.Controllers
             // Sort order
             if (sort != null)
             {
-                switch (sort)
+                switch (sort.ToLower())
                 {
-                    case "creationTimeDesc":
+                    case "creationtimedesc":
                         allShopOrdersQuery = _shopOrderService.FilterSortByCreationTime(allShopOrdersQuery, isDesc: true);
                         break;
-                    case "creationTimeAsc":
+                    case "creationtimeasc":
                         allShopOrdersQuery = _shopOrderService.FilterSortByCreationTime(allShopOrdersQuery, isDesc: false);
                         break;
-                    case "totalDesc":
+                    case "totaldesc":
                         allShopOrdersQuery = _shopOrderService.FilterSortByTotal(allShopOrdersQuery, isDesc: true);
                         break;
-                    case "totalAsc":
+                    case "totalasc":
                         allShopOrdersQuery = _shopOrderService.FilterSortByTotal(allShopOrdersQuery, isDesc: false);
                         break;
                     default:
