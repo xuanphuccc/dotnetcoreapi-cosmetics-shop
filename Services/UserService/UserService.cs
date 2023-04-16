@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using web_api_cosmetics_shop.Data;
+using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.UserService
@@ -139,6 +140,24 @@ namespace web_api_cosmetics_shop.Services.UserService
             }
 
             return existAppUser;
+        }
+
+        // Convert to DTO
+        public AppUserDTO ConvertToAppUserDto(AppUser appUser)
+        {
+            return new AppUserDTO()
+            {
+                UserId = appUser.UserId,
+                UserName = appUser.UserName,
+                Email = appUser.Email,
+                PhoneNumber = appUser.PhoneNumber,
+                FullName = appUser.FullName,
+                Avatar = appUser.Avatar,
+                Bio = appUser.Bio,
+                Gender = appUser.Gender,
+                BirthDate = appUser.BirthDate,
+                CreatedAt = appUser.CreatedAt
+            };
         }
 
         // Generate token

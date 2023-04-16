@@ -24,7 +24,6 @@ namespace web_api_cosmetics_shop.Data
                 entity.HasOne(c => c.Promotion)
                       .WithMany(p => p.Categories)
                       .OnDelete(DeleteBehavior.SetNull);
-                // nếu muốn xóa thì dùng cascade
             });
 
             modelBuilder.Entity<ProductCategory>(entity =>
@@ -44,7 +43,6 @@ namespace web_api_cosmetics_shop.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-
             modelBuilder.Entity<Product>(entity =>
             {
                 // Xóa Provider -> SetNull Product
@@ -53,8 +51,6 @@ namespace web_api_cosmetics_shop.Data
                       .OnDelete(DeleteBehavior.SetNull);
 
             });
-
-
 
             modelBuilder.Entity<ProductItem>(entity =>
             {
@@ -215,7 +211,7 @@ namespace web_api_cosmetics_shop.Data
                 // Xóa PaymentMethod -> NoAction do xung đột
                 entity.HasOne(so => so.PaymentMethod)
                       .WithMany(pm => pm.ShopOrders)
-                      .OnDelete(DeleteBehavior.Restrict);
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<AdminRole>(entity =>

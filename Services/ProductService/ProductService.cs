@@ -347,7 +347,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
             }
 
             // Converting ProductItem to ProductItemDTO
-            List<ProductItemDTO> productItemDtos = new List<ProductItemDTO>();
+            List<ProductItemDTO> productItemDtos = new();
             foreach (var productItem in productItems)
             {
                 // Get Product Options

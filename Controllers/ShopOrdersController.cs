@@ -43,24 +43,24 @@ namespace web_api_cosmetics_shop.Controllers
         {
             var shopOrderItems = await _shopOrderService.GetOrderItems(shopOrder);
 
-            List<OrderItemDTO> orderItemsDto = new List<OrderItemDTO>();
+            List<OrderItemDTO> orderItemsDto = new();
             foreach (var item in shopOrderItems)
             {
                 // Get product item
-                ProductItem productItem = null!;
-                if (item.ProductItemId != null)
+                ProductItem productItem = new();
+                if (item.ProductItemId.HasValue)
                 {
                     productItem = await _productService.GetItem(item.ProductItemId.Value);
                 }
 
                 // Get product
-                Product product = null!;
-                if (productItem?.ProductId != null)
+                Product product = new();
+                if (productItem != null && productItem.ProductId.HasValue)
                 {
                     product = await _productService.GetProductById(productItem.ProductId.Value);
                 }
 
-                var productDto = await _productService.ConvertToProductDtoAsync(product, productItem.ProductItemId);
+                var productDto = await _productService.ConvertToProductDtoAsync(product ?? new Product(), productItem != null ? productItem.ProductItemId : 0);
 
                 orderItemsDto.Add(new OrderItemDTO()
                 {
@@ -69,13 +69,37 @@ namespace web_api_cosmetics_shop.Controllers
                     Price = item.Price,
                     DiscountRate = item.DiscountRate,
                     OrderId = item.OrderId,
-                    ProductItemId = item.ProductItemId.Value,
+                    ProductItemId = item.ProductItemId != null ? item.ProductItemId.Value : 0,
                     Product = productDto
                 });
             }
 
-            var address = await _addressService.GetAddress(shopOrder.AddressId.Value);
-            var addressDto = _addressService.ConvertToAddressDto(address);
+            // Get order address
+            Address address = new();
+            if (shopOrder.AddressId.HasValue)
+            {
+                address = await _addressService.GetAddress(shopOrder.AddressId.Value);
+            }
+
+            AddressDTO addressDto = new();
+            if(address != null)
+            {
+                addressDto = _addressService.ConvertToAddressDto(address);
+            }
+
+            // Get user
+            AppUser appUser = new();
+            if (shopOrder.UserId != null)
+            {
+                appUser = await _userService.GetUserById(shopOrder.UserId);
+            }
+
+            AppUserDTO appUserDto = new();
+            if (appUser != null)
+            {
+                appUserDto = _userService.ConvertToAppUserDto(appUser);
+            }
+
 
             return new ShopOrderDTO()
             {
@@ -85,6 +109,7 @@ namespace web_api_cosmetics_shop.Controllers
                 ShippingCost = shopOrder.ShippingCost,
                 DiscountMoney = shopOrder.DiscountMoney,
                 UserId = shopOrder.UserId,
+                User = appUserDto,
                 PaymentMethodId = shopOrder.PaymentMethodId,
                 AddressId = shopOrder.AddressId,
                 Address = addressDto,
@@ -109,7 +134,7 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             // Filter order status
-            if(!string.IsNullOrEmpty(status))
+            if (!string.IsNullOrEmpty(status))
             {
                 allShopOrdersQuery = _shopOrderService.FilterByStatus(allShopOrdersQuery, status);
             }
@@ -248,8 +273,8 @@ namespace web_api_cosmetics_shop.Controllers
 
             try
             {
-                // Calculate Order Toal Price
-                // Toal Items Price
+                // Calculate Order Total Price
+                // Total Items Price
                 decimal totalItemsPrice = 0;
                 foreach (var item in shopOrderDto.Items)
                 {
@@ -370,7 +395,6 @@ namespace web_api_cosmetics_shop.Controllers
                     {
                         Data = await ConvertToShopOrderDto(createdShopOrder)
                     });
-
             }
             catch (Exception error)
             {

@@ -9,6 +9,7 @@ namespace web_api_cosmetics_shop.Services.AddressService
 		Task<List<Address>> GetAllAddresses();
 		Task<List<Address>> GetUserAddresses(string userId);
 		Task<Address> GetAddress(int addressId);
+		Task<bool> IsHasOrder(Address address);
 
 
 		// Add
