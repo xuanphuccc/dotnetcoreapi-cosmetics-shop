@@ -57,7 +57,29 @@ namespace web_api_cosmetics_shop.Controllers
                 return NotFound(new ErrorDTO() { Title = "Order Item not found", Status = 400 });
             }
 
+            // add userReview
+            try
+            {
+                var newUserReview = new UserReview()
+                {
+                    UserId = userReviewDto.UserId,
+                    RatingValue = userReviewDto.RatingValue,
+                    Title= userReviewDto.Title,
+                    Comment= userReviewDto.Comment,
+                    CommentDate= DateTime.UtcNow,
 
+                };
+                var createdUserReview = await _userReviewService.AddUserReview(newUserReview);
+                if (createdUserReview == null)
+                {
+                    return StatusCode(
+                                StatusCodes.Status500InternalServerError,
+                                new ErrorDTO() { Title = "can not create userReview", Status = 500 });
+                }
+            }catch(Exception error)
+            {
+                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+            }
             return Ok(new ResponseDTO()
             {
                 Data = userReviewDto
