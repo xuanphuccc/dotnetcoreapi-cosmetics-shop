@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.UserService
@@ -18,6 +19,9 @@ namespace web_api_cosmetics_shop.Services.UserService
 
         // Update
         Task<AppUser> UpdateUser(AppUser adminUser);
+
+        // Convert to DTO
+        AppUserDTO ConvertToAppUserDto(AppUser appUser);
 
         // Generate token
         string GenerateToken(AppUser appUser);

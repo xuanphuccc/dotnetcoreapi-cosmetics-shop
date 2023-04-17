@@ -13,7 +13,8 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			_context = context;
 		}
 
-		public async Task<PaymentMethod> AddPaymentMethod(PaymentMethod paymentMethod)
+        // Create payment method
+        public async Task<PaymentMethod> AddPaymentMethod(PaymentMethod paymentMethod)
 		{
 			await _context.PaymentMethods.AddAsync(paymentMethod);
 			var result = await _context.SaveChangesAsync();
@@ -25,7 +26,8 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			return paymentMethod;
 		}
 
-		public async Task<List<PaymentMethod>> GetAllPaymentMethods()
+        // Get payment method
+        public async Task<List<PaymentMethod>> GetAllPaymentMethods()
 		{
 			var paymentMethods = await _context.PaymentMethods.ToListAsync();
 			return paymentMethods;
@@ -33,7 +35,7 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 
 		public async Task<List<PaymentMethod>> GetUserPaymentMethods(string userId)
 		{
-			var userPaymentMethods = await _context.PaymentMethods.Where(p => p.UserId == userId).ToListAsync();
+			var userPaymentMethods = await _context.PaymentMethods.Where(p => p.UserId == userId && p.IsDisplay != false).ToListAsync();
 			return userPaymentMethods;
 		}
 
@@ -43,14 +45,32 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			return paymentMethod!;
 		}
 
-		public async Task<int> RemovePaymentMethod(PaymentMethod paymentMethod)
+		public async Task<bool> IsHasOrder(PaymentMethod paymentMethod)
+		{
+			var orderCount = await (from pm in _context.PaymentMethods
+                              join ord in _context.ShopOrders on pm.PaymentMethodId equals ord.PaymentMethodId
+                              where pm.PaymentMethodId == paymentMethod.PaymentMethodId
+                              select pm).CountAsync();
+
+			if(orderCount == 0)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+
+		// Remove payment method
+        public async Task<int> RemovePaymentMethod(PaymentMethod paymentMethod)
 		{
 			_context.Remove(paymentMethod);
 			var result = await _context.SaveChangesAsync();
 			return result;
 		}
 
-		public async Task<PaymentMethod> UpdatePaymentMethod(PaymentMethod paymentMethod)
+        // Update payment method
+        public async Task<PaymentMethod> UpdatePaymentMethod(PaymentMethod paymentMethod)
 		{
 			var existPaymentMethod = await GetPaymentMethod(paymentMethod.PaymentMethodId);
 			if(existPaymentMethod == null)
@@ -65,6 +85,7 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			existPaymentMethod.PostalCode = paymentMethod.PostalCode;
 			existPaymentMethod.ExpiryDate = paymentMethod.ExpiryDate;
 			existPaymentMethod.IsDefault = paymentMethod.IsDefault;
+			existPaymentMethod.IsDisplay = paymentMethod.IsDisplay;
 
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
@@ -75,7 +96,7 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			return existPaymentMethod;
 		}
 		
-		// Convert
+		// Convert to DTO
         public PaymentMethodDTO ConvertToPaymentMethodDto(PaymentMethod paymentMethod)
         {
             return new PaymentMethodDTO()

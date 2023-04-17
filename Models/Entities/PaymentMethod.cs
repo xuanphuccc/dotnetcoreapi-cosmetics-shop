@@ -35,6 +35,8 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         public DateTime? CreateAt { get; set; }
 
+        public bool? IsDisplay { get; set; }
+
         public int? PaymentTypeId { get; set; }
         [ForeignKey("PaymentTypeId")]
         public PaymentType? PaymentType { get; set; }
