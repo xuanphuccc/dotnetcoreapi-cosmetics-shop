@@ -6,6 +6,7 @@
         private bool isSuccess = true;
         private int totalPages = 1;
 
+        public string? Title { get; set; }
         public int Status { get => status; set => status = value; }
         public dynamic? Data { get; set; }
         public bool IsSuccess { get => isSuccess; set => isSuccess = value; }

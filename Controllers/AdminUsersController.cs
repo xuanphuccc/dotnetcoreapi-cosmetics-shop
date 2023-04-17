@@ -27,7 +27,7 @@ namespace web_api_cosmetics_shop.Controllers
         {
             var adminRoles = await _roleService.GetAdminRoles(adminUser);
 
-            List<RoleDTO> adminRolesDto = new List<RoleDTO>();
+            List<RoleDTO> adminRolesDto = new();
             foreach (var item in adminRoles)
             {
                 adminRolesDto.Add(_roleService.ConvertToRoleDto(item));
@@ -72,12 +72,14 @@ namespace web_api_cosmetics_shop.Controllers
         [Authorize]
         public async Task<IActionResult> GetCurrentAdminUser()
         {
+            // Get admin from token
             var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
             if (currentIdentityAdmin == null)
             {
                 return NotFound();
             }
 
+            // Get admin from database
             var currentAdmin = await _adminService.GetAdminByUserName(currentIdentityAdmin.UserName);
             if (currentAdmin == null)
             {
@@ -224,16 +226,25 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Get admin from token
             var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
             if (currentIdentityAdmin == null)
             {
                 return NotFound();
             }
 
+            // Get admin from database
             var currentAdmin = await _adminService.GetAdminByUserName(currentIdentityAdmin.UserName);
             if (currentAdmin == null)
             {
                 return NotFound();
+            }
+
+            // Check exist email
+            var existEmail = await _adminService.GetAdminByEmail(adminUserDto.Email);
+            if(existEmail != null && currentAdmin.Email.ToLower() != adminUserDto.Email.ToLower())
+            {
+                return BadRequest(new ErrorDTO() { Title = "email already exist" });
             }
 
             try

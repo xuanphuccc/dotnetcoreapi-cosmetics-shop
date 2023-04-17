@@ -29,36 +29,29 @@ namespace web_api_cosmetics_shop.Controllers
         {
             //Get User Adresses
             var userAddresses = await _addressService.GetUserAddresses(appUser.UserId);
+
             List<AddressDTO> addressesDtos = new List<AddressDTO>();
             foreach (var address in userAddresses)
             {
                 var addressDto = _addressService.ConvertToAddressDto(address);
                 addressesDtos.Add(addressDto);
             }
+
             //Get user payment methods
             var userPaymentMethods = await _paymentMethodService.GetUserPaymentMethods(appUser.UserId);
+
             List<PaymentMethodDTO> paymentMethodDtos = new List<PaymentMethodDTO>();
             foreach (var paymentMethod in userPaymentMethods)
             {
                 var paymentMethodDto = _paymentMethodService.ConvertToPaymentMethodDto(paymentMethod);
-
 				paymentMethodDtos.Add(paymentMethodDto);
             }
-            return new AppUserDTO()
-            {
-                UserId = appUser.UserId,
-                UserName = appUser.UserName,
-                Email = appUser.Email,
-                PhoneNumber = appUser.PhoneNumber,
-                FullName = appUser.FullName,
-                Avatar = appUser.Avatar,
-                Bio = appUser.Bio,
-                Gender = appUser.Gender,
-                BirthDate = appUser.BirthDate,
-                CreatedAt = appUser.CreatedAt,
-                Addresses = addressesDtos,
-				PaymentMethods = paymentMethodDtos
-            };
+
+            var appUserDto = _userService.ConvertToAppUserDto(appUser);
+            appUserDto.Addresses = addressesDtos;
+            appUserDto.PaymentMethods = paymentMethodDtos;
+
+            return appUserDto;
         }
 
         [HttpGet]
@@ -124,6 +117,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterUser([FromBody] AppUserDTO appUserDto)
         {
             if (appUserDto == null)
@@ -187,6 +181,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> LoginUser(UserLoginDTO userLoginDto)
         {
             if (userLoginDto == null)
@@ -231,16 +226,25 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Get user from token
             var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
             if (currentIdentityUser == null)
             {
                 return NotFound();
             }
 
+            // Get user from database
             var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
             if (currentUser == null)
             {
                 return NotFound();
+            }
+
+            // Check exist email
+            var existEmail = await _userService.GetUserByEmail(appUserDto.Email);
+            if(existEmail != null && appUserDto.Email.ToLower() != currentUser.Email.ToLower())
+            {
+                return BadRequest(new ErrorDTO() { Title = "email already exist"});
             }
 
             try

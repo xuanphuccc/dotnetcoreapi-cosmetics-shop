@@ -37,6 +37,8 @@ namespace web_api_cosmetics_shop.Models.Entities
 
         public DateTime? CreateAt { get; set; }
 
+        public bool? IsDisplay { get; set; }
+
         public string? UserId { get; set; }
         [ForeignKey("UserId")]
         public AppUser? AppUser { get; set; }

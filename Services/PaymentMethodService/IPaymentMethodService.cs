@@ -5,13 +5,14 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 {
 	public interface IPaymentMethodService
 	{
-		//Method
+		// Get
 		Task<List<PaymentMethod>> GetAllPaymentMethods();
 		Task<List<PaymentMethod>> GetUserPaymentMethods(string userId);
 		Task<PaymentMethod> GetPaymentMethod(int paymentMethodId);
+        Task<bool> IsHasOrder(PaymentMethod paymentMethod);
 
-		// Add
-		Task<PaymentMethod> AddPaymentMethod(PaymentMethod paymentMethod);
+        // Add
+        Task<PaymentMethod> AddPaymentMethod(PaymentMethod paymentMethod);
 
 		// Update
 		Task<PaymentMethod> UpdatePaymentMethod(PaymentMethod paymentMethod);
