@@ -20,6 +20,7 @@ using web_api_cosmetics_shop.Services.AdminService;
 using web_api_cosmetics_shop.Services.UserService;
 using web_api_cosmetics_shop.Services.RoleService;
 using web_api_cosmetics_shop.Services.ReportService;
+using web_api_cosmetics_shop.Services.UserReviewService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +69,7 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IShopOrderService, ShopOrderService>();
 builder.Services.AddScoped<IProviderService, ProviderService>();
+builder.Services.AddScoped<IUserReviewService, UserReviewService>();
 
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserService, UserService>();

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.WebSockets;
@@ -117,8 +118,8 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             // tổng số sản phẩm trên trang
-            int totalProducts = products.Count();
-            var result = products.Skip((page.Value - 1) * pageSize).Take(pageSize).ToList();
+            int totalProducts = await products.CountAsync();
+            var result = await products.Skip((page.Value - 1) * pageSize).Take(pageSize).ToListAsync();
             // tổng số trang
             int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
 
