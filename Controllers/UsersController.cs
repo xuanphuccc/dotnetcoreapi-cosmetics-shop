@@ -117,6 +117,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterUser([FromBody] AppUserDTO appUserDto)
         {
             if (appUserDto == null)
@@ -180,6 +181,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> LoginUser(UserLoginDTO userLoginDto)
         {
             if (userLoginDto == null)
@@ -224,16 +226,25 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Get user from token
             var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
             if (currentIdentityUser == null)
             {
                 return NotFound();
             }
 
+            // Get user from database
             var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
             if (currentUser == null)
             {
                 return NotFound();
+            }
+
+            // Check exist email
+            var existEmail = await _userService.GetUserByEmail(appUserDto.Email);
+            if(existEmail != null && appUserDto.Email.ToLower() != currentUser.Email.ToLower())
+            {
+                return BadRequest(new ErrorDTO() { Title = "email already exist"});
             }
 
             try

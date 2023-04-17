@@ -5,6 +5,7 @@ using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.AddressService;
 using web_api_cosmetics_shop.Services.OrderStatusService;
+using web_api_cosmetics_shop.Services.PaymentMethodService;
 using web_api_cosmetics_shop.Services.ProductService;
 using web_api_cosmetics_shop.Services.ShippingMethodService;
 using web_api_cosmetics_shop.Services.ShopOrderService;
@@ -22,13 +23,15 @@ namespace web_api_cosmetics_shop.Controllers
         private readonly IAddressService _addressService;
         private readonly IUserService _userService;
         private readonly IOrderStatusService _orderStatusService;
+        private readonly IPaymentMethodService _paymentMethodService;
         public ShopOrdersController(
             IShopOrderService shopOrderService,
             IProductService productService,
             IShippingMethodService shippingMethodService,
             IAddressService addressService,
             IUserService userService,
-            IOrderStatusService orderStatusService)
+            IOrderStatusService orderStatusService,
+            IPaymentMethodService paymentMethodService)
         {
             _shopOrderService = shopOrderService;
             _productService = productService;
@@ -36,6 +39,7 @@ namespace web_api_cosmetics_shop.Controllers
             _addressService = addressService;
             _userService = userService;
             _orderStatusService = orderStatusService;
+            _paymentMethodService = paymentMethodService;
         }
 
         [NonAction]
@@ -82,14 +86,14 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             AddressDTO addressDto = new();
-            if(address != null)
+            if (address != null)
             {
                 addressDto = _addressService.ConvertToAddressDto(address);
             }
 
             // Get user
             AppUser appUser = new();
-            if (shopOrder.UserId != null)
+            if (!string.IsNullOrEmpty(shopOrder.UserId))
             {
                 appUser = await _userService.GetUserById(shopOrder.UserId);
             }
@@ -98,6 +102,19 @@ namespace web_api_cosmetics_shop.Controllers
             if (appUser != null)
             {
                 appUserDto = _userService.ConvertToAppUserDto(appUser);
+            }
+
+            // Get payment method
+            PaymentMethod paymentMethod = new();
+            if (shopOrder.PaymentMethodId.HasValue)
+            {
+                paymentMethod = await _paymentMethodService.GetPaymentMethod(shopOrder.PaymentMethodId.Value);
+            }
+
+            PaymentMethodDTO paymentMethodDto = new();
+            if(paymentMethod != null)
+            {
+                paymentMethodDto = _paymentMethodService.ConvertToPaymentMethodDto(paymentMethod);
             }
 
 
@@ -111,6 +128,7 @@ namespace web_api_cosmetics_shop.Controllers
                 UserId = shopOrder.UserId,
                 User = appUserDto,
                 PaymentMethodId = shopOrder.PaymentMethodId,
+                PaymentMethod = paymentMethodDto,
                 AddressId = shopOrder.AddressId,
                 Address = addressDto,
                 ShippingMethodId = shopOrder.ShippingMethodId,
@@ -122,8 +140,8 @@ namespace web_api_cosmetics_shop.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllShopOrders(
             [FromQuery] string? search,
-            [FromQuery] string? sort,
-            [FromQuery] string? status)
+            [FromQuery] string? status,
+            [FromQuery] string? sort)
         {
             var allShopOrdersQuery = _shopOrderService.FilterAllShopOrders();
 
@@ -140,7 +158,9 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             // Sort order
-            if (sort != null)
+            if (string.IsNullOrEmpty(sort)) sort = "creationtimedesc";
+
+            if (!string.IsNullOrEmpty(sort))
             {
                 switch (sort.ToLower())
                 {
@@ -208,7 +228,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [HttpGet("{id?}")]
-        public async Task<IActionResult> GetOneShopOrder([FromRoute] int? id)
+        public async Task<IActionResult> GetAShopOrder([FromRoute] int? id)
         {
             if (!id.HasValue)
             {

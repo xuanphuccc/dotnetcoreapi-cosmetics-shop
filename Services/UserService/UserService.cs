@@ -93,7 +93,7 @@ namespace web_api_cosmetics_shop.Services.UserService
         public async Task<AppUser> GetUserByUserName(string userName)
         {
             var user = await _context.AppUsers
-                .FirstOrDefaultAsync(u => u.UserName == userName);
+                .FirstOrDefaultAsync(u => u.UserName.ToLower() == userName.ToLower());
 
             if (user == null)
             {
@@ -106,7 +106,7 @@ namespace web_api_cosmetics_shop.Services.UserService
         public async Task<AppUser> GetUserByEmail(string email)
         {
             var user = await _context.AppUsers
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
             if (user == null)
             {
