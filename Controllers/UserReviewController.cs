@@ -18,7 +18,7 @@ namespace web_api_cosmetics_shop.Controllers
         {
             _userReviewService = userReviewService;
             _userService = userService;
-            _shopOrderService= shopOrderService;
+            _shopOrderService = shopOrderService;
         }
 
         [HttpGet]
@@ -30,8 +30,36 @@ namespace web_api_cosmetics_shop.Controllers
                 Data = userReviews
             });
         }
+        [HttpGet("product/{id?}")]
+        public async Task<IActionResult> GetProductReview([FromRoute] int? id)
+        {
+            if (!id.HasValue)
+            {
+                return BadRequest();
+            }
+            
+            var productReviews = await _userReviewService.GetUserReviewByProductId(id.Value);
+            return Ok(new ResponseDTO()
+            {
+                Data = productReviews
+            });
+        }
+        [HttpGet("myorder/{id?}")]
+        public async Task<IActionResult> GetMyOrderReview([FromRoute] int? id)
+        {
+            if (!id.HasValue)
+            {
+                return BadRequest();
+            }
+            var productReviews = await _userReviewService.GetUserReviewByOrderId(id.Value);
+            return Ok(new ResponseDTO()
+            {
+                Data = productReviews
+            });
+        }
+
         [HttpPost]
-        public async Task<IActionResult> AddUserReview(UserReviewDTO userReviewDto)
+        public async Task<IActionResult> AddUserReview([FromBody] UserReviewDTO userReviewDto)
         {
             if (userReviewDto == null || userReviewDto.RatingValue == 0)
             {
@@ -50,9 +78,15 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 return NotFound();
             }
+            //check user rated product
+            var userRatedItem = await _userReviewService.GetUserReviewByOrderitemId(userReviewDto.OrderItemId);
+            if (userRatedItem != null)
+            {
+                return NotFound(new ErrorDTO() { Title = "user review  already exist", Status = 400 });
+            }
             //check order_item
             var orderItem = await _shopOrderService.GetOrderItem(userReviewDto.OrderItemId);
-            if(orderItem == null)
+            if (orderItem == null)
             {
                 return NotFound(new ErrorDTO() { Title = "Order Item not found", Status = 400 });
             }
@@ -62,11 +96,12 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 var newUserReview = new UserReview()
                 {
-                    UserId = userReviewDto.UserId,
+                    UserId = currentUser.UserId,
                     RatingValue = userReviewDto.RatingValue,
-                    Title= userReviewDto.Title,
-                    Comment= userReviewDto.Comment,
-                    CommentDate= DateTime.UtcNow,
+                    Title = userReviewDto.Title,
+                    Comment = userReviewDto.Comment,
+                    CommentDate = DateTime.UtcNow,
+                    OrderItemId = userReviewDto.OrderItemId
 
                 };
                 var createdUserReview = await _userReviewService.AddUserReview(newUserReview);
@@ -76,7 +111,8 @@ namespace web_api_cosmetics_shop.Controllers
                                 StatusCodes.Status500InternalServerError,
                                 new ErrorDTO() { Title = "can not create userReview", Status = 500 });
                 }
-            }catch(Exception error)
+            }
+            catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
@@ -84,6 +120,33 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 Data = userReviewDto
             });
+        }
+
+        //delete 
+        [HttpDelete("{id?}")]
+        public async Task<IActionResult> DeleteUserReview([FromRoute] int? id)
+        {
+            if (!id.HasValue)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var userReview = await _userReviewService.GetUserReviewByReviewId(id.Value);
+                await _userReviewService.RemoveUserReview(userReview);
+                return Ok(
+                new ResponseDTO()
+                {
+                    Data = userReview
+                }
+                );
+            }
+            catch (Exception error)
+            {
+                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+
+            }
+
         }
     }
 }
