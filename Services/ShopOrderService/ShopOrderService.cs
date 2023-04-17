@@ -69,6 +69,7 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
         {
             var userShopOrders = await _context.ShopOrders
                 .Where(s => s.UserId == userId)
+                .OrderByDescending(s => s.OrderDate)
                 .ToListAsync();
 
             return userShopOrders;

@@ -110,7 +110,8 @@ namespace web_api_cosmetics_shop.Services.ProductService
                                     join pc in _context.ProductCategories on p.ProductId equals pc.ProductId
                                     join c in _context.Categories on pc.CategoryId equals c.CategoryId
                                     join pr in _context.Promotions on c.PromotionId equals pr.PromotionId
-                                    where pi.ProductItemId == productItemId
+                                    where pi.ProductItemId == productItemId && 
+                                    pr.StartDate <= DateTime.UtcNow && DateTime.UtcNow <= pr.EndDate
                                     select pr).ToListAsync();
             return promotions;
         }
@@ -347,7 +348,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
             }
 
             // Converting ProductItem to ProductItemDTO
-            List<ProductItemDTO> productItemDtos = new List<ProductItemDTO>();
+            List<ProductItemDTO> productItemDtos = new();
             foreach (var productItem in productItems)
             {
                 // Get Product Options

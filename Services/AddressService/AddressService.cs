@@ -13,6 +13,7 @@ namespace web_api_cosmetics_shop.Services.AddressService
 			_context = context;
 		}
 
+		// Create address
 		public async Task<Address> AddAddress(Address address)
 		{
 			await _context.AddAsync(address);
@@ -25,15 +26,17 @@ namespace web_api_cosmetics_shop.Services.AddressService
 			return address;
 		}
 
+		// Get address
 		public async Task<Address> GetAddress(int addressId)
 		{
 			var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == addressId);
+
 			return address!;
 		}
 
 		public async Task<List<Address>> GetUserAddresses(string userId)
 		{
-			var userAddresses = await _context.Addresses.Where(a => a.UserId == userId).ToListAsync();
+			var userAddresses = await _context.Addresses.Where(a => a.UserId == userId && a.IsDisplay != false).ToListAsync();
 			return userAddresses;
 		}
 
@@ -43,13 +46,29 @@ namespace web_api_cosmetics_shop.Services.AddressService
 			return allAddress;
 		}
 
-		public async Task<int> RemoveAddress(Address address)
+        public async Task<bool> IsHasOrder(Address address)
+		{
+			var orderCount = await  (from add in _context.Addresses
+                              join ord in _context.ShopOrders on add.AddressId equals ord.AddressId
+							  where add.AddressId == address.AddressId
+                              select add).CountAsync();
+			if(orderCount == 0)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		// Remove address
+        public async Task<int> RemoveAddress(Address address)
 		{
 			_context.Remove(address);
 			var result = await _context.SaveChangesAsync();
 			return result;
 		}
 
+		// Update address
 		public async Task<Address> UpdateAddress(Address address)
 		{
 			var existAddress = await GetAddress(address.AddressId);
@@ -66,6 +85,7 @@ namespace web_api_cosmetics_shop.Services.AddressService
 			existAddress.AddressLine = address.AddressLine;
 			existAddress.PhoneNumber = address.PhoneNumber;
 			existAddress.IsDefault = address.IsDefault;
+			existAddress.IsDisplay = address.IsDisplay;
 
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
@@ -76,6 +96,7 @@ namespace web_api_cosmetics_shop.Services.AddressService
 			return existAddress;
 		}
 
+		// Convert to DTO
         public AddressDTO ConvertToAddressDto(Address address)
         {
             return new AddressDTO()
