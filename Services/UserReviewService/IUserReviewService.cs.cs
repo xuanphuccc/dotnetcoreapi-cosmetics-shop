@@ -8,7 +8,6 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         //Test
         Task<bool> IsReview(int orderItemId);
         // Get
-        Task<List<UserReview>> GetAllUserReview();
         Task<List<UserReview>> GetUserReviews(string userId);
         Task<UserReview> GetUserReviewByReviewId(int reviewId);
         Task<UserReview> GetUserReviewByOrderitemId(int orderItemId);

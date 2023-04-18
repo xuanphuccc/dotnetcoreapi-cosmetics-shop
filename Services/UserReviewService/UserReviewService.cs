@@ -14,12 +14,6 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         }
         //get
 
-        public async Task<List<UserReview>> GetAllUserReview()
-        {
-            var allUserReview = await _context.UserReviews.ToListAsync();
-            return allUserReview;
-
-        }
 
         public async Task<UserReview> GetUserReviewByReviewId(int reviewId)
         {
@@ -76,7 +70,12 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
 
         public async Task<UserReview> UpdateUserReview(UserReview userReview)
         {
-            var exitsUserReview = await GetUserReviewByOrderitemId(userReview.OrderItemId);
+            UserReview exitsUserReview = new();
+            if (userReview.OrderItemId.HasValue)
+            {
+                exitsUserReview = await GetUserReviewByOrderitemId(userReview.OrderItemId.Value);
+            }
+
             if (exitsUserReview == null)
             {
                 return null!;
