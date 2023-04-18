@@ -44,7 +44,7 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
             return allShopOrders;
         }
 
-        public async Task<OrderItem> GetOrderItem(int? orderItemId)
+        public async Task<OrderItem> GetOrderItem(int orderItemId)
         {
             var orderItem = await _context.OrderItems.FirstOrDefaultAsync(o => o.OrderItemId == orderItemId);
             return orderItem!;
