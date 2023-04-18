@@ -9,6 +9,7 @@ using web_api_cosmetics_shop.Services.PaymentMethodService;
 using web_api_cosmetics_shop.Services.ProductService;
 using web_api_cosmetics_shop.Services.ShippingMethodService;
 using web_api_cosmetics_shop.Services.ShopOrderService;
+using web_api_cosmetics_shop.Services.UserReviewService;
 using web_api_cosmetics_shop.Services.UserService;
 
 namespace web_api_cosmetics_shop.Controllers
@@ -23,6 +24,7 @@ namespace web_api_cosmetics_shop.Controllers
         private readonly IAddressService _addressService;
         private readonly IUserService _userService;
         private readonly IOrderStatusService _orderStatusService;
+        private readonly IUserReviewService _userReviewService;
         private readonly IPaymentMethodService _paymentMethodService;
         public ShopOrdersController(
             IShopOrderService shopOrderService,
@@ -30,6 +32,8 @@ namespace web_api_cosmetics_shop.Controllers
             IShippingMethodService shippingMethodService,
             IAddressService addressService,
             IUserService userService,
+
+            IUserReviewService userReviewService
             IOrderStatusService orderStatusService,
             IPaymentMethodService paymentMethodService)
         {
@@ -39,6 +43,7 @@ namespace web_api_cosmetics_shop.Controllers
             _addressService = addressService;
             _userService = userService;
             _orderStatusService = orderStatusService;
+            _userReviewService = userReviewService;
             _paymentMethodService = paymentMethodService;
         }
 
@@ -66,8 +71,12 @@ namespace web_api_cosmetics_shop.Controllers
 
                 var productDto = await _productService.ConvertToProductDtoAsync(product ?? new Product(), productItem != null ? productItem.ProductItemId : 0);
 
+                //check order item is Review 
+                var isReview = await _userReviewService.IsReview(item.OrderItemId);
+
                 orderItemsDto.Add(new OrderItemDTO()
                 {
+                    IsReview= isReview,
                     OrderItemId = item.OrderItemId,
                     Qty = item.Qty,
                     Price = item.Price,

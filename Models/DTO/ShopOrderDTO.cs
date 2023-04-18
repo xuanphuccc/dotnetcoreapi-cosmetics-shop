@@ -51,5 +51,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 		public int ProductItemId { get; set; }
 
 		public ProductDTO? Product { get; set; }
+
+		public bool? IsReview { get; set; }
 	}
 }
