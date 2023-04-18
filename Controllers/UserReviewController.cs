@@ -90,19 +90,23 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 return NotFound();
             }
+
             //check user rated product
             var userRatedItem = await _userReviewService.GetUserReviewByOrderitemId(userReviewDto.OrderItemId);
+
             if (userRatedItem != null)
             {
                 return NotFound(new ErrorDTO() { Title = "user review  already exist", Status = 400 });
             }
             //check order_item
+
             OrderItem orderItem = new();
+
             if (userReviewDto.OrderItemId.HasValue)
             {
-                orderItem= await _shopOrderService.GetOrderItem(userReviewDto.OrderItemId.Value);
+                orderItem = await _shopOrderService.GetOrderItem(userReviewDto.OrderItemId.Value);
             }
-       
+
             if (orderItem == null)
             {
                 return NotFound(new ErrorDTO() { Title = "Order Item not found", Status = 400 });
@@ -128,7 +132,7 @@ namespace web_api_cosmetics_shop.Controllers
                                 StatusCodes.Status500InternalServerError,
                                 new ErrorDTO() { Title = "can not create userReview", Status = 500 });
                 }
-                
+
             }
             catch (Exception error)
             {
@@ -141,7 +145,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
         //update
         [HttpPut("{id?}")]
-        public async Task<IActionResult> UpdateUserReview([FromRoute] int? id,[FromBody] UserReviewDTO userReviewDto)
+        public async Task<IActionResult> UpdateUserReview([FromRoute] int? id, [FromBody] UserReviewDTO userReviewDto)
         {
             if (!id.HasValue || userReviewDto == null)
             {
@@ -154,11 +158,11 @@ namespace web_api_cosmetics_shop.Controllers
                 {
                     ReviewId = exitsUserReview.ReviewId,
                     RatingValue = userReviewDto.RatingValue,
-                    Comment=userReviewDto.Comment,
+                    Comment = userReviewDto.Comment,
                     Title = userReviewDto.Title,
                     OrderItemId = userReviewDto.OrderItemId
                 };
-                if (updateUserReivew.RatingValue != exitsUserReview.RatingValue 
+                if (updateUserReivew.RatingValue != exitsUserReview.RatingValue
                     || updateUserReivew.Comment != exitsUserReview.Comment ||
                     updateUserReivew.Title != exitsUserReview.Title)
                 {
