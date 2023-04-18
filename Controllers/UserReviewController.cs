@@ -123,6 +123,47 @@ namespace web_api_cosmetics_shop.Controllers
                                 StatusCodes.Status500InternalServerError,
                                 new ErrorDTO() { Title = "can not create userReview", Status = 500 });
                 }
+                
+            }
+            catch (Exception error)
+            {
+                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+            }
+            return Ok(new ResponseDTO()
+            {
+                Data = userReviewDto
+            });
+        }
+        //update
+        [HttpPut("{id?}")]
+        public async Task<IActionResult> UpdateUserReview([FromRoute] int? id,[FromBody] UserReviewDTO userReviewDto)
+        {
+            if (!id.HasValue || userReviewDto == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var exitsUserReview = await _userReviewService.GetUserReviewByOrderitemId(id.Value);
+                var updateUserReivew = new UserReview()
+                {
+                    ReviewId = exitsUserReview.ReviewId,
+                    RatingValue = userReviewDto.RatingValue,
+                    Comment=userReviewDto.Comment,
+                    Title = userReviewDto.Title,
+                    OrderItemId = userReviewDto.OrderItemId
+                };
+                if (updateUserReivew.RatingValue != exitsUserReview.RatingValue 
+                    || updateUserReivew.Comment != exitsUserReview.Comment ||
+                    updateUserReivew.Title != exitsUserReview.Title)
+                {
+                    var updateResult = await _userReviewService.UpdateUserReview(updateUserReivew);
+                    if (updateResult == null)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                                        new ErrorDTO() { Title = "Can not update review", Status = 500 });
+                    }
+                }
             }
             catch (Exception error)
             {

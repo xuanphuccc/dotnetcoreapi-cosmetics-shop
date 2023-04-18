@@ -17,8 +17,9 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
 
         Task<UserReviewDTO> ConvertUserReviewDTOAsync(UserReview userReview);
         // Add
-
         Task<UserReview> AddUserReview(UserReview userReview);
+        // put
+        Task<UserReview> UpdateUserReview(UserReview userReview);
         //delete
         Task<int> RemoveUserReview(UserReview userReview);
     }

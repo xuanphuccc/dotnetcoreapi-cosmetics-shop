@@ -45,7 +45,7 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
             return userReview;
         }
 
-      
+
         public async Task<List<UserReview>> GetUserReviewByOrderId(int orderId)
         {
             var userReview = await (from so in _context.ShopOrders
@@ -72,7 +72,26 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
 
             return userReview;
         }
+        //update
 
+        public async Task<UserReview> UpdateUserReview(UserReview userReview)
+        {
+            var exitsUserReview = await GetUserReviewByOrderitemId(userReview.OrderItemId);
+            if (exitsUserReview == null)
+            {
+                return null!;
+            }
+            exitsUserReview.Comment = userReview.Comment;
+            exitsUserReview.RatingValue = userReview.RatingValue;
+            exitsUserReview.Title = userReview.Title;
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+            {
+                return null!;
+            }
+
+            return userReview;
+        }
         //delete
         public async Task<int> RemoveUserReview(UserReview userReview)
         {
@@ -97,7 +116,7 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         public async Task<UserReviewDTO> ConvertUserReviewDTOAsync(UserReview userReview)
         {
             var userReviewDto = new UserReviewDTO();
-            var user = await _context.AppUsers.FirstOrDefaultAsync(u=>u.UserId==userReview.UserId);
+            var user = await _context.AppUsers.FirstOrDefaultAsync(u => u.UserId == userReview.UserId);
 
             if (user == null)
             {
@@ -108,7 +127,7 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
                     Comment = userReview.Comment,
                     CommentDate = DateTime.UtcNow,
                     OrderItemId = userReview.OrderItemId,
-                    ReviewId=userReview.ReviewId
+                    ReviewId = userReview.ReviewId
                 };
             }
             return new UserReviewDTO()
@@ -118,9 +137,11 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
                 Comment = userReview.Comment,
                 CommentDate = DateTime.UtcNow,
                 OrderItemId = userReview.OrderItemId,
-                Name=user.FullName,
+                Name = user.FullName,
                 ReviewId = userReview.ReviewId
             };
         }
+
+
     }
 }
