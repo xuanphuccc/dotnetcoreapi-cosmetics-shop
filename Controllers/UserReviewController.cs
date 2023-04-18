@@ -92,12 +92,8 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             //check user rated product
-            var userRatedItem = await _userReviewService.GetUserReviewByOrderitemId(userReviewDto.OrderItemId);
+            UserReview userRatedItem = new();
 
-            if (userRatedItem != null)
-            {
-                return NotFound(new ErrorDTO() { Title = "user review  already exist", Status = 400 });
-            }
             //check order_item
 
             OrderItem orderItem = new();
@@ -105,6 +101,11 @@ namespace web_api_cosmetics_shop.Controllers
             if (userReviewDto.OrderItemId.HasValue)
             {
                 orderItem = await _shopOrderService.GetOrderItem(userReviewDto.OrderItemId.Value);
+                userRatedItem = await _userReviewService.GetUserReviewByOrderitemId(userReviewDto.OrderItemId.Value);
+            }
+            if (userRatedItem != null)
+            {
+                return NotFound(new ErrorDTO() { Title = "user review  already exist", Status = 400 });
             }
 
             if (orderItem == null)
