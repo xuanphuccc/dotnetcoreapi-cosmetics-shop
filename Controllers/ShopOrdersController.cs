@@ -33,7 +33,7 @@ namespace web_api_cosmetics_shop.Controllers
             IAddressService addressService,
             IUserService userService,
 
-            IUserReviewService userReviewService
+            IUserReviewService userReviewService,
             IOrderStatusService orderStatusService,
             IPaymentMethodService paymentMethodService)
         {
