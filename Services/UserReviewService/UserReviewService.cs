@@ -14,6 +14,12 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         }
         //get
 
+        public async Task<List<UserReview>> GetAllUserReview()
+        {
+            var allUserReview = await _context.UserReviews.ToListAsync();
+            return allUserReview;
+
+        }
 
         public async Task<UserReview> GetUserReviewByReviewId(int reviewId)
         {
