@@ -1,4 +1,5 @@
-﻿using web_api_cosmetics_shop.Models.Entities;
+﻿using web_api_cosmetics_shop.Models.DTO;
+using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.UserReviewService
 {
@@ -10,11 +11,11 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         Task<List<UserReview>> GetAllUserReview();
         Task<List<UserReview>> GetUserReviews(string userId);
         Task<UserReview> GetUserReviewByReviewId(int reviewId);
-        Task<UserReview> GetUserReviewByOrderitemId(int orderItemId);
+        Task<UserReview> GetUserReviewByOrderitemId(int? orderItemId);
         Task<List<UserReview>> GetUserReviewByProductId(int productId);
         Task<List<UserReview>> GetUserReviewByOrderId(int orderItemId);
 
-
+        Task<UserReviewDTO> ConvertUserReviewDTOAsync(UserReview userReview);
         // Add
 
         Task<UserReview> AddUserReview(UserReview userReview);

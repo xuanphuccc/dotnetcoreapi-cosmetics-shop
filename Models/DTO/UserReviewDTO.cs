@@ -20,12 +20,14 @@ namespace web_api_cosmetics_shop.Models.DTO
 
         public string? UserId { get; set; }
 
+        public string? Name { get; set; }
+
         public AppUser? AppUser { get; set; }
 
         [Required]
-        public int OrderItemId { get; set; }
+        public int? OrderItemId { get; set; }
 
-        public OrderItem? OrderItem { get; set; }
+        public OrderItemDTO? OrderItem { get; set; }
 
     }
 }

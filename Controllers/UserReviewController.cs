@@ -37,11 +37,17 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 return BadRequest();
             }
-            
-            var productReviews = await _userReviewService.GetUserReviewByProductId(id.Value);
+
+            var userReviewsProduct = await _userReviewService.GetUserReviewByProductId(id.Value);
+            var userReviewsProductDto = new List<UserReviewDTO>();
+            foreach (var userReview in userReviewsProduct)
+            {
+                var addUserReview = await _userReviewService.ConvertUserReviewDTOAsync(userReview);
+                userReviewsProductDto.Add(addUserReview);
+            }
             return Ok(new ResponseDTO()
             {
-                Data = productReviews
+                Data = userReviewsProductDto
             });
         }
         [HttpGet("myorder/{id?}")]
@@ -51,10 +57,16 @@ namespace web_api_cosmetics_shop.Controllers
             {
                 return BadRequest();
             }
-            var productReviews = await _userReviewService.GetUserReviewByOrderId(id.Value);
+            var userReviewsProduct = await _userReviewService.GetUserReviewByOrderId(id.Value);
+            var userReviewsProductDto = new List<UserReviewDTO>();
+            foreach (var userReview in userReviewsProduct)
+            {
+                var addUserReview = await _userReviewService.ConvertUserReviewDTOAsync(userReview);
+                userReviewsProductDto.Add(addUserReview);
+            }
             return Ok(new ResponseDTO()
             {
-                Data = productReviews
+                Data = userReviewsProductDto
             });
         }
 

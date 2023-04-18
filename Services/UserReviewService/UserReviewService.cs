@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Data;
+using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.UserReviewService
@@ -23,13 +24,13 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         public async Task<UserReview> GetUserReviewByReviewId(int reviewId)
         {
             var userReview = await _context.UserReviews.FirstOrDefaultAsync(ur => ur.ReviewId == reviewId);
-            return userReview;
+            return userReview!;
         }
 
-        public async Task<UserReview> GetUserReviewByOrderitemId(int orderItemId)
+        public async Task<UserReview> GetUserReviewByOrderitemId(int? orderItemId)
         {
             var userReview = await _context.UserReviews.FirstOrDefaultAsync(ur => ur.OrderItemId == orderItemId);
-            return userReview;
+            return userReview!;
         }
 
         public async Task<List<UserReview>> GetUserReviewByProductId(int productId)
@@ -90,6 +91,36 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
                 return false;
             }
             return true;
+        }
+
+        //convert DTO
+        public async Task<UserReviewDTO> ConvertUserReviewDTOAsync(UserReview userReview)
+        {
+            var userReviewDto = new UserReviewDTO();
+            var user = await _context.AppUsers.FirstOrDefaultAsync(u=>u.UserId==userReview.UserId);
+
+            if (user == null)
+            {
+                return new UserReviewDTO()
+                {
+                    RatingValue = userReview.RatingValue,
+                    Title = userReview.Title,
+                    Comment = userReview.Comment,
+                    CommentDate = DateTime.UtcNow,
+                    OrderItemId = userReview.OrderItemId,
+                    ReviewId=userReview.ReviewId
+                };
+            }
+            return new UserReviewDTO()
+            {
+                RatingValue = userReview.RatingValue,
+                Title = userReview.Title,
+                Comment = userReview.Comment,
+                CommentDate = DateTime.UtcNow,
+                OrderItemId = userReview.OrderItemId,
+                Name=user.FullName,
+                ReviewId = userReview.ReviewId
+            };
         }
     }
 }
