@@ -20,7 +20,7 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
 			{
-				return null!;
+				throw new Exception("cannot create payment method");
 			}
 
 			return paymentMethod;
@@ -66,6 +66,12 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 		{
 			_context.Remove(paymentMethod);
 			var result = await _context.SaveChangesAsync();
+
+			if(result == 0)
+			{
+				throw new Exception("cannot delete payment method");
+			}
+
 			return result;
 		}
 
@@ -75,8 +81,8 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			var existPaymentMethod = await GetPaymentMethod(paymentMethod.PaymentMethodId);
 			if(existPaymentMethod == null)
 			{
-				return null!;
-			}
+                throw new Exception("payment method not found");
+            }
 
 			existPaymentMethod.Provider = paymentMethod.Provider;
 			existPaymentMethod.CardholderName = paymentMethod.CardholderName;
@@ -90,8 +96,8 @@ namespace web_api_cosmetics_shop.Services.PaymentMethodService
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
 			{
-				return null!;
-			}
+                throw new Exception("cannot update payment method");
+            }
 
 			return existPaymentMethod;
 		}

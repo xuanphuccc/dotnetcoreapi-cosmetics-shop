@@ -22,7 +22,7 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create options type");
             }
 
             return optionsType;
@@ -34,7 +34,7 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create option");
             }
 
             return option;
@@ -83,17 +83,10 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
             _context.Remove(optionsType);
             var result = await _context.SaveChangesAsync();
 
-            return result;
-        }
-
-        public async Task<int> RemoveOptions(ProductOptionType optionsType)
-        {
-            var options = await _context.ProductOptions
-                                .Where(po => po.OptionTypeId == optionsType.OptionTypeId)
-                                .ToListAsync();
-
-            _context.RemoveRange(options);
-            var result = await _context.SaveChangesAsync();
+            if(result == 0)
+            {
+                throw new Exception("cannot delete options type");
+            }
 
             return result;
         }
@@ -102,6 +95,11 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
         {
             _context.Remove(option);
             var result = await _context.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                throw new Exception("cannot delete option");
+            }
 
             return result;
         }
@@ -112,7 +110,7 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
             var existOptionsType = await GetOptionsTypeById(optionsType.OptionTypeId);
             if (existOptionsType == null)
             {
-                return null!;
+                throw new Exception("options type not found");
             }
 
             existOptionsType.Name = optionsType.Name;
@@ -120,7 +118,7 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update options type");
             }
 
             return optionsType;
@@ -131,7 +129,7 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
             var existOption = await _context.ProductOptions.FirstOrDefaultAsync(o => o.ProductOptionId == option.ProductOptionId);
             if (existOption == null)
             {
-                return null!;
+                throw new Exception("option not found");
             }
 
             existOption.Name = option.Name;
@@ -140,7 +138,7 @@ namespace web_api_cosmetics_shop.Services.ProductOptionService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update option");
             }
 
             return option;

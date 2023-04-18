@@ -19,7 +19,7 @@ namespace web_api_cosmetics_shop.Controllers
         }
 
         [NonAction]
-        private async Task<ProductOptionTypeDTO> ConvertToProductOptionTypeDtoAsync(ProductOptionType optionsType)
+        private async Task<ProductOptionTypeDTO> ConvertToProductOptionTypeDto(ProductOptionType optionsType)
         {
             // Get Options of Type
             var options = await _productOptionService.GetOptions(optionsType);
@@ -59,11 +59,13 @@ namespace web_api_cosmetics_shop.Controllers
         {
             var allOptionTypesQuery = _productOptionService.FilterAllProductOptionTypes();
 
+            // Search
             if (!string.IsNullOrEmpty(search))
             {
                 allOptionTypesQuery = _productOptionService.FilterSearch(allOptionTypesQuery, search);
             }
 
+            // Sort
             if (!string.IsNullOrEmpty(sort))
             {
                 switch (sort.ToLower())
@@ -84,11 +86,14 @@ namespace web_api_cosmetics_shop.Controllers
             List<ProductOptionTypeDTO> productOptionTypeDtos = new List<ProductOptionTypeDTO>();
             foreach (var type in allOptionsType)
             {
-                var productOptionTypeDto = await ConvertToProductOptionTypeDtoAsync(type);
+                var productOptionTypeDto = await ConvertToProductOptionTypeDto(type);
                 productOptionTypeDtos.Add(productOptionTypeDto);
             }
 
-            return Ok(productOptionTypeDtos);
+            return Ok(new ResponseDTO()
+            {
+                Data = productOptionTypeDtos
+            });
         }
 
         // ----------- GET -----------
@@ -105,12 +110,13 @@ namespace web_api_cosmetics_shop.Controllers
             var optionsType = await _productOptionService.GetOptionsTypeById(id.Value);
             if (optionsType == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "options type not found", Status = 404 });
             }
 
-            var productOptionTypeDto = await ConvertToProductOptionTypeDtoAsync(optionsType);
-
-            return Ok(productOptionTypeDto);
+            return Ok(new ResponseDTO()
+            {
+                Data = await ConvertToProductOptionTypeDto(optionsType)
+            });
         }
 
         // ----------- POST -----------
@@ -123,27 +129,21 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
-            // Check exist Option Type name
+            // Check exist option type name
             if (await _productOptionService.GetExistOptionTypeName(productOptionsTypeDto.Name))
             {
-                return BadRequest(new ErrorDTO() { Title = "Type Name already exist", Status = 400 });
+                return BadRequest(new ErrorDTO() { Title = "type name already exist", Status = 400 });
             }
 
             try
             {
-                //# Adding Product Options Type
+                //# Add product options type
                 var newOptionsType = new ProductOptionType()
                 {
                     Name = productOptionsTypeDto.Name,
                 };
 
                 var createdOptionsType = await _productOptionService.AddOptionsType(newOptionsType);
-                if (createdOptionsType == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
-                // Get information
-                productOptionsTypeDto.OptionTypeId = createdOptionsType.OptionTypeId;
 
                 //# Adding Product Options
                 foreach (var option in productOptionsTypeDto.Options)
@@ -155,17 +155,16 @@ namespace web_api_cosmetics_shop.Controllers
                         Value = option.Value
                     };
 
-                    var createdOption = await _productOptionService.AddOption(newOption);
-                    if (createdOption == null)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError);
-                    }
-                    // Get information
-                    option.ProductOptionId = createdOption.ProductOptionId;
-                    option.OptionTypeId = createdOption.OptionTypeId;
+                    await _productOptionService.AddOption(newOption);
                 }
 
-                return CreatedAtAction(nameof(GetProductOptions), new { id = createdOptionsType.OptionTypeId }, productOptionsTypeDto);
+                return CreatedAtAction(
+                    nameof(GetProductOptions),
+                    new { id = createdOptionsType.OptionTypeId },
+                    new ResponseDTO()
+                    {
+                        Data = await ConvertToProductOptionTypeDto(createdOptionsType)
+                    });
             }
             catch (Exception error)
             {
@@ -187,62 +186,40 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
-            //# Check existing Option Type
+            //# Get exist option type
             var existOptionsType = await _productOptionService.GetOptionsTypeById(id.Value);
             if (existOptionsType == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "options type not found", Status = 404 });
             }
-            // Get information
-            productOptionsTypeDto.OptionTypeId = existOptionsType.OptionTypeId;
 
-            // Check exist Option Type name
+            // Check exist option type name
             if (await _productOptionService.GetExistOptionTypeName(productOptionsTypeDto.Name) && existOptionsType.Name != productOptionsTypeDto.Name)
             {
-                return BadRequest(new ErrorDTO() { Title = "Type Name already exist", Status = 400 });
+                return BadRequest(new ErrorDTO() { Title = "type name already exist", Status = 400 });
             }
 
             try
             {
-                // Update Options Type
-                var newOptionsType = new ProductOptionType()
-                {
-                    OptionTypeId = existOptionsType.OptionTypeId,
-                    Name = productOptionsTypeDto.Name,
-                };
-
-                if (existOptionsType.Name != newOptionsType.Name)
-                {
-                    var updateOptionsTypeResult = await _productOptionService.UpdateOptionsType(newOptionsType);
-                    if (updateOptionsTypeResult == null)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError);
-                    }
-                }
-
-                // Get old Options
+                // Get old options
                 var oldOptions = await _productOptionService.GetOptions(existOptionsType);
                 var oldOptionsId = oldOptions.Select(o => o.ProductOptionId).ToList();
 
                 var newOptionsId = productOptionsTypeDto.Options.Select(o => o.ProductOptionId).ToList();
 
-                // Remove Options list: in old options and not in new options
+                // Remove options list: in old options and not in new options
                 foreach (var option in oldOptions)
                 {
                     if (!newOptionsId.Contains(option.ProductOptionId))
                     {
-                        var removeResult = await _productOptionService.RemoveOption(option);
-                        if (removeResult == 0)
-                        {
-                            return BadRequest(new ErrorDTO() { Title = "Can not remove option", Status = 500 });
-                        }
+                        await _productOptionService.RemoveOption(option);
                     }
                 }
 
-                // Add new Options list: in new options and not in old options
+                // Add new options list: in new options and not in old options
                 foreach (var option in productOptionsTypeDto.Options)
                 {
-                    // Add new Option
+                    // Add new option
                     if (!oldOptionsId.Contains(option.ProductOptionId))
                     {
                         var newOption = new ProductOption()
@@ -252,23 +229,16 @@ namespace web_api_cosmetics_shop.Controllers
                             Value = option.Value
                         };
 
-                        var createdOption = await _productOptionService.AddOption(newOption);
-                        if (createdOption == null)
-                        {
-                            return StatusCode(StatusCodes.Status500InternalServerError);
-                        }
-                        // Get information
-                        option.ProductOptionId = createdOption.ProductOptionId;
-                        option.OptionTypeId = createdOption.OptionTypeId;
+                        await _productOptionService.AddOption(newOption);
                     }
 
-                    // Update old Option
+                    // Update old option
                     if (oldOptionsId.Contains(option.ProductOptionId))
                     {
                         var existOption = await _productOptionService.GetOption(option.ProductOptionId);
                         if (existOption == null)
                         {
-                            return NotFound(new ErrorDTO() { Title = "Option Id not found", Status = 404 });
+                            return NotFound(new ErrorDTO() { Title = "option not found", Status = 404 });
                         }
 
                         var updateOption = new ProductOption()
@@ -280,22 +250,40 @@ namespace web_api_cosmetics_shop.Controllers
 
                         if (existOption.Name != updateOption.Name || existOption.Value != updateOption.Value)
                         {
-                            var updateOptionResult = await _productOptionService.UpdateOption(updateOption);
-                            if (updateOptionResult == null)
-                            {
-                                return BadRequest(new ErrorDTO() { Title = "Can not update option", Status = 500 });
-                            }
+                            await _productOptionService.UpdateOption(updateOption);
                         }
 
                     }
                 }
 
-                return Ok(productOptionsTypeDto);
+                // Update options type
+                var newOptionsType = new ProductOptionType()
+                {
+                    OptionTypeId = existOptionsType.OptionTypeId,
+                    Name = productOptionsTypeDto.Name,
+                };
+
+                if (existOptionsType.Name != newOptionsType.Name)
+                {
+                    var updatedOptionsType = await _productOptionService.UpdateOptionsType(newOptionsType);
+
+                    return Ok(new ResponseDTO()
+                    {
+                        Data = await ConvertToProductOptionTypeDto(updatedOptionsType)
+                    });
+                }
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = await ConvertToProductOptionTypeDto(existOptionsType),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
         // ----------- DELETE -----------
@@ -308,29 +296,27 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Get exist options type
             var existOptionType = await _productOptionService.GetOptionsTypeById(id.Value);
             if (existOptionType == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "options type not found", Status = 404 });
             }
-
-            var hasRemove = await ConvertToProductOptionTypeDtoAsync(existOptionType);
 
             try
             {
-                // Removing Options Type
-                var result = await _productOptionService.RemoveOptionsType(existOptionType);
-                if (result == 0)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
-
-                return Ok(hasRemove);
+                // Remove options type
+                await _productOptionService.RemoveOptionsType(existOptionType);
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = await ConvertToProductOptionTypeDto(existOptionType)
+            });
         }
     }
 }

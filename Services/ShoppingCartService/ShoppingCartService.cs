@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Data;
-using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.ShoppingCartService
@@ -18,9 +17,10 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 		{
 			await _context.ShoppingCarts.AddAsync(shoppingCart);
 			var result = await _context.SaveChangesAsync();
+
 			if(result == 0)
 			{
-				return null!;
+				throw new Exception("cannot create shopping cart");
 			}
 
 			return shoppingCart;
@@ -30,10 +30,11 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 		{
 			await _context.ShoppingCartItems.AddAsync(shoppingCartItem);
 			var result = await _context.SaveChangesAsync();
+
 			if (result == 0)
 			{
-				return null!;
-			}
+                throw new Exception("cannot create shopping cart item");
+            }
 
 			return shoppingCartItem;
 		}
@@ -70,12 +71,26 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 			return shoppingCartItem!;
 		}
 
+        public async Task<ShoppingCartItem> IsExistProductItem(ShoppingCart shoppingCart, int productItemId)
+        {
+            var isExist = await _context.ShoppingCartItems.FirstOrDefaultAsync(
+                                        ci => ci.ProductItemId == productItemId &&
+                                        ci.CartId == shoppingCart.CartId);
 
-		// ---------------- Remove ----------------
-		public async Task<int> RemoveShoppingCartItem(ShoppingCartItem shoppingCartItem)
+            return isExist!;
+        }
+
+
+        // ---------------- Remove ----------------
+        public async Task<int> RemoveShoppingCartItem(ShoppingCartItem shoppingCartItem)
 		{
 			_context.Remove(shoppingCartItem);
 			var result = await _context.SaveChangesAsync();
+
+			if(result == 0)
+			{
+                throw new Exception("cannot delete shopping cart item");
+            }
 
 			return result;
 		}
@@ -86,8 +101,8 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 			var existShoppingCartItem = await _context.ShoppingCartItems.FirstOrDefaultAsync(ci => ci.CartItemId == shoppingCartItem.CartItemId);
 			if (existShoppingCartItem == null)
 			{
-				return null!;
-			}
+                throw new Exception("shopping cart item not found");
+            }
 
 			existShoppingCartItem.Qty = shoppingCartItem.Qty;
 
@@ -95,8 +110,8 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 
 			if(result == 0)
 			{
-				return null!;
-			}
+                throw new Exception("cannot update shopping cart item");
+            }
 
 			return shoppingCartItem;
 		}
@@ -106,8 +121,8 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 			var existShoppingCartItem = await _context.ShoppingCartItems.FirstOrDefaultAsync(ci => ci.CartItemId == shoppingCartItem.CartItemId);
 			if (existShoppingCartItem == null)
 			{
-				return 0;
-			}
+                throw new Exception("shopping cart item not found");
+            }
 
 			existShoppingCartItem.Qty += qty;
 
@@ -115,20 +130,11 @@ namespace web_api_cosmetics_shop.Services.ShoppingCartService
 
 			if (result == 0)
 			{
-				return 0;
-			}
+                throw new Exception("cannot increase qty shopping cart item");
+            }
 
 			var resultQty = existShoppingCartItem.Qty;
 			return resultQty;
-		}
-
-		public async Task<ShoppingCartItem> IsExistProductItem(ShoppingCart shoppingCart, int productItemId)
-		{
-			var isExist = await _context.ShoppingCartItems.FirstOrDefaultAsync(
-										ci => ci.ProductItemId == productItemId && 
-										ci.CartId == shoppingCart.CartId);
-
-			return isExist!;
 		}
 	}
 }

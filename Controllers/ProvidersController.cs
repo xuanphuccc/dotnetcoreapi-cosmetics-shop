@@ -32,18 +32,20 @@ namespace web_api_cosmetics_shop.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllProviders(
             [FromQuery] string? search,
-            [FromQuery] string? sort) {
+            [FromQuery] string? sort)
+        {
 
             var providersQuery = _providerService.FilterAllProviders();
 
-            if(!string.IsNullOrEmpty(search))
+            if (!string.IsNullOrEmpty(search))
             {
                 providersQuery = _providerService.FilterSearch(providersQuery, search);
             }
 
-            if(!string.IsNullOrEmpty(sort))
+            if (!string.IsNullOrEmpty(sort))
             {
-                switch (sort.ToLower()) {
+                switch (sort.ToLower())
+                {
                     case "creationtimedesc":
                         providersQuery = _providerService.FilterSortByCreationTime(providersQuery, isDesc: true);
                         break;
@@ -64,36 +66,43 @@ namespace web_api_cosmetics_shop.Controllers
 
             var providers = await providersQuery.ToListAsync();
 
-            List<ProviderDTO> providerDtos = new List<ProviderDTO>();
+            List<ProviderDTO> providersDto = new List<ProviderDTO>();
             foreach (var provider in providers)
             {
-                providerDtos.Add(ConvertToProviderDto(provider));
+                providersDto.Add(ConvertToProviderDto(provider));
             }
 
-            return Ok(providerDtos);
+            return Ok(new ResponseDTO()
+            {
+                Data = providersDto
+            });
         }
 
         [HttpGet("{id?}")]
         public async Task<IActionResult> GetProvider([FromRoute] int? id)
         {
-            if(!id.HasValue)
+            if (!id.HasValue)
             {
                 return BadRequest();
             }
 
+            // Get provider
             var provider = await _providerService.GetProvider(id.Value);
-            if(provider == null)
+            if (provider == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "provider not found", Status = 404 });
             }
 
-            return Ok(ConvertToProviderDto(provider));
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToProviderDto(provider)
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> AddProvider([FromBody] ProviderDTO providerDto)
         {
-            if(providerDto == null)
+            if (providerDto == null)
             {
                 return BadRequest();
             }
@@ -107,16 +116,15 @@ namespace web_api_cosmetics_shop.Controllers
                 };
 
                 var createdProvider = await _providerService.AddProvider(newProvider);
-                if(createdProvider == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                                new ErrorDTO() { Title = "Can not create provider", Status = 500 });
-                }
 
                 return CreatedAtAction(
                     nameof(GetProvider),
                     new { id = createdProvider.ProviderId },
-                    ConvertToProviderDto(createdProvider));
+                    new ResponseDTO()
+                    {
+                        Data = ConvertToProviderDto(createdProvider),
+                        Status = 201,
+                    });
             }
             catch (Exception error)
             {
@@ -127,15 +135,16 @@ namespace web_api_cosmetics_shop.Controllers
         [HttpPut("{id?}")]
         public async Task<IActionResult> UpdateProvider([FromRoute] int? id, [FromBody] ProviderDTO providerDto)
         {
-            if(!id.HasValue || providerDto == null)
+            if (!id.HasValue || providerDto == null)
             {
                 return BadRequest();
             }
 
+            // Get exist provider
             var existProvider = await _providerService.GetProvider(id.Value);
-            if(existProvider == null)
+            if (existProvider == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "provider not found", Status = 404 });
             }
 
             try
@@ -146,21 +155,28 @@ namespace web_api_cosmetics_shop.Controllers
                     Name = providerDto.Name
                 };
 
-                if(existProvider.Name != newProvider.Name)
+                // Update provider
+                if (existProvider.Name != newProvider.Name)
                 {
                     var updateResult = await _providerService.UpdateProvider(newProvider);
-                    if(updateResult == null) {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                                    new ErrorDTO() { Title = "Can not update provider", Status = 500 });
-                    }
-                }
 
-                return Ok(providerDto);
+                    return Ok(new ResponseDTO()
+                    {
+                        Data = ConvertToProviderDto(updateResult)
+                    });
+                }
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToProviderDto(existProvider),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
         [HttpDelete("{id?}")]
@@ -171,27 +187,26 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Get exist provider
             var existProvider = await _providerService.GetProvider(id.Value);
-            if(existProvider == null)
+            if (existProvider == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "provider not found", Status = 404 });
             }
 
             try
             {
-                var removeResult = await _providerService.RemoveProvider(existProvider);
-                if (removeResult == 0)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                                    new ErrorDTO() { Title = "Can not remove provider", Status = 500 });
-                }
+                await _providerService.RemoveProvider(existProvider);
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
 
-            return Ok(ConvertToProviderDto(existProvider));
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToProviderDto(existProvider)
+            });
         }
     }
 }

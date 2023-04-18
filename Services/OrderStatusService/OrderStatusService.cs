@@ -11,18 +11,21 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 		{
 			_context = context;
 		}
+
+		// Create status
 		public async Task<OrderStatus> AddOrderStatus(OrderStatus orderStatus)
 		{
 			await _context.OrderStatuses.AddAsync(orderStatus);
 			var result = await _context.SaveChangesAsync();
 			if (result == 0)
 			{
-				return null!;
+				throw new Exception("cannot create status");
 			}
 
 			return orderStatus;
 		}
 
+		// Get status
 		public async Task<List<OrderStatus>> GetAllOrderStatuses()
 		{
 			var orderStatuses = await _context.OrderStatuses.ToListAsync();
@@ -43,11 +46,16 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 			return orderStatus!;
 		}
 
-
+		// Delete status
         public async Task<int> RemoveOrderStatus(OrderStatus orderStatus)
 		{
 			_context.Remove(orderStatus);
 			var result = await _context.SaveChangesAsync();
+
+			if(result == 0)
+			{
+				throw new Exception("cannot delete status");
+			}
 
 			return result;
 		}
@@ -57,8 +65,8 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 			var existOrderStatus = await GetOrderStatus(orderStatus.OrderStatusId);
 			if(existOrderStatus == null)
 			{
-				return null!;
-			}
+                throw new Exception("status not found");
+            }
 
 			existOrderStatus.Name = orderStatus.Name;
 			existOrderStatus.Status = orderStatus.Status;
@@ -67,8 +75,8 @@ namespace web_api_cosmetics_shop.Services.OrderStatusService
 
 			if(result == 0)
 			{
-				return null!;
-			}
+                throw new Exception("cannot update status");
+            }
 
 			return existOrderStatus;
 		}

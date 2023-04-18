@@ -30,19 +30,33 @@ namespace web_api_cosmetics_shop.Controllers
         {
             var shoppingCartItems = await _shoppingCartService.GetAllShoppingCartItems(shoppingCart);
 
-            List<ShoppingCartItemDTO> items = new List<ShoppingCartItemDTO>();
+            List<ShoppingCartItemDTO> items = new();
             foreach (var item in shoppingCartItems)
             {
                 // Get product
-                var productItem = await _productService.GetItem(item.ProductItemId!.Value);
-                var product = await _productService.GetProductById(productItem.ProductId.Value);
-                var productDto = await _productService.ConvertToProductDtoAsync(product, item.ProductItemId.Value);
+                ProductItem productItem = new();
+                if (item.ProductItemId.HasValue)
+                {
+                    productItem = await _productService.GetItem(item.ProductItemId.Value);
+                }
+
+                Product product = new();
+                if (productItem != null && productItem.ProductId.HasValue)
+                {
+                    product = await _productService.GetProductById(productItem.ProductId.Value);
+                }
+
+                ProductDTO productDto = new();
+                if (productItem != null && product != null)
+                {
+                    productDto = await _productService.ConvertToProductDtoAsync(product, productItem.ProductItemId);
+                }
 
                 var shoppingCartItemDto = new ShoppingCartItemDTO()
                 {
-                    CartId = item.CartId!.Value,
+                    CartId = item.CartId != null ? item.CartId.Value : 0,
                     CartItemId = item.CartItemId,
-                    ProductItemId = item.ProductItemId.Value,
+                    ProductItemId = item.ProductItemId != null ? item.ProductItemId.Value : 0,
                     Qty = item.Qty,
                     Product = productDto,
                     CreateAt = item.CreateAt
@@ -54,7 +68,7 @@ namespace web_api_cosmetics_shop.Controllers
             var shoppingCartDto = new ShoppingCartDTO()
             {
                 CartId = shoppingCart.CartId,
-                UserId = shoppingCart.UserId!,
+                UserId = shoppingCart.UserId ?? "",
                 Items = items
             };
 
@@ -66,7 +80,7 @@ namespace web_api_cosmetics_shop.Controllers
         {
             var shoppingCarts = await _shoppingCartService.GetAllShoppingCarts();
 
-            List<ShoppingCartDTO> shoppingCartDtos = new List<ShoppingCartDTO>();
+            List<ShoppingCartDTO> shoppingCartDtos = new();
             foreach (var item in shoppingCarts)
             {
                 var shoppingCartDto = await ConvertToShoppingCartDto(item);
@@ -91,7 +105,7 @@ namespace web_api_cosmetics_shop.Controllers
             var shoppingCart = await _shoppingCartService.GetShoppingCart(id);
             if (shoppingCart == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "shopping cart not found", Status = 404 });
             }
 
             var shoppingCartDto = await ConvertToShoppingCartDto(shoppingCart);
@@ -141,28 +155,22 @@ namespace web_api_cosmetics_shop.Controllers
                         UserId = currentUser.UserId,
                     };
 
-                    var resultCreateShoppingCart = await _shoppingCartService.AddShoppingCart(newShoppingCart);
-                    if (resultCreateShoppingCart == null)
-                    {
-                        return StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorDTO() { Title = "Can not create shopping cart", Status = 500 });
-                    }
+                    var createdShoppingCart = await _shoppingCartService.AddShoppingCart(newShoppingCart);
 
-                    // Get created information
-                    existShoppingCart = resultCreateShoppingCart;
+                    // Get created shopping cart information
+                    existShoppingCart = createdShoppingCart;
                 }
                 catch (Exception error)
                 {
-                    return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+                    return BadRequest(new ErrorDTO() { Title = error.Message, Status = 500 });
                 }
             }
 
             // If the productItemId does not exist, add the productItem,
             // otherwise increase the quantity of the existing product
-            foreach (var item in shoppingCartDto.Items)
+            try
             {
-                try
+                foreach (var item in shoppingCartDto.Items)
                 {
                     var newShoppingCartItem = new ShoppingCartItem()
                     {
@@ -176,30 +184,18 @@ namespace web_api_cosmetics_shop.Controllers
                     var existCartItem = await _shoppingCartService.IsExistProductItem(existShoppingCart, item.ProductItemId);
                     if (existCartItem != null)
                     {
-                        var increaseResult = await _shoppingCartService.IncreaseQtyOfShoppingCartItem(existCartItem, item.Qty);
-                        if (increaseResult == 0)
-                        {
-                            return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not increase qty", Status = 500 });
-                        }
+                        await _shoppingCartService.IncreaseQtyOfShoppingCartItem(existCartItem, item.Qty);
                     }
                     else
                     {
                         // Add new ProductItem
-                        var addItemResult = await _shoppingCartService.AddShoppingCartItem(newShoppingCartItem);
-                        if (addItemResult == null)
-                        {
-                            return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not add shopping cart item", Status = 500 });
-                        }
+                        await _shoppingCartService.AddShoppingCartItem(newShoppingCartItem);
                     }
                 }
-                catch (Exception error)
-                {
-                    return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
-                }
+            }
+            catch (Exception error)
+            {
+                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 500 });
             }
 
             return CreatedAtAction(
@@ -207,16 +203,16 @@ namespace web_api_cosmetics_shop.Controllers
                 new { id = shoppingCartDto.UserId },
                 new ResponseDTO()
                 {
-                    Data = await ConvertToShoppingCartDto(existShoppingCart)
+                    Data = await ConvertToShoppingCartDto(existShoppingCart),
+                    Status = 201,
+                    Title = "created",
                 });
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateShoppingCart([FromBody] ShoppingCartDTO shoppingCartDto)
         {
-            if (
-
-                shoppingCartDto == null ||
+            if (shoppingCartDto == null ||
                 shoppingCartDto.Items == null)
             {
                 return BadRequest();
@@ -226,20 +222,21 @@ namespace web_api_cosmetics_shop.Controllers
             var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
             if (currentIdentityUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
             // Exist user from database
             var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
             if (currentUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
+            // Get exist shopping cart
             var existShoppingCart = await _shoppingCartService.GetShoppingCart(currentUser.UserId);
             if (existShoppingCart == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "shopping cart not found", Status = 404 });
             }
 
             var oldShoppingCartItems = await _shoppingCartService.GetAllShoppingCartItems(existShoppingCart);
@@ -255,21 +252,14 @@ namespace web_api_cosmetics_shop.Controllers
                 {
                     if (!newShoppingCartItemsId.Contains(item.CartItemId))
                     {
-                        var removeOldCartItemResult = await _shoppingCartService.RemoveShoppingCartItem(item);
-                        if (removeOldCartItemResult == 0)
-                        {
-                            return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not delete shopping cart item", Status = 500 });
-                        }
+                        await _shoppingCartService.RemoveShoppingCartItem(item);
                     }
                 }
             }
             catch (Exception error)
             {
-                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 500 });
             }
-
 
             // Add shopping cart items list
             try
@@ -288,13 +278,7 @@ namespace web_api_cosmetics_shop.Controllers
                         };
 
                         // Add new ProductItem
-                        var addItemResult = await _shoppingCartService.AddShoppingCartItem(newShoppingCartItem);
-                        if (addItemResult == null)
-                        {
-                            return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not delete shopping cart item", Status = 500 });
-                        }
+                        await _shoppingCartService.AddShoppingCartItem(newShoppingCartItem);
                     }
 
                     // Update old shopping cart item
@@ -303,7 +287,7 @@ namespace web_api_cosmetics_shop.Controllers
                         var existCartItem = await _shoppingCartService.GetShoppingCartItem(item.CartItemId);
                         if (existCartItem == null)
                         {
-                            return NotFound(new ErrorDTO() { Title = "Shopping cart item not found", Status = 404 });
+                            return NotFound(new ErrorDTO() { Title = "shopping cart item not found", Status = 404 });
                         }
 
                         var updateShoppingCartItem = new ShoppingCartItem()
@@ -314,13 +298,7 @@ namespace web_api_cosmetics_shop.Controllers
 
                         if (updateShoppingCartItem.Qty != existCartItem.Qty)
                         {
-                            var updateItemResult = await _shoppingCartService.UpdateShoppingCartItem(updateShoppingCartItem);
-                            if (updateItemResult == null)
-                            {
-                                return StatusCode(
-                                        StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not update shopping cart item", Status = 500 });
-                            }
+                            await _shoppingCartService.UpdateShoppingCartItem(updateShoppingCartItem);
                         }
 
                     }

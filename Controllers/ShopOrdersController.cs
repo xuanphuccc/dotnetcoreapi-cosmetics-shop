@@ -390,13 +390,7 @@ namespace web_api_cosmetics_shop.Controllers
                             {
                                 // Update qty in stock
                                 productItem.QtyInStock -= item.Qty;
-                                var descreaseResult = await _productService.UpdateProductItem(productItem);
-                                if (descreaseResult == null)
-                                {
-                                    return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not update qty in stock", Status = 500 });
-                                }
+                                await _productService.UpdateProductItem(productItem);
                             }
                         }
                     }
