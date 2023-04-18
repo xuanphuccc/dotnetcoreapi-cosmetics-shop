@@ -97,7 +97,12 @@ namespace web_api_cosmetics_shop.Controllers
                 return NotFound(new ErrorDTO() { Title = "user review  already exist", Status = 400 });
             }
             //check order_item
-            var orderItem = await _shopOrderService.GetOrderItem(userReviewDto.OrderItemId);
+            OrderItem orderItem = new();
+            if (userReviewDto.OrderItemId.HasValue)
+            {
+                orderItem= await _shopOrderService.GetOrderItem(userReviewDto.OrderItemId.Value);
+            }
+       
             if (orderItem == null)
             {
                 return NotFound(new ErrorDTO() { Title = "Order Item not found", Status = 400 });

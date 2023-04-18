@@ -9,7 +9,7 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
         Task<List<ShopOrder>> GetUserShopOrders(string userId);
         Task<ShopOrder> GetShopOrder(int shopOrderId);
         Task<List<OrderItem>> GetOrderItems(ShopOrder shopOrder);
-        Task<OrderItem> GetOrderItem(int? orderItemId);
+        Task<OrderItem> GetOrderItem(int orderItemId);
 
         // Add
         Task<ShopOrder> AddShopOrder(ShopOrder shopOrder);
