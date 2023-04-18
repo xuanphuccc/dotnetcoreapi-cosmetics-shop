@@ -27,7 +27,7 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
             return userReview!;
         }
 
-        public async Task<UserReview> GetUserReviewByOrderitemId(int? orderItemId)
+        public async Task<UserReview> GetUserReviewByOrderitemId(int orderItemId)
         {
             var userReview = await _context.UserReviews.FirstOrDefaultAsync(ur => ur.OrderItemId == orderItemId);
             return userReview!;

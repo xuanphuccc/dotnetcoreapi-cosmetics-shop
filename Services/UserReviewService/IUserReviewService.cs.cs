@@ -11,7 +11,7 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         Task<List<UserReview>> GetAllUserReview();
         Task<List<UserReview>> GetUserReviews(string userId);
         Task<UserReview> GetUserReviewByReviewId(int reviewId);
-        Task<UserReview> GetUserReviewByOrderitemId(int? orderItemId);
+        Task<UserReview> GetUserReviewByOrderitemId(int orderItemId);
         Task<List<UserReview>> GetUserReviewByProductId(int productId);
         Task<List<UserReview>> GetUserReviewByOrderId(int orderItemId);
 
