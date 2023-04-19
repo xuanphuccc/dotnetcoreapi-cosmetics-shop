@@ -29,7 +29,7 @@ namespace web_api_cosmetics_shop.Services.AdminService
 
             if (existAdminUser == null)
             {
-                return null!;
+                throw new Exception("invalid username/password");
             }
 
             return existAdminUser;
@@ -44,7 +44,7 @@ namespace web_api_cosmetics_shop.Services.AdminService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("can not register admin");
             }
 
             return adminUser;
@@ -114,7 +114,7 @@ namespace web_api_cosmetics_shop.Services.AdminService
             var existAdminUser = await GetAdminByUserName(adminUser.UserName);
             if (existAdminUser == null)
             {
-                return null!;
+                throw new Exception("admin not found");
             }
 
             existAdminUser.Email = adminUser.Email;
@@ -128,7 +128,7 @@ namespace web_api_cosmetics_shop.Services.AdminService
             var result = await _context.SaveChangesAsync();
             if(result == 0)
             {
-                return null!;
+                throw new Exception("can not update admin");
             }
 
             return existAdminUser;

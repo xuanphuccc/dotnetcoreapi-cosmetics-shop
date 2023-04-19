@@ -19,9 +19,10 @@ namespace web_api_cosmetics_shop.Services.ProductService
         {
             await _context.Products.AddAsync(product);
             var addProductResult = await _context.SaveChangesAsync();
+
             if (addProductResult == 0)
             {
-                return null!;
+                throw new Exception("cannot create product");
             }
 
             return product;
@@ -31,9 +32,10 @@ namespace web_api_cosmetics_shop.Services.ProductService
         {
             await _context.ProductItems.AddAsync(productItem);
             var addProductItemResult = await _context.SaveChangesAsync();
+
             if (addProductItemResult == 0)
             {
-                return null!;
+                throw new Exception("cannot create product item");
             }
             return productItem;
         }
@@ -42,9 +44,10 @@ namespace web_api_cosmetics_shop.Services.ProductService
         {
             await _context.ProductConfigurations.AddAsync(productConfiguration);
             var addProductOptionResult = await _context.SaveChangesAsync();
+
             if (addProductOptionResult == 0)
             {
-                return null!;
+                throw new Exception("cannot create product configuration");
             }
 
             return productConfiguration;
@@ -54,10 +57,12 @@ namespace web_api_cosmetics_shop.Services.ProductService
         {
             await _context.ProductCategories.AddAsync(productCategory);
             var result = await _context.SaveChangesAsync();
+
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create product category");
             }
+
             return productCategory;
         }
         //---------- End Add ----------
@@ -124,6 +129,11 @@ namespace web_api_cosmetics_shop.Services.ProductService
             _context.Remove(product);
             var result = await _context.SaveChangesAsync();
 
+            if(result == 0)
+            {
+                throw new Exception("cannot delete product");
+            }
+
             return result;
         }
 
@@ -131,6 +141,11 @@ namespace web_api_cosmetics_shop.Services.ProductService
         {
             _context.Remove(productItem);
             var result = await _context.SaveChangesAsync();
+
+            if(result == 0)
+            {
+                throw new Exception("cannot delete product item");
+            }
 
             return result;
         }
@@ -147,6 +162,11 @@ namespace web_api_cosmetics_shop.Services.ProductService
         {
             _context.Remove(productCategory);
             var result = await _context.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                throw new Exception("cannot delete product category");
+            }
 
             return result;
         }
@@ -171,7 +191,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
             var existProduct = await GetProductById(product.ProductId);
             if (existProduct == null)
             {
-                return null!;
+                throw new Exception("product not found");
             }
 
             existProduct.Name = product.Name;
@@ -183,7 +203,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update product");
             }
 
             return product;
@@ -195,7 +215,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
             var existProductItem = await GetItem(productItem.ProductItemId);
             if (existProductItem == null)
             {
-                return null!;
+                throw new Exception("product item not found");
             }
 
             existProductItem.SKU = productItem.SKU;
@@ -207,7 +227,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update product item");
             }
 
             return productItem;
@@ -250,7 +270,6 @@ namespace web_api_cosmetics_shop.Services.ProductService
                        where pi.Price >= min && pi.Price <= max
                        group p by p.ProductId into g
                        select g.FirstOrDefault();
-            //group by vì so sánh khoảng giá sẽ lấy ra các sản phẩm và bị trùng sản phẩm
 
             return products;
         }
@@ -334,24 +353,24 @@ namespace web_api_cosmetics_shop.Services.ProductService
         // Convert DTO
         public async Task<ProductDTO> ConvertToProductDtoAsync(Product product, int itemId = 0)
         {
-            // Getting Product Categories
+            // Get product categories
             var categoriesId = (await getProductCategories(product))
                                 .Select(c => { return c.CategoryId != null ? c.CategoryId.Value : 0; })
                                 .ToList();
 
-            // Getting Product Items
+            // Get product items
             var productItems = await GetAllItems(product);
             if (itemId != 0)
             {
-                // Getting one product item
+                // Get one product item
                 productItems = productItems.Where(pi => pi.ProductItemId == itemId).ToList();
             }
 
-            // Converting ProductItem to ProductItemDTO
+            // Convert productItem to productItemDTO
             List<ProductItemDTO> productItemDtos = new();
             foreach (var productItem in productItems)
             {
-                // Get Product Options
+                // Get product options
                 var productOptionsId = (await GetConfigurations(productItem))
                                         .Select(pc => { return pc.ProductOptionId != null ? pc.ProductOptionId.Value : 0; })
                                         .ToList();
@@ -380,7 +399,7 @@ namespace web_api_cosmetics_shop.Services.ProductService
                 productItemDtos.Add(productItemDto);
             }
 
-            // Converting Product to ProductDTO
+            // Convert product to productDTO
             var productDto = new ProductDTO()
             {
                 ProductId = product.ProductId,

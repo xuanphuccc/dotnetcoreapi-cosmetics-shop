@@ -30,7 +30,7 @@ namespace web_api_cosmetics_shop.Services.UserService
 
             if (existUser == null)
             {
-                return null!;
+                throw new Exception("invalid username/password");
             }
 
             return existUser;
@@ -45,7 +45,7 @@ namespace web_api_cosmetics_shop.Services.UserService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("can not register user");
             }
 
             return appUser;
@@ -122,7 +122,7 @@ namespace web_api_cosmetics_shop.Services.UserService
             var existAppUser = await GetUserByUserName(appUser.UserName);
             if (existAppUser == null)
             {
-                return null!;
+                throw new Exception("user not found");
             }
 
             existAppUser.Email = appUser.Email;
@@ -136,7 +136,7 @@ namespace web_api_cosmetics_shop.Services.UserService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("can not update user");
             }
 
             return existAppUser;

@@ -18,11 +18,8 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
         // Remove
         Task<int> RemoveShopOrder(ShopOrder shopOrder);
 
-        // Cancel order
-        Task<ShopOrder> CancelShopOrder(ShopOrder shopOrder);
-
-        // Delivery
-        Task<ShopOrder> DeliveryOrder(ShopOrder shopOrder);
+        // Change order status
+        Task<ShopOrder> ChangeOrderStatus(ShopOrder shopOrder, string statusCode, string statusName);
 
         // Filter
         IQueryable<ShopOrder> FilterAllShopOrders();

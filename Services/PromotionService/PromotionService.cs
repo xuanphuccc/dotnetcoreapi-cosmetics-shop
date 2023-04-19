@@ -1,6 +1,7 @@
 ﻿using web_api_cosmetics_shop.Data;
 using web_api_cosmetics_shop.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using web_api_cosmetics_shop.Models.DTO;
 
 namespace web_api_cosmetics_shop.Services.PromotionService
 {
@@ -40,7 +41,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create promotion");
             }
 
             return promotion;
@@ -54,7 +55,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot delete promotion");
             }
             return promotion;
         }
@@ -66,7 +67,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             if (existPromotion == null)
             {
-                return null!;
+                throw new Exception("promotion not found");
             }
 
             existPromotion.Name = promotion.Name;
@@ -79,7 +80,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update promotion");
             }
 
             return promotion;
@@ -120,7 +121,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
         }
         public IQueryable<Promotion> FilterSortByName(IQueryable<Promotion> promotions, bool isDesc = false)
         {
-            if(isDesc)
+            if (isDesc)
             {
                 promotions = promotions.OrderByDescending(p => p.Name);
             }
@@ -134,7 +135,7 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
         public IQueryable<Promotion> FilterSortByDiscountRate(IQueryable<Promotion> promotions, bool isDesc = false)
         {
-            if(isDesc)
+            if (isDesc)
             {
                 promotions = promotions.OrderByDescending(p => p.DiscountRate);
             }
@@ -148,20 +149,35 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
         public IQueryable<Promotion> FilterByStatus(IQueryable<Promotion> promotions, string status)
         {
-            if(status == "active")
+            if (status == "active")
             {
                 promotions = promotions.Where(p => p.StartDate <= DateTime.UtcNow && DateTime.UtcNow <= p.EndDate);
             }
-            else if(status == "expired")
+            else if (status == "expired")
             {
                 promotions = promotions.Where(p => DateTime.UtcNow > p.EndDate);
             }
-            else if(status == "comming")
+            else if (status == "comming")
             {
                 promotions = promotions.Where(p => DateTime.UtcNow < p.StartDate);
             }
 
             return promotions;
+        }
+
+        // Convert to DTO
+        public PromotionDTO ConvertToPromotionDto(Promotion promotion)
+        {
+            return new PromotionDTO()
+            {
+                PromotionId = promotion.PromotionId,
+                Name = promotion.Name,
+                Description = promotion.Description,
+                DiscountRate = promotion.DiscountRate,
+                StartDate = promotion.StartDate,
+                EndDate = promotion.EndDate,
+                CreateAt = promotion.CreateAt,
+            };
         }
     }
 }

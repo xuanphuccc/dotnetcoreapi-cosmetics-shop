@@ -19,7 +19,7 @@ namespace web_api_cosmetics_shop.Services.WishlistService
 			var result = await _context.SaveChangesAsync();
 			if(result == 0)
 			{
-				return null;
+				throw new Exception("cannot create wishlist");
 			}
 
 			return wishlist;
@@ -55,6 +55,12 @@ namespace web_api_cosmetics_shop.Services.WishlistService
 		{
 			_context.Remove(wishlist);
 			var result = await _context.SaveChangesAsync();
+
+			if(result == 0)
+			{
+                throw new Exception("cannot delete wishlist");
+            }
+
 			return result;
 		}
 

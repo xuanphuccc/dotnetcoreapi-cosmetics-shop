@@ -17,9 +17,10 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
         {
             await _context.OrderItems.AddAsync(orderItem);
             var result = await _context.SaveChangesAsync();
+
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create order item");
             }
 
             return orderItem;
@@ -31,7 +32,7 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create order");
             }
 
             return shopOrder;
@@ -80,78 +81,47 @@ namespace web_api_cosmetics_shop.Services.ShopOrderService
         {
             _context.Remove(shopOrder);
             var result = await _context.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                throw new Exception("cannot delete order");
+            }
+
             return result;
         }
 
-        // Cancel shop order
-        public async Task<ShopOrder> CancelShopOrder(ShopOrder shopOrder)
+        // Change order status
+        public async Task<ShopOrder> ChangeOrderStatus(ShopOrder shopOrder, string statusCode, string statusName)
         {
             var existOrder = await GetShopOrder(shopOrder.OrderId);
             if (existOrder == null)
             {
-                return null!;
+                throw new Exception("order not found");
             }
 
-            var cancelStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.Status.ToLower() == "canceled");
-            if (cancelStatus == null)
+            var orderStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.Status.ToLower() == statusCode.ToLower());
+            if (orderStatus == null)
             {
-                var newCancelOrderStatus = new OrderStatus()
+                var newOrderStatus = new OrderStatus()
                 {
-                    Name = "Đã huỷ đơn hàng",
-                    Status = "canceled"
+                    Name = statusName,
+                    Status = statusCode.ToLower(),
                 };
 
-                await _context.OrderStatuses.AddAsync(newCancelOrderStatus);
+                await _context.OrderStatuses.AddAsync(newOrderStatus);
                 await _context.SaveChangesAsync();
-                cancelStatus = newCancelOrderStatus;
+                orderStatus = newOrderStatus;
             }
 
-            if (cancelStatus != null)
+            if (orderStatus != null)
             {
-                existOrder.OrderStatusId = cancelStatus.OrderStatusId;
+                existOrder.OrderStatusId = orderStatus.OrderStatusId;
             }
 
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
-            }
-
-            return existOrder;
-        }
-
-        // Delivery order
-        public async Task<ShopOrder> DeliveryOrder(ShopOrder shopOrder)
-        {
-            var existOrder = await GetShopOrder(shopOrder.OrderId);
-            if (existOrder == null)
-            {
-                return null!;
-            }
-
-            var deliveryStatus = await _context.OrderStatuses.FirstOrDefaultAsync(o => o.Status.ToLower() == "delivery");
-            if (deliveryStatus == null)
-            {
-                var newDeliveryStatus = new OrderStatus()
-                {
-                    Name = "Đang giao hàng",
-                    Status = "delivery"
-                };
-
-                await _context.OrderStatuses.AddAsync(newDeliveryStatus);
-                await _context.SaveChangesAsync();
-                deliveryStatus = newDeliveryStatus;
-            }
-
-            if (deliveryStatus != null)
-            {
-                existOrder.OrderStatusId = deliveryStatus.OrderStatusId;
-            }
-
-            var result = await _context.SaveChangesAsync();
-            if (result == 0)
-            {
-                return null!;
+                throw new Exception($"cannot {statusCode} order");
             }
 
             return existOrder;
