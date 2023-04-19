@@ -1,4 +1,5 @@
-﻿using web_api_cosmetics_shop.Models.Entities;
+﻿using web_api_cosmetics_shop.Models.DTO;
+using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.PromotionService
 {
@@ -17,6 +18,9 @@ namespace web_api_cosmetics_shop.Services.PromotionService
 
         // Remove
         Task<Promotion> RemovePromotion(Promotion promotion);
+
+        // Convert to DTO
+        PromotionDTO ConvertToPromotionDto(Promotion promotion);
 
         // Filter
         IQueryable<Promotion> FilterAllPromotions();

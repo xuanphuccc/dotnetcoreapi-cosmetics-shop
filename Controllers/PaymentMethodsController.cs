@@ -31,7 +31,10 @@ namespace web_api_cosmetics_shop.Controllers
                 paymentMethodDtos.Add(_paymentMethodService.ConvertToPaymentMethodDto(item));
             }
 
-            return Ok(paymentMethodDtos);
+            return Ok(new ResponseDTO()
+            {
+                Data = paymentMethodDtos
+            });
         }
 
         [HttpGet("{id?}")]
@@ -49,7 +52,10 @@ namespace web_api_cosmetics_shop.Controllers
                 userPaymentMethodsList.Add(_paymentMethodService.ConvertToPaymentMethodDto(item));
             }
 
-            return Ok(userPaymentMethodsList);
+            return Ok(new ResponseDTO()
+            {
+                Data = userPaymentMethodsList
+            });
         }
 
         [HttpPost]
@@ -60,16 +66,18 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Get user from token
             var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
             if (currentIdentityUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
+            // Get user from database
             var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
             if (currentUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
             try
@@ -89,15 +97,13 @@ namespace web_api_cosmetics_shop.Controllers
                 };
 
                 var createdPaymentMethod = await _paymentMethodService.AddPaymentMethod(newPaymentMethod);
-                if (createdPaymentMethod == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not create payment method", Status = 500 });
-                }
 
                 return CreatedAtAction(nameof(GetUserPaymentMethods),
                 new { id = createdPaymentMethod.PaymentMethodId },
-                _paymentMethodService.ConvertToPaymentMethodDto(createdPaymentMethod));
+                new ResponseDTO()
+                {
+                    Data = _paymentMethodService.ConvertToPaymentMethodDto(createdPaymentMethod)
+                });
             }
             catch (Exception error)
             {
@@ -116,7 +122,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existPaymentMethod = await _paymentMethodService.GetPaymentMethod(id.Value);
             if (existPaymentMethod == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "payment not found", Status = 404 });
             }
 
             try
@@ -140,11 +146,11 @@ namespace web_api_cosmetics_shop.Controllers
                     existPaymentMethod.IsDefault != newPaymentMethod.IsDefault)
                 {
                     var updatedPaymentMethod = await _paymentMethodService.UpdatePaymentMethod(newPaymentMethod);
-                    if (updatedPaymentMethod == null)
+
+                    return Ok(new ResponseDTO()
                     {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not update payment method", Status = 500 });
-                    }
+                        Data = _paymentMethodService.ConvertToPaymentMethodDto(updatedPaymentMethod)
+                    });
                 }
             }
             catch (Exception error)
@@ -152,7 +158,12 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
 
-            return Ok(paymentMethodDto);
+            return Ok(new ResponseDTO()
+            {
+                Data = _paymentMethodService.ConvertToPaymentMethodDto(existPaymentMethod),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
         [HttpDelete("{id?}")]
@@ -166,7 +177,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existPaymentMethod = await _paymentMethodService.GetPaymentMethod(id.Value);
             if (existPaymentMethod == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "payment not found", Status = 404 });
             }
 
             try
@@ -177,34 +188,23 @@ namespace web_api_cosmetics_shop.Controllers
                 {
                     // Hide payment method
                     existPaymentMethod.IsDisplay = false;
-                    var updatedPaymentMethod = await _paymentMethodService.UpdatePaymentMethod(existPaymentMethod);
-                    if (updatedPaymentMethod == null)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not hide payment method", Status = 500 });
-                    }
+                    await _paymentMethodService.UpdatePaymentMethod(existPaymentMethod);
                 }
                 else
                 {
                     // Remove payment method
-                    var removedPaymentMethod = await _paymentMethodService.RemovePaymentMethod(existPaymentMethod);
-                    if (removedPaymentMethod == 0)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not remove payment method", Status = 500 });
-                    }
+                    await _paymentMethodService.RemovePaymentMethod(existPaymentMethod);
                 }
             }
             catch (Exception error)
             {
-                return BadRequest(new ErrorDTO()
-                {
-                    Title = "Can not remove payment method already in the order. " + error.Message,
-                    Status = 400
-                });
+                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
 
-            return Ok(_paymentMethodService.ConvertToPaymentMethodDto(existPaymentMethod));
+            return Ok(new ResponseDTO()
+            {
+                Data = _paymentMethodService.ConvertToPaymentMethodDto(existPaymentMethod)
+            });
         }
     }
 }

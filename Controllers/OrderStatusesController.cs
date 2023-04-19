@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 using web_api_cosmetics_shop.Services.OrderStatusService;
-using web_api_cosmetics_shop.Services.ShippingMethodService;
 
 namespace web_api_cosmetics_shop.Controllers
 {
@@ -61,14 +60,12 @@ namespace web_api_cosmetics_shop.Controllers
             var orderStatus = await _orderStatusService.GetOrderStatus(id.Value);
             if (orderStatus == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "status not found", Status = 404 });
             }
-
-            var orderStatusDto = ConvertToOrderStatusDto(orderStatus);
 
             return Ok(new ResponseDTO()
             {
-                Data = orderStatusDto
+                Data = ConvertToOrderStatusDto(orderStatus)
             });
         }
 
@@ -89,11 +86,6 @@ namespace web_api_cosmetics_shop.Controllers
                 };
 
                 var addResult = await _orderStatusService.AddOrderStatus(newOrderStatus);
-                if (addResult == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                                new ErrorDTO() { Title = "Can not add order status", Status = 500 });
-                }
 
                 return CreatedAtAction(
                     nameof(GetOrderStatus),
@@ -120,7 +112,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existOrderStatus = await _orderStatusService.GetOrderStatus(id.Value);
             if (existOrderStatus == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "status not found", Status = 404 });
             }
 
             // Update order status
@@ -137,22 +129,25 @@ namespace web_api_cosmetics_shop.Controllers
                     existOrderStatus.Name != updateOrderStatus.Name)
                 {
                     var updateResult = await _orderStatusService.UpdateOrderStatus(updateOrderStatus);
-                    if (updateResult == null)
+
+                    return Ok(new ResponseDTO()
                     {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                            new ErrorDTO() { Title = "Can not update order status", Status = 500 });
-                    }
+                        Data = ConvertToOrderStatusDto(updateOrderStatus)
+                    });
                 }
 
-                return Ok(new ResponseDTO()
-                {
-                    Data = orderStatusDto
-                });
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToOrderStatusDto(existOrderStatus),
+                Status = 304,
+                Title = "not modified"
+            });
         }
 
         [HttpDelete("{id?}")]
@@ -166,20 +161,13 @@ namespace web_api_cosmetics_shop.Controllers
             var existOrderStatus = await _orderStatusService.GetOrderStatus(id.Value);
             if (existOrderStatus == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "status not found", Status = 404 });
             }
-
-            var hasRemove = ConvertToOrderStatusDto(existOrderStatus);
 
             // Delete order status
             try
             {
-                var removeResult = await _orderStatusService.RemoveOrderStatus(existOrderStatus);
-                if (removeResult == 0)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not remove order status", Status = 500 });
-                }
+                await _orderStatusService.RemoveOrderStatus(existOrderStatus);
             }
             catch (Exception error)
             {
@@ -188,7 +176,7 @@ namespace web_api_cosmetics_shop.Controllers
 
             return Ok(new ResponseDTO()
             {
-                Data = hasRemove
+                Data = ConvertToOrderStatusDto(existOrderStatus)
             });
         }
     }
