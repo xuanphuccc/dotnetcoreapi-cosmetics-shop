@@ -56,10 +56,7 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
                                     ).ToListAsync();
             return userReview;
         }
-        public Task<List<UserReview>> GetUserReviews(string userId)
-        {
-            throw new NotImplementedException();
-        }
+
         //add
         public async Task<UserReview> AddUserReview(UserReview userReview)
         {
@@ -77,11 +74,7 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         public async Task<UserReview> UpdateUserReview(UserReview userReview)
         {
             UserReview exitsUserReview = new();
-            if (userReview.OrderItemId.HasValue)
-            {
-                exitsUserReview = await GetUserReviewByOrderitemId(userReview.OrderItemId.Value);
-            }
-
+            exitsUserReview = await GetUserReviewByReviewId(userReview.ReviewId);
             if (exitsUserReview == null)
             {
                 return null!;
@@ -102,6 +95,11 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
         {
             _context.Remove(userReview);
             var result = await _context.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                throw new Exception("cannot remove review");
+            }
             return result;
         }
 
