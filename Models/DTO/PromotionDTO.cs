@@ -4,7 +4,9 @@ namespace web_api_cosmetics_shop.Models.DTO
 {
 	public class PromotionDTO
 	{
-		[Required]
+        public int PromotionId { get; set; }
+
+        [Required]
 		[StringLength(256)]
 		public string Name { get; set; } = string.Empty;
 

@@ -49,7 +49,7 @@ namespace web_api_cosmetics_shop.Services.RoleService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("can not create role");
             }
 
             return role;
@@ -62,7 +62,7 @@ namespace web_api_cosmetics_shop.Services.RoleService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("can not add role");
             }
 
             return adminRole;
@@ -76,7 +76,7 @@ namespace web_api_cosmetics_shop.Services.RoleService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("can not delete role");
             }
 
             return role;
@@ -91,14 +91,14 @@ namespace web_api_cosmetics_shop.Services.RoleService
 
             if (existAdminRole == null)
             {
-                return null!;
+                throw new Exception("role not found");
             }
 
             _context.AdminRoles.Remove(existAdminRole);
             var result = await _context.SaveChangesAsync();
             if(result == 0)
             {
-                return null!;
+                throw new Exception("can not remove role");
             }
 
             return existAdminRole;
@@ -111,7 +111,7 @@ namespace web_api_cosmetics_shop.Services.RoleService
 
             if (existRole == null)
             {
-                return null!;
+                throw new Exception("role not found");
             }
 
             existRole.Name = role.Name;
@@ -119,7 +119,7 @@ namespace web_api_cosmetics_shop.Services.RoleService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update role");
             }
 
             return existRole;

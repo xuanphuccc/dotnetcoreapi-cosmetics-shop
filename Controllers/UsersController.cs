@@ -19,7 +19,7 @@ namespace web_api_cosmetics_shop.Controllers
         private readonly IPaymentMethodService _paymentMethodService;
         public UsersController(IUserService userService, IAddressService addressService, IPaymentMethodService paymentMethodService)
         {
-            _paymentMethodService=paymentMethodService;
+            _paymentMethodService = paymentMethodService;
             _addressService = addressService;
             _userService = userService;
         }
@@ -44,7 +44,7 @@ namespace web_api_cosmetics_shop.Controllers
             foreach (var paymentMethod in userPaymentMethods)
             {
                 var paymentMethodDto = _paymentMethodService.ConvertToPaymentMethodDto(paymentMethod);
-				paymentMethodDtos.Add(paymentMethodDto);
+                paymentMethodDtos.Add(paymentMethodDto);
             }
 
             var appUserDto = _userService.ConvertToAppUserDto(appUser);
@@ -62,7 +62,7 @@ namespace web_api_cosmetics_shop.Controllers
             List<AppUserDTO> users = new List<AppUserDTO>();
             foreach (var user in allUsers)
             {
-                users.Add( await ConvertToAppUserDto(user));
+                users.Add(await ConvertToAppUserDto(user));
             }
 
             return Ok(new ResponseDTO()
@@ -76,16 +76,18 @@ namespace web_api_cosmetics_shop.Controllers
         [Authorize]
         public async Task<IActionResult> GetCurrentUser()
         {
+            // Get user from token
             var userIdentity = _userService.GetCurrentUser(HttpContext.User);
             if (userIdentity == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
+            // Get user from database
             var currentUser = await _userService.GetUserByUserName(userIdentity.UserName);
             if (currentUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
             return Ok(new ResponseDTO()
@@ -107,7 +109,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existUser = await _userService.GetUserById(id);
             if (existUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
             return Ok(new ResponseDTO()
@@ -125,12 +127,14 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Check exist email
             var existEmail = await _userService.GetUserByEmail(appUserDto.Email);
             if (existEmail != null)
             {
                 return BadRequest(new ErrorDTO() { Title = "email already exist" });
             }
 
+            // Check exist username
             var existUsername = await _userService.GetUserByUserName(appUserDto.UserName);
             if (existUsername != null)
             {
@@ -152,20 +156,13 @@ namespace web_api_cosmetics_shop.Controllers
                     CreatedAt = DateTime.UtcNow,
                 };
 
+                // Register user
                 var registedUser = await _userService.Register(newUser, appUserDto.Password);
-                if (registedUser == null)
-                {
-                    return StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorDTO() { Title = "can not register user", Status = 500 });
-                }
 
+                // Login user
                 var loggedUser = await _userService.Login(registedUser, registedUser.Password);
-                if (loggedUser == null)
-                {
-                    return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
-                }
 
+                // Generate token
                 var token = _userService.GenerateToken(loggedUser);
 
                 return Ok(new ResponseDTO()
@@ -197,12 +194,10 @@ namespace web_api_cosmetics_shop.Controllers
                     return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
 
+                // Login admin
                 var loggedUser = await _userService.Login(existUser, userLoginDto.Password);
-                if (loggedUser == null)
-                {
-                    return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
-                }
 
+                // Generate token
                 var token = _userService.GenerateToken(loggedUser);
 
                 return Ok(new ResponseDTO()
@@ -230,21 +225,21 @@ namespace web_api_cosmetics_shop.Controllers
             var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
             if (currentIdentityUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
             // Get user from database
             var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
             if (currentUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
             // Check exist email
             var existEmail = await _userService.GetUserByEmail(appUserDto.Email);
-            if(existEmail != null && appUserDto.Email.ToLower() != currentUser.Email.ToLower())
+            if (existEmail != null && appUserDto.Email.ToLower() != currentUser.Email.ToLower())
             {
-                return BadRequest(new ErrorDTO() { Title = "email already exist"});
+                return BadRequest(new ErrorDTO() { Title = "email already exist" });
             }
 
             try
@@ -269,30 +264,26 @@ namespace web_api_cosmetics_shop.Controllers
                     currentUser.Gender != updateUser.Gender ||
                     currentUser.BirthDate != updateUser.BirthDate)
                 {
+                    // Update user
                     var updatedUser = await _userService.UpdateUser(updateUser);
-                    if (updatedUser == null)
-                    {
-                        return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "can not update user", Status = 500 });
-                    }
 
                     return Ok(new ResponseDTO()
                     {
                         Data = await ConvertToAppUserDto(updatedUser)
                     });
                 }
-                else
-                {
-                    return StatusCode(
-                        StatusCodes.Status304NotModified,
-                        new ErrorDTO() { Title = "not modified", Status = 304 });
-                }
             }
             catch (Exception ex)
             {
                 return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = await ConvertToAppUserDto(currentUser),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
     }

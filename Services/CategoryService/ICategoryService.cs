@@ -1,4 +1,5 @@
-﻿using web_api_cosmetics_shop.Models.Entities;
+﻿using web_api_cosmetics_shop.Models.DTO;
+using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.CategoryService
 {
@@ -17,6 +18,9 @@ namespace web_api_cosmetics_shop.Services.CategoryService
 
 		// Remove
 		Task<Category> RemoveCategory(Category category);
+
+		// Convert to DTO
+		CategoryDTO ConvertToCategoryDto(Category category);
 
         // Filter
         IQueryable<Category> FilterAllCategories();

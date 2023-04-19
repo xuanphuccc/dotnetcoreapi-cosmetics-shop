@@ -21,7 +21,7 @@ namespace web_api_cosmetics_shop.Controllers
         {
             var roles = await _roleService.GetAllRoles();
 
-            List<RoleDTO> rolesDto = new List<RoleDTO>();
+            List<RoleDTO> rolesDto = new();
             foreach (var role in roles)
             {
                 rolesDto.Add(_roleService.ConvertToRoleDto(role));
@@ -44,7 +44,7 @@ namespace web_api_cosmetics_shop.Controllers
             var role = await _roleService.GetRoleById(id.Value);
             if (role == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "role not found", Status = 404 });
             }
 
             return Ok(new ResponseDTO()
@@ -64,11 +64,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existNameRole = await _roleService.GetRoleByName(roleDto.Name);
             if (existNameRole != null)
             {
-                return BadRequest(new ErrorDTO()
-                {
-                    Title = "name already exist",
-                    Status = 400
-                });
+                return BadRequest(new ErrorDTO() { Title = "name already exist", Status = 400 });
             }
 
             try
@@ -79,16 +75,15 @@ namespace web_api_cosmetics_shop.Controllers
                 };
 
                 var createdRole = await _roleService.AddRole(newRole);
-                if (createdRole == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                                new ErrorDTO() { Title = "Can not create role", Status = 500 });
-                }
 
                 return CreatedAtAction(
                     nameof(GetRole),
                     new { id = createdRole.RoleId },
-                    new ResponseDTO() { Data = _roleService.ConvertToRoleDto(createdRole), Status = 201 });
+                    new ResponseDTO()
+                    {
+                        Data = _roleService.ConvertToRoleDto(createdRole),
+                        Status = 201
+                    });
             }
             catch (Exception error)
             {
@@ -104,20 +99,18 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Get exist role
             var existRole = await _roleService.GetRoleById(id.Value);
             if (existRole == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "role not found", Status = 404 });
             }
 
+            // Check exist role name
             var existNameRole = await _roleService.GetRoleByName(roleDto.Name);
             if (existNameRole != null && existRole.Name != roleDto.Name)
             {
-                return BadRequest(new ErrorDTO()
-                {
-                    Title = "name already exist",
-                    Status = 400
-                });
+                return BadRequest(new ErrorDTO() { Title = "name already exist", Status = 400 });
             }
 
             try
@@ -131,23 +124,25 @@ namespace web_api_cosmetics_shop.Controllers
                 if (existRole.Name != updateRole.Name)
                 {
                     var updatedRole = await _roleService.UpdateRole(updateRole);
-                    if (updatedRole == null)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                                    new ErrorDTO() { Title = "Can not update role", Status = 500 });
-                    }
 
+                    return Ok(new ResponseDTO()
+                    {
+                        Data = _roleService.ConvertToRoleDto(updatedRole)
+                    });
                 }
 
-                return Ok(new ResponseDTO()
-                {
-                    Data = roleDto
-                });
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = _roleService.ConvertToRoleDto(existRole),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
         [HttpDelete("{id?}")]
@@ -161,27 +156,22 @@ namespace web_api_cosmetics_shop.Controllers
             var existRole = await _roleService.GetRoleById(id.Value);
             if (existRole == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "role not found", Status = 404 });
             }
 
             try
             {
-                var deletedRole = await _roleService.RemoveRole(existRole);
-                if (deletedRole == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                                new ErrorDTO() { Title = "Can not delete role", Status = 500 });
-                }
-
-                return Ok(new ResponseDTO()
-                {
-                    Data = _roleService.ConvertToRoleDto(existRole)
-                });
+                await _roleService.RemoveRole(existRole);
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = _roleService.ConvertToRoleDto(existRole)
+            });
         }
     }
 }

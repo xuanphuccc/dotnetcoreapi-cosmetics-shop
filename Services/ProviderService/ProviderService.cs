@@ -18,7 +18,7 @@ namespace web_api_cosmetics_shop.Services.ProviderService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create provider");
             }
 
             return provider;
@@ -42,6 +42,12 @@ namespace web_api_cosmetics_shop.Services.ProviderService
         {
             _context.Remove(provider);
             var result = await _context.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                throw new Exception("cannot delete provider");
+            }
+
             return result;
         }
 
@@ -50,7 +56,7 @@ namespace web_api_cosmetics_shop.Services.ProviderService
             var existProvider = await GetProvider(provider.ProviderId);
             if (existProvider == null)
             {
-                return null!;
+                throw new Exception("provider not found");
             }
 
             existProvider.Name = provider.Name;
@@ -58,7 +64,7 @@ namespace web_api_cosmetics_shop.Services.ProviderService
 
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update provider");
             }
 
             return existProvider;

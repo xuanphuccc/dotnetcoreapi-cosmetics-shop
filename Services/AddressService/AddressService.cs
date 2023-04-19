@@ -18,9 +18,10 @@ namespace web_api_cosmetics_shop.Services.AddressService
 		{
 			await _context.AddAsync(address);
 			var result = await _context.SaveChangesAsync();
+
 			if(result == 0)
 			{
-				return null!;
+				throw new Exception("can not create address");
 			}
 
 			return address;
@@ -65,6 +66,12 @@ namespace web_api_cosmetics_shop.Services.AddressService
 		{
 			_context.Remove(address);
 			var result = await _context.SaveChangesAsync();
+
+			if(result == 0)
+			{
+				throw new Exception("cannot remove address");
+			}
+
 			return result;
 		}
 
@@ -75,8 +82,8 @@ namespace web_api_cosmetics_shop.Services.AddressService
 
 			if(existAddress == null)
 			{
-				return null!;
-			}
+                throw new Exception("address not found");
+            }
 
 			existAddress.FullName = address.FullName;
 			existAddress.City = address.City;
@@ -88,10 +95,11 @@ namespace web_api_cosmetics_shop.Services.AddressService
 			existAddress.IsDisplay = address.IsDisplay;
 
 			var result = await _context.SaveChangesAsync();
+
 			if(result == 0)
 			{
-				return null!;
-			}
+                throw new Exception("cannot update address");
+            }
 
 			return existAddress;
 		}

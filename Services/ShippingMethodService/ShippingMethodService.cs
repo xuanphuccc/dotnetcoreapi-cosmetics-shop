@@ -18,7 +18,7 @@ namespace web_api_cosmetics_shop.Services.ShippingMethodService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create shipping method");
             }
 
             return shippingMethod;
@@ -43,6 +43,11 @@ namespace web_api_cosmetics_shop.Services.ShippingMethodService
             _context.Remove(shippingMethod);
             var result = await _context.SaveChangesAsync();
 
+            if (result == 0)
+            {
+                throw new Exception("cannot delete shipping method");
+            }
+
             return result;
         }
 
@@ -51,7 +56,7 @@ namespace web_api_cosmetics_shop.Services.ShippingMethodService
             var existShippingMethod = await GetShippingMethod(shippingMethod.ShippingMethodId);
             if (existShippingMethod == null)
             {
-                return null!;
+                throw new Exception("shipping method not found");
             }
 
             existShippingMethod.Name = shippingMethod.Name;
@@ -60,7 +65,7 @@ namespace web_api_cosmetics_shop.Services.ShippingMethodService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update shipping method");
             }
 
             return existShippingMethod;
@@ -82,7 +87,7 @@ namespace web_api_cosmetics_shop.Services.ShippingMethodService
         }
         public IQueryable<ShippingMethod> FilterSortByCreationTime(IQueryable<ShippingMethod> shippingMethods, bool isDesc = true)
         {
-            if(isDesc)
+            if (isDesc)
             {
                 shippingMethods = shippingMethods.OrderByDescending(s => s.CreateAt);
             }
@@ -95,7 +100,7 @@ namespace web_api_cosmetics_shop.Services.ShippingMethodService
         }
         public IQueryable<ShippingMethod> FilterSortByName(IQueryable<ShippingMethod> shippingMethods, bool isDesc = false)
         {
-            if(isDesc)
+            if (isDesc)
             {
                 shippingMethods = shippingMethods.OrderByDescending(s => s.Name);
             }
@@ -108,7 +113,7 @@ namespace web_api_cosmetics_shop.Services.ShippingMethodService
         }
         public IQueryable<ShippingMethod> FilterSortByPrice(IQueryable<ShippingMethod> shippingMethods, bool isDesc = false)
         {
-            if(isDesc)
+            if (isDesc)
             {
                 shippingMethods = shippingMethods.OrderByDescending(s => s.Price);
             }

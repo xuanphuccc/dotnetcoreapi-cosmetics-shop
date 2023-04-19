@@ -76,14 +76,14 @@ namespace web_api_cosmetics_shop.Controllers
             var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
             if (currentIdentityAdmin == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "admin not found", Status = 404 });
             }
 
             // Get admin from database
             var currentAdmin = await _adminService.GetAdminByUserName(currentIdentityAdmin.UserName);
             if (currentAdmin == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "admin not found", Status = 404 });
             }
 
             return Ok(new ResponseDTO()
@@ -105,7 +105,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existAdmin = await _adminService.GetAdminById(id);
             if (existAdmin == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "admin not found", Status = 404 });
             }
 
             return Ok(new ResponseDTO()
@@ -123,12 +123,14 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
+            // Check exist email
             var existEmail = await _adminService.GetAdminByEmail(adminUserDto.Email);
             if (existEmail != null)
             {
                 return BadRequest(new ErrorDTO() { Title = "email already exist" });
             }
 
+            // Check exist username
             var existUserName = await _adminService.GetAdminByUserName(adminUserDto.UserName);
             if (existUserName != null)
             {
@@ -150,21 +152,13 @@ namespace web_api_cosmetics_shop.Controllers
                     CreatedAt = DateTime.UtcNow,
                 };
 
+                // Register admin
                 var createdAdmin = await _adminService.Register(newAdmin, adminUserDto.Password);
-                if (createdAdmin == null)
-                {
-                    return StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorDTO() { Title = "can not register admin", Status = 500 });
-                }
 
-
+                // Login admin
                 var loggedAdmin = await _adminService.Login(createdAdmin, adminUserDto.Password);
-                if (loggedAdmin == null)
-                {
-                    return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
-                }
 
+                // Generate token
                 string token = _adminService.GenerateToken(loggedAdmin);
 
                 return Ok(new ResponseDTO()
@@ -195,14 +189,13 @@ namespace web_api_cosmetics_shop.Controllers
                     return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
                 }
 
+                // Login admin
                 var loggedAdmin = await _adminService.Login(existAdmin, userLoginDto.Password);
-                if (loggedAdmin == null)
-                {
-                    return BadRequest(new ErrorDTO() { Title = "invalid username/password", Status = 400 });
-                }
 
+                // Get admin roles
                 var adminRoles = await _roleService.GetAdminRoles(loggedAdmin);
 
+                // Generate token
                 string token = _adminService.GenerateToken(loggedAdmin, adminRoles);
 
                 return Ok(new ResponseDTO()
@@ -230,19 +223,19 @@ namespace web_api_cosmetics_shop.Controllers
             var currentIdentityAdmin = _adminService.GetCurrentAdmin(HttpContext.User);
             if (currentIdentityAdmin == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "admin not found", Status = 404 });
             }
 
             // Get admin from database
             var currentAdmin = await _adminService.GetAdminByUserName(currentIdentityAdmin.UserName);
             if (currentAdmin == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "admin not found", Status = 404 });
             }
 
             // Check exist email
             var existEmail = await _adminService.GetAdminByEmail(adminUserDto.Email);
-            if(existEmail != null && currentAdmin.Email.ToLower() != adminUserDto.Email.ToLower())
+            if (existEmail != null && currentAdmin.Email.ToLower() != adminUserDto.Email.ToLower())
             {
                 return BadRequest(new ErrorDTO() { Title = "email already exist" });
             }
@@ -270,29 +263,24 @@ namespace web_api_cosmetics_shop.Controllers
                     currentAdmin.BirthDate != updateAdmin.BirthDate)
                 {
                     var updatedAdmin = await _adminService.UpdateAdmin(updateAdmin);
-                    if (updatedAdmin == null)
-                    {
-                        return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "can not update admin", Status = 500 });
-                    }
 
                     return Ok(new ResponseDTO()
                     {
                         Data = await ConvertToAdminUserDto(updatedAdmin)
                     });
                 }
-                else
-                {
-                    return StatusCode(
-                        StatusCodes.Status304NotModified,
-                        new ErrorDTO() { Title = "not modified", Status = 304 });
-                }
             }
             catch (Exception ex)
             {
                 return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = await ConvertToAdminUserDto(currentAdmin),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
         [HttpPut("account/{id?}")]
@@ -307,7 +295,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existAdmin = await _adminService.GetAdminById(id);
             if (existAdmin == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "admin not found", Status = 404 });
             }
 
             var existAdminRoles = await _roleService.GetAdminRoles(existAdmin);
@@ -321,22 +309,16 @@ namespace web_api_cosmetics_shop.Controllers
                 // Delete list: in existAdminRoles but not in newAdminRoles
                 foreach (var item in existAdminRoles)
                 {
-                    if(!newAdminRolesId.Contains(item.RoleId))
+                    if (!newAdminRolesId.Contains(item.RoleId))
                     {
-                        var removeResult = await _roleService.RemoveAdminRole(existAdmin, item);
-                        if(removeResult == null)
-                        {
-                            return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "can not remove role", Status = 500 });
-                        }
+                        await _roleService.RemoveAdminRole(existAdmin, item);
                     }
                 }
 
                 // Add list: in newAdminRoles but not in existAdminRoles
                 foreach (var item in newAdminRoles)
                 {
-                    if(!existAdminRolesId.Contains(item.RoleId))
+                    if (!existAdminRolesId.Contains(item.RoleId))
                     {
                         var newAdminRole = new AdminRole()
                         {
@@ -344,13 +326,7 @@ namespace web_api_cosmetics_shop.Controllers
                             RoleId = item.RoleId,
                         };
 
-                        var createdResult = await _roleService.AddAdminRole(newAdminRole);
-                        if(createdResult == null)
-                        {
-                            return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "can not add role", Status = 500 });
-                        }
+                        await _roleService.AddAdminRole(newAdminRole);
                     }
                 }
             }
