@@ -28,13 +28,16 @@ namespace web_api_cosmetics_shop.Controllers
         {
             var allAddresses = await _addressService.GetAllAddresses();
 
-            List<AddressDTO> addresses = new List<AddressDTO>();
+            List<AddressDTO> addresses = new();
             foreach (var item in allAddresses)
             {
                 addresses.Add(_addressService.ConvertToAddressDto(item));
             }
 
-            return Ok(addresses);
+            return Ok(new ResponseDTO()
+            {
+                Data = addresses
+            });
         }
 
         [HttpGet("{id?}")]
@@ -47,13 +50,16 @@ namespace web_api_cosmetics_shop.Controllers
 
             var userAddress = await _addressService.GetUserAddresses(id);
 
-            List<AddressDTO> listAddress = new List<AddressDTO>();
+            List<AddressDTO> listAddress = new();
             foreach (var item in userAddress)
             {
                 listAddress.Add(_addressService.ConvertToAddressDto(item));
             }
 
-            return Ok(listAddress);
+            return Ok(new ResponseDTO()
+            {
+                Data = listAddress
+            });
         }
 
         [HttpPost]
@@ -66,16 +72,20 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             // ** need to double check the user's id
+            // Get user from token
             var userIdentity = _userService.GetCurrentUser(HttpContext.User);
             if (userIdentity == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
+
+            // Get user from database
             var currentUser = await _userService.GetUserByUserName(userIdentity.UserName);
             if (currentUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
+
             // Add new address
             try
             {
@@ -93,21 +103,20 @@ namespace web_api_cosmetics_shop.Controllers
                 };
 
                 var addResult = await _addressService.AddAddress(newAddress);
-                if (addResult == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not create address", Status = 500 });
-                }
 
                 return CreatedAtAction(nameof(GetUserAddresses),
                                     new { id = addResult.UserId },
-                                    _addressService.ConvertToAddressDto(addResult));
+                                    new ResponseDTO()
+                                    {
+                                        Data = _addressService.ConvertToAddressDto(addResult),
+                                        Status = 201,
+                                        Title = "created",
+                                    });
             }
-            catch (Exception error)
+            catch (Exception ex)
             {
-                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+                return BadRequest(new ErrorDTO() { Title = ex.Message, Status = 400 });
             }
-
         }
 
         [HttpPut("{id?}")]
@@ -121,7 +130,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existAddress = await _addressService.GetAddress(id.Value);
             if (existAddress == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "address not found", Status = 404 });
             }
 
             // ** need to double check the user's id
@@ -148,12 +157,12 @@ namespace web_api_cosmetics_shop.Controllers
                     existAddress.PhoneNumber != addressDto.PhoneNumber ||
                     existAddress.IsDefault != addressDto.IsDefault)
                 {
-                    var updateResult = await _addressService.UpdateAddress(updateAddress);
-                    if (updateResult == null)
+                    var updatedAdress = await _addressService.UpdateAddress(updateAddress);
+
+                    return Ok(new ResponseDTO()
                     {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not update address", Status = 500 });
-                    }
+                        Data = _addressService.ConvertToAddressDto(updatedAdress)
+                    });
                 }
             }
             catch (Exception error)
@@ -161,7 +170,12 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
 
-            return Ok(addressDto);
+            return Ok(new ResponseDTO()
+            {
+                Data = _addressService.ConvertToAddressDto(existAddress),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
         [HttpDelete("{id?}")]
@@ -175,7 +189,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existAddress = await _addressService.GetAddress(id.Value);
             if (existAddress == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "address not found", Status = 404 });
             }
 
             // Remove address
@@ -187,22 +201,12 @@ namespace web_api_cosmetics_shop.Controllers
                 {
                     // Hide address
                     existAddress.IsDisplay = false;
-                    var updateResult = await _addressService.UpdateAddress(existAddress);
-                    if (updateResult == null)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not hide address", Status = 500 });
-                    }
+                    await _addressService.UpdateAddress(existAddress);
                 }
                 else
                 {
                     // Remove address
-                    var removeResult = await _addressService.RemoveAddress(existAddress);
-                    if (removeResult == 0)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not remove address", Status = 500 });
-                    }
+                    await _addressService.RemoveAddress(existAddress);
                 }
             }
             catch (Exception error)
@@ -210,7 +214,10 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
 
-            return Ok(_addressService.ConvertToAddressDto(existAddress));
+            return Ok(new ResponseDTO()
+            {
+                Data = _addressService.ConvertToAddressDto(existAddress),
+            });
         }
     }
 }

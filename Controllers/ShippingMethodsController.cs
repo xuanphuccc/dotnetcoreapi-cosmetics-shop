@@ -39,14 +39,17 @@ namespace web_api_cosmetics_shop.Controllers
         {
             var shippingMethodQuery = _shippingMethodService.FilterAllShippingMethods();
 
+            // Search
             if (!string.IsNullOrEmpty(search))
             {
                 shippingMethodQuery = _shippingMethodService.FilterSearch(shippingMethodQuery, search);
             }
 
-            if(!string.IsNullOrEmpty(sort))
+            // Sort
+            if (!string.IsNullOrEmpty(sort))
             {
-                switch (sort.ToLower()) {
+                switch (sort.ToLower())
+                {
                     case "creationtimedesc":
                         shippingMethodQuery = _shippingMethodService.FilterSortByCreationTime(shippingMethodQuery, isDesc: true);
                         break;
@@ -80,7 +83,10 @@ namespace web_api_cosmetics_shop.Controllers
                 shippingMethodDtos.Add(shippingMethodDto);
             }
 
-            return Ok(shippingMethodDtos);
+            return Ok(new ResponseDTO()
+            {
+                Data = shippingMethodDtos
+            });
         }
 
         [HttpGet("{id?}")]
@@ -94,12 +100,13 @@ namespace web_api_cosmetics_shop.Controllers
             var shippingMethod = await _shippingMethodService.GetShippingMethod(id.Value);
             if (shippingMethod == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "shipping method not found", Status = 404 });
             }
 
-            var shippingMethodDto = ConvertToShippingMethodDto(shippingMethod);
-
-            return Ok(shippingMethodDto);
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToShippingMethodDto(shippingMethod)
+            });
         }
 
         [HttpPost]
@@ -121,19 +128,15 @@ namespace web_api_cosmetics_shop.Controllers
                 };
 
                 var createdShippingMethod = await _shippingMethodService.AddShippingMethod(newShippingMethod);
-                if (createdShippingMethod == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not create shipping method", Status = 500 });
-                }
-
-                // Get Information
-                shippingMethodDto.ShippingMethodId = createdShippingMethod.ShippingMethodId;
 
                 return CreatedAtAction(
                     nameof(GetShippingmethod),
                     new { id = createdShippingMethod.ShippingMethodId },
-                    shippingMethodDto);
+                    new ResponseDTO()
+                    {
+                        Data = ConvertToShippingMethodDto(createdShippingMethod),
+                        Status = 201,
+                    });
             }
             catch (Exception error)
             {
@@ -152,7 +155,7 @@ namespace web_api_cosmetics_shop.Controllers
             var existShippingMethod = await _shippingMethodService.GetShippingMethod(id.Value);
             if (existShippingMethod == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "shipping method not found", Status = 404 });
             }
 
             // Update shiping method
@@ -169,11 +172,11 @@ namespace web_api_cosmetics_shop.Controllers
                     existShippingMethod.Price != updateShippingMethod.Price)
                 {
                     var updateResult = await _shippingMethodService.UpdateShippingMethod(updateShippingMethod);
-                    if (updateResult == null)
+
+                    return Ok(new ResponseDTO()
                     {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                                        new ErrorDTO() { Title = "Can not update shipping method", Status = 500 });
-                    }
+                        Data = ConvertToShippingMethodDto(updateResult),
+                    });
                 }
             }
             catch (Exception error)
@@ -181,7 +184,12 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
 
-            return Ok(shippingMethodDto);
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToShippingMethodDto(existShippingMethod),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
         [HttpDelete("{id?}")]
@@ -193,30 +201,25 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             var existShippingMethod = await _shippingMethodService.GetShippingMethod(id.Value);
-
-            var hasRemove = ConvertToShippingMethodDto(existShippingMethod);
-
             if (existShippingMethod == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "shipping method not found", Status = 404 });
             }
 
             // Remove shipping method
             try
             {
-                var removeResult = await _shippingMethodService.RemoveShippingMethod(existShippingMethod);
-                if (removeResult == 0)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not remove shipping method", Status = 500 });
-                }
+                await _shippingMethodService.RemoveShippingMethod(existShippingMethod);
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
 
-            return Ok(hasRemove);
+            return Ok(new ResponseDTO()
+            {
+                Data = ConvertToShippingMethodDto(existShippingMethod)
+            });
         }
     }
 }

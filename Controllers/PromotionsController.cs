@@ -25,47 +25,59 @@ namespace web_api_cosmetics_shop.Controllers
             [FromQuery] string? sort,
             [FromQuery] string? status)
         {
-            var promotions = _promotionService.FilterAllPromotions();
+            var promotionsQuery = _promotionService.FilterAllPromotions();
 
             // Search promotions
             if (!string.IsNullOrEmpty(search))
             {
-                promotions = _promotionService.FilterSearch(promotions, search);
+                promotionsQuery = _promotionService.FilterSearch(promotionsQuery, search);
             }
 
             // Filter by status
-            if(!string.IsNullOrEmpty(status))
+            if (!string.IsNullOrEmpty(status))
             {
-                promotions = _promotionService.FilterByStatus(promotions, status);
+                promotionsQuery = _promotionService.FilterByStatus(promotionsQuery, status);
             }
 
-            if(!string.IsNullOrEmpty(sort)) {
+            if (!string.IsNullOrEmpty(sort))
+            {
                 switch (sort.ToLower())
                 {
                     case "namedesc":
-                        promotions = _promotionService.FilterSortByName(promotions, isDesc: true);
+                        promotionsQuery = _promotionService.FilterSortByName(promotionsQuery, isDesc: true);
                         break;
                     case "nameasc":
-                        promotions = _promotionService.FilterSortByName(promotions, isDesc: false);
+                        promotionsQuery = _promotionService.FilterSortByName(promotionsQuery, isDesc: false);
                         break;
                     case "creationtimedesc":
-                        promotions = _promotionService.FilterSortByCreationTime(promotions, isDesc: true);
+                        promotionsQuery = _promotionService.FilterSortByCreationTime(promotionsQuery, isDesc: true);
                         break;
                     case "creationtimeasc":
-                        promotions = _promotionService.FilterSortByCreationTime(promotions, isDesc: false);
+                        promotionsQuery = _promotionService.FilterSortByCreationTime(promotionsQuery, isDesc: false);
                         break;
                     case "discountdesc":
-                        promotions = _promotionService.FilterSortByDiscountRate(promotions, isDesc: true);
+                        promotionsQuery = _promotionService.FilterSortByDiscountRate(promotionsQuery, isDesc: true);
                         break;
                     case "discountasc":
-                        promotions = _promotionService.FilterSortByDiscountRate(promotions, isDesc: false);
+                        promotionsQuery = _promotionService.FilterSortByDiscountRate(promotionsQuery, isDesc: false);
                         break;
                     default:
                         break;
                 }
             }
 
-            return Ok(await promotions.ToListAsync());
+            var promotions = await promotionsQuery.ToListAsync();
+
+            List<PromotionDTO> promotionsDto = new();
+            foreach (var promotion in promotions)
+            {
+                promotionsDto.Add(_promotionService.ConvertToPromotionDto(promotion));
+            }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = promotionsDto
+            });
         }
 
         // GET: /api/promotions/{id}
@@ -81,10 +93,13 @@ namespace web_api_cosmetics_shop.Controllers
             var promotion = await _promotionService.GetPromotion(id.Value);
             if (promotion == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "promotion not found", Status = 404 });
             }
 
-            return Ok(promotion);
+            return Ok(new ResponseDTO()
+            {
+                Data = _promotionService.ConvertToPromotionDto(promotion)
+            });
         }
 
         // POST: /api/promotions
@@ -100,7 +115,7 @@ namespace web_api_cosmetics_shop.Controllers
             var isExistPromotionName = await _promotionService.GetExistPromotionName(promotion.Name);
             if (isExistPromotionName == true)
             {
-                return BadRequest(new ErrorDTO() { Title = "Name already exist", Status = 400 });
+                return BadRequest(new ErrorDTO() { Title = "promotion name already exist", Status = 400 });
             }
 
             try
@@ -117,12 +132,15 @@ namespace web_api_cosmetics_shop.Controllers
 
                 // Creating Promotion
                 var createdPromotion = await _promotionService.AddPromotion(newPromotion);
-                if (createdPromotion == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
 
-                return CreatedAtAction(nameof(GetPromotion), new { id = createdPromotion.PromotionId }, createdPromotion);
+                return CreatedAtAction(
+                    nameof(GetPromotion),
+                    new { id = createdPromotion.PromotionId },
+                    new ResponseDTO()
+                    {
+                        Data = _promotionService.ConvertToPromotionDto(createdPromotion),
+                        Status = 201,
+                    });
             }
             catch (Exception error)
             {
@@ -139,18 +157,18 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
-            // Find existing Promotion with PromotionId = id
+            // Get exist promotion with
             var existPromotion = await _promotionService.GetPromotion(id.Value);
             if (existPromotion == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "promotion not found", Status = 404 });
             }
 
-            // Check existing Category name
+            // Check exist category name
             var isExistPromotionName = await _promotionService.GetExistPromotionName(promotion.Name);
             if (isExistPromotionName == true && promotion.Name != existPromotion.Name)
             {
-                return BadRequest(new ErrorDTO() { Title = "Name already exist", Status = 400 });
+                return BadRequest(new ErrorDTO() { Title = "promotion name already exist", Status = 400 });
             }
 
             try
@@ -165,19 +183,32 @@ namespace web_api_cosmetics_shop.Controllers
                     EndDate = promotion.EndDate
                 };
 
-                // Updating Promotion
-                var result = await _promotionService.UpdatePromotion(newPromotion);
-                if (result == null)
+                if (existPromotion.Name != newPromotion.Name ||
+                    existPromotion.Description != newPromotion.Description ||
+                    existPromotion.DiscountRate != newPromotion.DiscountRate ||
+                    existPromotion.StartDate != newPromotion.StartDate ||
+                    existPromotion.EndDate != newPromotion.EndDate)
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
+                    // Updating Promotion
+                    var result = await _promotionService.UpdatePromotion(newPromotion);
 
-                return Ok(result);
+                    return Ok(new ResponseDTO()
+                    {
+                        Data = _promotionService.ConvertToPromotionDto(result)
+                    });
+                }
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = _promotionService.ConvertToPromotionDto(existPromotion),
+                Status = 304,
+                Title = "not modified",
+            });
         }
 
         // DELETE: /api/promotions/{id}
@@ -189,28 +220,27 @@ namespace web_api_cosmetics_shop.Controllers
                 return BadRequest();
             }
 
-            // Find existing Promotion
+            // Get exist promotion
             var existPromotion = await _promotionService.GetPromotion(id.Value);
             if (existPromotion == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "promotion not found", Status = 404 });
             }
 
             try
             {
-                // Removing Promotion
-                var result = await _promotionService.RemovePromotion(existPromotion);
-                if (result == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
-
-                return Ok(result);
+                // Remove promotion
+                await _promotionService.RemovePromotion(existPromotion);
             }
             catch (Exception error)
             {
                 return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
             }
+
+            return Ok(new ResponseDTO()
+            {
+                Data = _promotionService.ConvertToPromotionDto(existPromotion)
+            });
         }
     }
 }
