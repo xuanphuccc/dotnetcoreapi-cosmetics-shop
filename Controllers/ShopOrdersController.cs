@@ -76,14 +76,14 @@ namespace web_api_cosmetics_shop.Controllers
 
                 orderItemsDto.Add(new OrderItemDTO()
                 {
-                    IsReview= isReview,
                     OrderItemId = item.OrderItemId,
                     Qty = item.Qty,
                     Price = item.Price,
                     DiscountRate = item.DiscountRate,
                     OrderId = item.OrderId,
                     ProductItemId = item.ProductItemId != null ? item.ProductItemId.Value : 0,
-                    Product = productDto
+                    Product = productDto,
+                    IsReview = isReview,
                 });
             }
 
@@ -121,7 +121,7 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             PaymentMethodDTO paymentMethodDto = new();
-            if(paymentMethod != null)
+            if (paymentMethod != null)
             {
                 paymentMethodDto = _paymentMethodService.ConvertToPaymentMethodDto(paymentMethod);
             }
@@ -212,14 +212,14 @@ namespace web_api_cosmetics_shop.Controllers
             var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
             if (currentIdentityUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "unauthorized", Status = 401 });
             }
 
             // Exist user from database
             var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
             if (currentUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
             var userShopOrders = await _shopOrderService.GetUserShopOrders(currentUser.UserId);
@@ -241,13 +241,13 @@ namespace web_api_cosmetics_shop.Controllers
         {
             if (!id.HasValue)
             {
-                return BadRequest();
+                return BadRequest(new ErrorDTO() { Title = "id is required", Status = 400 });
             }
 
             var shopOrder = await _shopOrderService.GetShopOrder(id.Value);
             if (shopOrder == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "order not found", Status = 404 });
             }
 
             return Ok(new ResponseDTO()
@@ -270,34 +270,14 @@ namespace web_api_cosmetics_shop.Controllers
             var currentIdentityUser = _userService.GetCurrentUser(HttpContext.User);
             if (currentIdentityUser == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "unauthorized", Status = 401 });
             }
 
             // Exist user from database
             var currentUser = await _userService.GetUserByUserName(currentIdentityUser.UserName);
             if (currentUser == null)
             {
-                return NotFound();
-            }
-
-            // Get init order status
-            OrderStatus initOrderStatus = await _orderStatusService.GetOrderStatus("created");
-            if (initOrderStatus == null)
-            {
-                try
-                {
-                    var newInitOrderStatus = new OrderStatus()
-                    {
-                        Name = "Đã tạo đơn hàng",
-                        Status = "created"
-                    };
-
-                    initOrderStatus = await _orderStatusService.AddOrderStatus(newInitOrderStatus);
-                }
-                catch (Exception error)
-                {
-                    return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
-                }
+                return NotFound(new ErrorDTO() { Title = "user not found", Status = 404 });
             }
 
             try
@@ -346,7 +326,7 @@ namespace web_api_cosmetics_shop.Controllers
                     PaymentMethodId = shopOrderDto.PaymentMethodId,
                     AddressId = shopOrderDto.AddressId,
                     ShippingMethodId = shopOrderDto.ShippingMethodId,
-                    OrderStatusId = initOrderStatus.OrderStatusId,
+                    OrderStatusId = null,
                     OrderDate = DateTime.UtcNow,
                     ShippingCost = shippingCost,
                     DiscountMoney = discountMoney,
@@ -355,68 +335,57 @@ namespace web_api_cosmetics_shop.Controllers
 
                 // Add Shop Order
                 var createdShopOrder = await _shopOrderService.AddShopOrder(newShopOrder);
-                if (createdShopOrder == null)
-                {
-                    return StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorDTO() { Title = "Can not create shop order", Status = 500 });
-                }
 
-                if (createdShopOrder != null)
+                // Order status
+                await _shopOrderService.ChangeOrderStatus(createdShopOrder, "created", "Đã tạo đơn hàng");
+
+                try
                 {
-                    try
+                    foreach (var item in shopOrderDto.Items)
                     {
-                        foreach (var item in shopOrderDto.Items)
+                        // Get order item price
+                        var productItem = await _productService.GetItem(item.ProductItemId) ?? throw new Exception("product item not found");
+
+                        // Get max discount rate from promotions
+                        var promotions = await _productService.GetItemPromotions(productItem.ProductItemId);
+                        int maxDiscountRate = 0;
+                        if (promotions.Count > 0)
                         {
-                            // Get order item price
-                            var productItem = await _productService.GetItem(item.ProductItemId) ?? throw new Exception("product item not found");
-
-                            // Get max discount rate from promotions
-                            var promotions = await _productService.GetItemPromotions(productItem.ProductItemId);
-                            int maxDiscountRate = 0;
-                            if (promotions.Count > 0)
-                            {
-                                maxDiscountRate = promotions.Max(p => p.DiscountRate);
-                            }
-
-                            var newOrderItem = new OrderItem()
-                            {
-                                OrderId = createdShopOrder.OrderId,
-                                ProductItemId = item.ProductItemId,
-                                Qty = item.Qty,
-                                Price = productItem.Price,
-                                DiscountRate = maxDiscountRate,
-                            };
-
-                            var createdOrderItem = await _shopOrderService.AddOrderItem(newOrderItem);
-                            if (createdOrderItem == null)
-                            {
-                                return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not create order item", Status = 500 });
-                            }
-                            else
-                            {
-                                // Update qty in stock
-                                productItem.QtyInStock -= item.Qty;
-                                await _productService.UpdateProductItem(productItem);
-                            }
+                            maxDiscountRate = promotions.Max(p => p.DiscountRate);
                         }
-                    }
-                    catch (Exception error)
-                    {
-                        // Remove created shop order on fail
-                        await _shopOrderService.RemoveShopOrder(createdShopOrder);
 
-                        return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+                        var newOrderItem = new OrderItem()
+                        {
+                            OrderId = createdShopOrder.OrderId,
+                            ProductItemId = productItem.ProductItemId,
+                            Qty = item.Qty,
+                            Price = productItem.Price,
+                            DiscountRate = maxDiscountRate,
+                        };
+
+                        await _shopOrderService.AddOrderItem(newOrderItem);
+
+                        // Update qty in stock
+                        productItem.QtyInStock -= item.Qty;
+                        await _productService.UpdateProductItem(productItem);
                     }
                 }
+                catch (Exception error)
+                {
+                    // Remove created shop order on fail
+                    await _shopOrderService.RemoveShopOrder(createdShopOrder);
 
-                return CreatedAtAction(nameof(GetUserShopOrders),
+                    return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+                }
+
+                return CreatedAtAction(
+                    nameof(GetUserShopOrders),
                     new { id = createdShopOrder?.UserId },
                     new ResponseDTO()
                     {
-                        Data = await ConvertToShopOrderDto(createdShopOrder)
+                        Data = await ConvertToShopOrderDto(createdShopOrder ?? new ShopOrder()),
+                        Status = 201,
+                        Title = "created",
                     });
             }
             catch (Exception error)
@@ -437,18 +406,13 @@ namespace web_api_cosmetics_shop.Controllers
             var existShopOrder = await _shopOrderService.GetShopOrder(id.Value);
             if (existShopOrder == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "order not found", Status = 404 });
             }
 
             try
             {
-                var cancelResult = await _shopOrderService.CancelShopOrder(existShopOrder);
-                if (cancelResult == null)
-                {
-                    return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not cancel order", Status = 500 });
-                }
+                var cancelResult = await _shopOrderService.ChangeOrderStatus(
+                                            existShopOrder, "canceled", "Đã huỷ đơn hàng");
 
                 return Ok(new ResponseDTO()
                 {
@@ -473,22 +437,48 @@ namespace web_api_cosmetics_shop.Controllers
             var existShopOrder = await _shopOrderService.GetShopOrder(id.Value);
             if (existShopOrder == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "order not found", Status = 404 });
             }
 
             try
             {
-                var cancelResult = await _shopOrderService.DeliveryOrder(existShopOrder);
-                if (cancelResult == null)
-                {
-                    return StatusCode(
-                                    StatusCodes.Status500InternalServerError,
-                                    new ErrorDTO() { Title = "Can not delivery order", Status = 500 });
-                }
+                var deliveryResult = await _shopOrderService.ChangeOrderStatus(
+                                            existShopOrder, "delivery", "Đang giao hàng");
 
                 return Ok(new ResponseDTO()
                 {
-                    Data = await ConvertToShopOrderDto(cancelResult)
+                    Data = await ConvertToShopOrderDto(deliveryResult)
+                });
+            }
+            catch (Exception error)
+            {
+                return BadRequest(new ErrorDTO() { Title = error.Message, Status = 400 });
+            }
+        }
+
+        // success order
+        [HttpPut("success/{id?}")]
+        public async Task<IActionResult> SuccessShopOrder([FromRoute] int? id)
+        {
+            if (!id.HasValue)
+            {
+                return BadRequest();
+            }
+
+            var existShopOrder = await _shopOrderService.GetShopOrder(id.Value);
+            if (existShopOrder == null)
+            {
+                return NotFound(new ErrorDTO() { Title = "order not found", Status = 404 });
+            }
+
+            try
+            {
+                var successResult = await _shopOrderService.ChangeOrderStatus(
+                                            existShopOrder, "success", "Giao hàng thành công");
+
+                return Ok(new ResponseDTO()
+                {
+                    Data = await ConvertToShopOrderDto(successResult)
                 });
             }
             catch (Exception error)
@@ -508,18 +498,12 @@ namespace web_api_cosmetics_shop.Controllers
             var existShopOrder = await _shopOrderService.GetShopOrder(id.Value);
             if (existShopOrder == null)
             {
-                return NotFound();
+                return NotFound(new ErrorDTO() { Title = "order not found", Status = 404 });
             }
 
             try
             {
-                var removeShopOrderResult = await _shopOrderService.RemoveShopOrder(existShopOrder);
-                if (removeShopOrderResult == 0)
-                {
-                    return StatusCode(
-                                StatusCodes.Status500InternalServerError,
-                                new ErrorDTO() { Title = "Can not delete shop order", Status = 500 });
-                }
+                await _shopOrderService.RemoveShopOrder(existShopOrder);
             }
             catch (Exception error)
             {
