@@ -383,6 +383,9 @@ namespace web_api_cosmetics_shop.Services.ProductService
                     maxDiscountRate = promotions.Max(p => p.DiscountRate);
                 }
 
+                // Get is has order status
+                bool isHasOrder = await IsHasOrderItem(productItem);
+
                 var productItemDto = new ProductItemDTO()
                 {
                     ProductItemId = productItem.ProductItemId,
@@ -393,7 +396,8 @@ namespace web_api_cosmetics_shop.Services.ProductService
                     Price = productItem.Price,
                     CostPrice = productItem.CostPrice,
                     DiscountRate = maxDiscountRate,
-                    OptionsId = productOptionsId
+                    OptionsId = productOptionsId,
+                    IsHasOrder = isHasOrder,
                 };
 
                 productItemDtos.Add(productItemDto);

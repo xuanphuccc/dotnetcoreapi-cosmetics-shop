@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.WebSockets;
@@ -118,17 +119,17 @@ namespace web_api_cosmetics_shop.Controllers
             }
 
             // Total products
-            int totalProducts = productsQuery.Count();
+            int totalProducts = await productsQuery.CountAsync();
 
             // Total pages = total products / page size
             int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
 
             // Paging
-            var PagedProducts = productsQuery.Skip((page.Value - 1) * pageSize).Take(pageSize).ToList();
+            var pagedProducts = await productsQuery.Skip((page.Value - 1) * pageSize).Take(pageSize).ToListAsync();
 
             // Convert to data transfer object
-            List<ProductDTO> productsDtos = new List<ProductDTO>();
-            foreach (var product in PagedProducts)
+            List<ProductDTO> productsDtos = new();
+            foreach (var product in pagedProducts)
             {
                 productsDtos.Add(await _productService.ConvertToProductDtoAsync(product));
             }

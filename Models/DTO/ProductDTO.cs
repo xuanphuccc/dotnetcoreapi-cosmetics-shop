@@ -53,5 +53,7 @@ namespace web_api_cosmetics_shop.Models.DTO
 
 		[Required]
 		public List<int>? OptionsId { get; set; }
+
+		public bool IsHasOrder { get; set; }
 	}
 }
