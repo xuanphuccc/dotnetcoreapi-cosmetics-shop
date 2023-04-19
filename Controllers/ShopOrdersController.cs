@@ -150,8 +150,15 @@ namespace web_api_cosmetics_shop.Controllers
         public async Task<IActionResult> GetAllShopOrders(
             [FromQuery] string? search,
             [FromQuery] string? status,
-            [FromQuery] string? sort)
+            [FromQuery] string? sort,
+            [FromQuery] int? page)
         {
+            const int pageSize = 10;
+            if (!page.HasValue)
+            {
+                page = 1;
+            }
+
             var allShopOrdersQuery = _shopOrderService.FilterAllShopOrders();
 
             // Search Order
@@ -190,18 +197,25 @@ namespace web_api_cosmetics_shop.Controllers
                 }
             }
 
-            // Query to database
-            var allShopOrders = await allShopOrdersQuery.ToListAsync();
+            // Total orders
+            int totalOrders = await allShopOrdersQuery.CountAsync();
 
-            List<ShopOrderDTO> orders = new List<ShopOrderDTO>();
-            foreach (var item in allShopOrders)
+            // Total pages = total products / page size
+            int totalPages = (int)Math.Ceiling(totalOrders / (double)pageSize);
+
+            // Paging
+            var pagedOrders = await allShopOrdersQuery.Skip((page.Value - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            List<ShopOrderDTO> ordersDto = new();
+            foreach (var item in pagedOrders)
             {
-                orders.Add(await ConvertToShopOrderDto(item));
+                ordersDto.Add(await ConvertToShopOrderDto(item));
             }
 
             return Ok(new ResponseDTO()
             {
-                Data = orders
+                Data = ordersDto,
+                TotalPages = totalPages,
             });
         }
 
