@@ -76,7 +76,12 @@ namespace web_api_cosmetics_shop.Services.UserReviewService
 
         public async Task<UserReview> UpdateUserReview(UserReview userReview)
         {
-            var exitsUserReview = await GetUserReviewByOrderitemId(userReview.OrderItemId);
+            UserReview exitsUserReview = new();
+            if (userReview.OrderItemId.HasValue)
+            {
+                exitsUserReview = await GetUserReviewByOrderitemId(userReview.OrderItemId.Value);
+            }
+
             if (exitsUserReview == null)
             {
                 return null!;

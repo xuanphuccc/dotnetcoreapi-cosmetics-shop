@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using web_api_cosmetics_shop.Data;
+using web_api_cosmetics_shop.Models.DTO;
 using web_api_cosmetics_shop.Models.Entities;
 
 namespace web_api_cosmetics_shop.Services.CategoryService
@@ -13,6 +14,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
             _context = context;
         }
 
+        // Get category
         public async Task<List<Category>> GetCategoriesAsync()
         {
             var categories = await _context.Categories.ToListAsync();
@@ -31,6 +33,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
             return category;
         }
 
+        // Add category
         public async Task<Category> AddCategory(Category category)
         {
             await _context.AddAsync(category);
@@ -38,18 +41,19 @@ namespace web_api_cosmetics_shop.Services.CategoryService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot create category");
             }
 
             return category;
         }
 
+        // Update category
         public async Task<Category> UpdateCategory(Category category)
         {
             var existCategory = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == category.CategoryId);
             if (existCategory == null)
             {
-                return null!;
+                throw new Exception("category not found");
             }
 
             existCategory.Name = category.Name;
@@ -59,12 +63,13 @@ namespace web_api_cosmetics_shop.Services.CategoryService
             var result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot update category");
             }
 
             return existCategory;
         }
 
+        // Delete category
         public async Task<Category> RemoveCategory(Category category)
         {
             _context.Categories.Remove(category);
@@ -72,7 +77,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
             int result = await _context.SaveChangesAsync();
             if (result == 0)
             {
-                return null!;
+                throw new Exception("cannot delete category");
             }
 
             return category;
@@ -83,6 +88,19 @@ namespace web_api_cosmetics_shop.Services.CategoryService
             var isExistName = await _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower());
             return isExistName;
 
+        }
+
+        // Convert to DTO
+        public CategoryDTO ConvertToCategoryDto(Category category)
+        {
+            return new CategoryDTO()
+            {
+                CategoryId = category.CategoryId,
+                PromotionId = category.PromotionId,
+                Name = category.Name,
+                Image = category.Image,
+                CreateAt = category.CreateAt,
+            };
         }
 
         // Filter
@@ -100,7 +118,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
         }
         public IQueryable<Category> FilterSortByCreationTime(IQueryable<Category> categories, bool isDesc = true)
         {
-            if(isDesc)
+            if (isDesc)
             {
                 categories = categories.OrderByDescending(c => c.CreateAt);
             }
@@ -113,7 +131,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
         }
         public IQueryable<Category> FilterSortByName(IQueryable<Category> categories, bool isDesc = false)
         {
-            if(isDesc)
+            if (isDesc)
             {
                 categories = categories.OrderByDescending(c => c.Name);
             }
@@ -126,7 +144,7 @@ namespace web_api_cosmetics_shop.Services.CategoryService
         }
         public IQueryable<Category> FilterBySaleStatus(IQueryable<Category> categories, bool onSale = false)
         {
-            if(onSale)
+            if (onSale)
             {
                 categories = categories.Where(c => c.PromotionId != null);
             }
