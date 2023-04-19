@@ -108,7 +108,9 @@ namespace web_api_cosmetics_shop.Controllers
                                     new { id = addResult.UserId },
                                     new ResponseDTO()
                                     {
-                                        Data = _addressService.ConvertToAddressDto(addResult)
+                                        Data = _addressService.ConvertToAddressDto(addResult),
+                                        Status = 201,
+                                        Title = "created",
                                     });
             }
             catch (Exception ex)
@@ -155,11 +157,11 @@ namespace web_api_cosmetics_shop.Controllers
                     existAddress.PhoneNumber != addressDto.PhoneNumber ||
                     existAddress.IsDefault != addressDto.IsDefault)
                 {
-                    var updateResult = await _addressService.UpdateAddress(updateAddress);
+                    var updatedAdress = await _addressService.UpdateAddress(updateAddress);
 
                     return Ok(new ResponseDTO()
                     {
-                        Data = _addressService.ConvertToAddressDto(updateAddress)
+                        Data = _addressService.ConvertToAddressDto(updatedAdress)
                     });
                 }
             }
